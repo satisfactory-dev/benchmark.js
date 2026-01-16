@@ -18,8 +18,6 @@ jobs:
                     - 11
         steps:
             - uses: actions/checkout@v4
-              with:
-                  submodules: true
             - name: Use Node.js ${{ matrix.node_version }}
               uses: actions/setup-node@v6
               with:
@@ -32,3 +30,71 @@ jobs:
               if: ${{ matrix.node_version == 6 }}
               run: npm install
             - run: node ./test/test.js
+    coverage--node:
+        name: Node Coverage
+        runs-on: ubuntu-latest
+        outputs:
+            coverage: ${{ steps.coverage--node.outputs.artifact-id }}
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js 10
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 10
+                  cache: 'npm'
+            - run: npm ci
+            - run: npm install -g c8@7
+            - run: c8 -c ./.c8rc.node.json node ./test/test.js
+            - uses: actions/upload-artifact@v4
+              id: coverage--node
+              with:
+                name: coverage--node
+                path: ./coverage/node/tmp/*.json
+    coverage--playwright:
+        name: Browser Coverage
+        runs-on: ubuntu-latest
+        outputs:
+            coverage: ${{ steps.coverage--playwright.outputs.artifact-id }}
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js 24
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 24
+                  cache: 'npm'
+            - run: npm ci
+            - run: npm install -g playwright@1.57
+            - run: playwright install --with-deps --only-shell chromium
+            - run: NODE_PATH=$(npm root -g) node ./playwright.js
+            - uses: actions/upload-artifact@v4
+              id: coverage--playwright
+              with:
+                name: coverage--playwright
+                path: ./coverage/playwright/tmp/*.json
+    coverage--upload:
+        name: Upload Coverage
+        runs-on: ubuntu-latest
+        needs:
+            - coverage--node
+            - coverage--playwright
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js 10
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 10
+                  cache: 'npm'
+            - run: npm install -g c8@7
+            - name: Download Coverage
+              uses: actions/download-artifact@v5
+              with:
+                  path: ./coverage/tmp/
+                  pattern: coverage-*
+                  merge-multiple: true
+            - run: ls -R my-artifact
+            - name: Merge Coverage
+              run: c8 -c ./.c8rc.coveralls.json report
+            - name: Coveralls GitHub Action
+              uses: coverallsapp/github-action@v2.2.3
+              with:
+                  file: './coverage/lcov.info'

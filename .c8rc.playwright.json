@@ -1,0 +1,6 @@
+{
+	"reporter": ["text", "html"],
+	"report-dir": "./coverage/playwright",
+	"all": true,
+	"include": ["benchmark.js"]
+}

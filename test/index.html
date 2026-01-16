@@ -63,6 +63,9 @@
           benchmarkModule = window.Benchmark = Benchmark;
           require(['test'], function() {
             QUnit.start();
+            QUnit.on('runEnd', () => {
+                console.log('Finished running tests')
+            })
           });
         });
       }());

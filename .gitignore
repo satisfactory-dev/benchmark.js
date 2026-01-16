@@ -3,3 +3,6 @@
 *.log
 coverage
 node_modules
+/.devcontainer/.env
+/.cache/
+/playwright-node.env
