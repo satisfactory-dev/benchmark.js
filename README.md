@@ -1,14 +1,10 @@
-# Benchmark.js v2.1.4
+# Satisfactory.dev Benchmark.js Fork
 
 A [robust](https://mathiasbynens.be/notes/javascript-benchmarking "Bulletproof JavaScript benchmarks") benchmarking library that supports high-resolution timers & returns statistically significant results. As seen on [jsPerf](https://jsperf.com/).
 
 ## Documentation
 
 * [API Documentation](https://benchmarkjs.com/docs)
-
-## Download
-
- * [Development source](https://raw.githubusercontent.com/bestiejs/benchmark.js/2.1.4/benchmark.js)
 
 ## Installation
 
