@@ -62,10 +62,22 @@ jobs:
               with:
                   node-version: 24
                   cache: 'npm'
+            - uses: hoverkraft-tech/compose-action@05da55b2bb8a5a759d1c4732095044bd9018c050
+              with:
+                services: tests
+                cwd: ./.devcontainer/
+                compose-file: ./docker-compose.yml
+            - name: http check
+              id: http-check
+              uses: fjogeleit/http-request-action@v1
+              with:
+                url: "http://localhost:8003"
+                method: GET
+            - run: echo ${{ steps.http-check.outputs.status }}
             - run: npm ci
             - run: npm install -g playwright@1.57
             - run: playwright install --with-deps --only-shell chromium
-            - run: NODE_PATH=$(npm root -g) node ./playwright.js
+            - run: NODE_PATH=$(npm root -g) node ./playwright.js http://localhost:8003
             - uses: actions/upload-artifact@v4
               id: coverage--playwright
               with:

@@ -17,7 +17,17 @@ const {
 	const browser = await chromium.launch();
 	const page = await browser.newPage();
 	await page.coverage.startJSCoverage();
-	await page.goto(`http://tests:80/`)
+
+	const url = process.argv[2] || 'http://tests:80'
+
+	if (
+		url !== 'http://tests:80'
+		&& url !== 'http://localhost:8003'
+	) {
+		throw new Error(`Unsupported URL specified: ${url}`)
+	}
+
+	await page.goto(url)
 	await page.click('#qunit-userAgent')
 	await new Promise((yup) => {
 		page.on('console', (e) => {
