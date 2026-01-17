@@ -103,7 +103,7 @@ jobs:
                   path: ./coverage/tmp/
                   pattern: coverage-*
                   merge-multiple: true
-            - run: ls -R my-artifact
+            - run: ls -R ./coverage/tmp/
             - name: Merge Coverage
               run: c8 -c ./.c8rc.coveralls.json report
             - name: Coveralls GitHub Action
