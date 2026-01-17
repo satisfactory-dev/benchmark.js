@@ -44,7 +44,7 @@ const {
 				result: coverage
 					.filter((
 						maybe,
-					) => maybe.url.startsWith('http://tests/benchmark.js?'))
+					) => maybe.url.startsWith(`${url.replace(/:80$/, '')}/benchmark.js?`))
 					.map((e) => {
 						e.url = pathToFileURL(__dirname + '/benchmark.js')
 
