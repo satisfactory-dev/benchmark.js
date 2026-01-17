@@ -3,7 +3,7 @@
 [![Coverage Status](https://coveralls.io/repos/github/satisfactory-dev/benchmark.js/badge.svg?branch=main)](https://coveralls.io/github/satisfactory-dev/benchmark.js?branch=main)
 [![Workflow Status](https://github.com/satisfactory-dev/benchmark.js/actions/workflows/nodejs.yml/badge.svg?branch=main)](https://github.com/satisfactory-dev/benchmark.js/actions/workflows/nodejs.yml?query=branch%3Amain)
 
-A [robust](https://mathiasbynens.be/notes/javascript-benchmarking "Bulletproof JavaScript benchmarks") benchmarking library that supports high-resolution timers & returns statistically significant results. As seen on [jsPerf](https://jsperf.com/).
+Forked from [benchmark.js](https://github.com/bestiejs/benchmark.js)
 
 ## Documentation
 

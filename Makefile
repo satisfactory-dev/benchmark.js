@@ -47,3 +47,8 @@ coverage--merge:
 	git clean -fxd ./coverage/tmp/
 	cp -r ./coverage/*/tmp/*.json ./coverage/tmp
 	@VERSION=10 CMD="c8 report" make nvm--exec
+
+docs:
+	@make nvm CMD="use 10"
+	@./node_modules/.bin/docdown benchmark.js doc/README.md style=github title="@satisfactory-dev/benchmark " toc=categories url=https://github.com/satisfactory-dev/benchmark.js/benchmark.js
+	@make nvm CMD="use 25"
