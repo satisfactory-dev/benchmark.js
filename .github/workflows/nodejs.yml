@@ -7,14 +7,29 @@ on:
     pull_request:
         branches: [main]
 jobs:
+    fail-early:
+        runs-on: ubuntu-latest
+        strategy:
+            matrix:
+                node_version:
+                    - 10
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js ${{ matrix.node_version }}
+              uses: actions/setup-node@v6
+              with:
+                  node-version: ${{ matrix.node_version }}
+                  cache: 'npm'
+            - run: npm ci
+            - run: node ./test/test.js
     basic-checks:
         runs-on: ubuntu-latest
+        needs: fail-early
         strategy:
             matrix:
                 node_version:
                     - 6
                     - 8
-                    - 10
                     - 11
         steps:
             - uses: actions/checkout@v4
@@ -33,6 +48,7 @@ jobs:
     coverage--node:
         name: Node Coverage
         runs-on: ubuntu-latest
+        needs: fail-early
         outputs:
             coverage: ${{ steps.coverage--node.outputs.artifact-id }}
         steps:
