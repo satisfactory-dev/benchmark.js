@@ -25,9 +25,3 @@ services:
         volumes:
             - ./tests.conf:/etc/nginx/conf.d/default.conf
             - ../:/app/
-    playwright:
-        image: mcr.microsoft.com/playwright:v1.57.0-noble
-        restart: unless-stopped
-        ports:
-            - '${PORT_PLAYWRIGHT:-8004}:3000'
-        command: npx -y playwright@1.57.0 run-server --port 3000 --host 0.0.0.0
