@@ -50,5 +50,5 @@ coverage--merge:
 
 docs:
 	@make nvm CMD="use 10"
-	@./node_modules/.bin/docdown benchmark.js doc/README.md style=github title="@satisfactory-dev/benchmark " toc=categories url=https://github.com/satisfactory-dev/benchmark.js/benchmark.js
+	@./node_modules/.bin/docdown benchmark.js doc/README.md style=github title="@satisfactory-dev/benchmark <span>$(shell git rev-parse HEAD)</span>" toc=categories url=https://github.com/satisfactory-dev/benchmark.js/blob/$(shell git rev-parse HEAD)/benchmark.js
 	@make nvm CMD="use 25"
