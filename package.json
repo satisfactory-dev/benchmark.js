@@ -1,7 +1,6 @@
 {
   "name": "@satisfactory-dev/benchmark",
   "description": "A benchmarking library that supports high-resolution timers & returns statistically significant results.",
-  "homepage": "https://benchmarkjs.com/",
   "license": "MIT",
   "main": "benchmark.js",
   "keywords": "benchmark, performance, speed",
@@ -13,10 +12,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/bestiejs/benchmark.js.git"
-  },
-  "scripts": {
-    "test": "node test/test"
+    "url": "git+https://github.com/satisfactory-dev/benchmark.js.git"
   },
   "dependencies": {
     "lodash": "^4.17.10",
