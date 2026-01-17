@@ -36,9 +36,9 @@ jobs:
         strategy:
             matrix:
                 node_version:
-                    - 6
-                    - 8
                     - 11
+                    - 24
+                    - 25
         steps:
             - uses: actions/checkout@v4
             - name: Use Node.js ${{ matrix.node_version }}
@@ -81,10 +81,10 @@ jobs:
             coverage: ${{ steps.coverage--playwright.outputs.artifact-id }}
         steps:
             - uses: actions/checkout@v4
-            - name: Use Node.js 24
+            - name: Use Node.js 25
               uses: actions/setup-node@v6
               with:
-                  node-version: 24
+                  node-version: 25
                   cache: 'npm'
             - uses: hoverkraft-tech/compose-action@05da55b2bb8a5a759d1c4732095044bd9018c050
               with:

@@ -15,7 +15,7 @@
   /** Load libraries. */
   var _ = root._ || require('lodash'),
       Benchmark = root.Benchmark || require('../benchmark.js'),
-      QUnit = root.QUnit || require('qunit-extras');
+      QUnit = root.QUnit || require('qunit');
 
   /** Used to create dummy benchmarks for comparisons. */
   var benchData = {
@@ -1298,7 +1298,6 @@
 
   if (!document) {
     QUnit.config.noglobals = true;
-    QUnit.load();
     QUnit.start();
   }
 }.call(this));

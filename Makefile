@@ -1,6 +1,6 @@
 .PHONY: test coverage
 
-VERSIONS = 6 8 10 11 24 25
+VERSIONS = 10 11 24 25
 
 nvm:
 	@. ${NVM_DIR}/nvm.sh && nvm $(CMD)

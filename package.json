@@ -24,8 +24,7 @@
   },
   "devDependencies": {
     "docdown": "^0.7.3",
-    "qunit-extras": "^3.0.0",
-    "qunitjs": "^2.4.1",
+    "qunit": "^2.25.0",
     "requirejs": "^2.3.5"
   },
   "files": [
