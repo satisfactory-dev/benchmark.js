@@ -115,6 +115,15 @@
   /*--------------------------------------------------------------------------*/
 
   /**
+   * no need to reference noop()
+   *
+   * @private
+   */
+  function noop() {
+    /** empty */
+  }
+
+  /**
    * Create a new `Benchmark` function using the given `context` object.
    *
    * @static
@@ -534,7 +543,7 @@
       };
       // Fix JaegerMonkey bug.
       // For more information see http://bugzil.la/639720.
-      createFunction = support.browser && (createFunction('', 'return"' + uid + '"') || _.noop)() == uid ? createFunction : Function;
+      createFunction = support.browser && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : Function;
       return createFunction.apply(null, arguments);
     }
 
@@ -841,7 +850,7 @@
           queued,
           index = -1,
           eventProps = { 'currentTarget': benches },
-          options = { 'onStart': _.noop, 'onCycle': _.noop, 'onComplete': _.noop },
+          options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
           result = _.toArray(benches);
 
       /**
@@ -1579,7 +1588,7 @@
         var bench = clone._original,
             stringable = isStringable(bench.fn),
             count = bench.count = clone.count,
-            decompilable = stringable || (support.decompilation && (clone.setup !== _.noop || clone.teardown !== _.noop)),
+            decompilable = stringable || (support.decompilation && (clone.setup !== noop || clone.teardown !== noop)),
             id = bench.id,
             name = bench.name || (typeof id == 'number' ? '<Test #' + id + '>' : id),
             result = 0;
@@ -2443,7 +2452,7 @@
        *   }())
        * }())
        */
-      'setup': _.noop,
+      'setup': noop,
 
       /**
        * Compiled into the test and executed immediately **after** the test loop.
@@ -2451,7 +2460,7 @@
        * @memberOf Benchmark
        * @type {Function|string}
        */
-      'teardown': _.noop,
+      'teardown': noop,
 
       /**
        * An object of stats including mean, margin or error, and standard deviation.
