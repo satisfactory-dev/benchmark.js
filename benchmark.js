@@ -602,13 +602,11 @@
      * Computes the arithmetic mean of a sample.
      *
      * @private
-     * @param {Array} sample The sample.
+     * @param {[number, ...number[]]} sample The sample.
      * @returns {number} The mean.
      */
     function getMean(sample) {
-      return (_.reduce(sample, function(sum, x) {
-        return sum + x;
-      }) / sample.length) || 0;
+      return sample.reduce((sum, x) => sum + x, 0) / sample.length;
     }
 
     /**
@@ -1441,13 +1439,13 @@
           u = min(u1, u2);
 
       function getScore(xA, sampleB) {
-        return _.reduce(sampleB, function(total, xB) {
+        return sampleB.reduce((total, xB) => {
           return total + (xB > xA ? 0 : xB < xA ? 1 : 0.5);
         }, 0);
       }
 
       function getU(sampleA, sampleB) {
-        return _.reduce(sampleA, function(total, xA) {
+        return sampleA.reduce((total, xA) => {
           return total + getScore(xA, sampleB);
         }, 0);
       }
@@ -1945,7 +1943,7 @@
           // Compute the sample mean (estimate of the population mean).
           mean = getMean(sample);
           // Compute the sample variance (estimate of the population variance).
-          variance = _.reduce(sample, varOf, 0) / (size - 1) || 0;
+          variance = sample.reduce(varOf, 0) / (size - 1) || 0;
           // Compute the sample standard deviation (estimate of the population standard deviation).
           sd = sqrt(variance);
           // Compute the standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean).
