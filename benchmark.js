@@ -1215,7 +1215,7 @@
       // Copy own properties.
       root.Object.entries(suite).forEach(([key, value]) => {
         if (!has(result, key)) {
-          result[key] = (typeof _.get(value, 'clone') === 'function')
+          result[key] = (typeof value?.clone === 'function')
             ? value.clone()
             : cloneDeep(value);
         }
