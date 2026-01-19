@@ -501,7 +501,7 @@
     /*------------------------------------------------------------------------*/
 
     /**
-     * A specialized version of `_.cloneDeep` which only clones arrays and plain
+     * A specialized version of lodash's `cloneDeep` which only clones arrays and plain
      * objects assigning all other values by reference.
      *
      * @private
