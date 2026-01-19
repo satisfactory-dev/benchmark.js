@@ -8,12 +8,18 @@ on:
             - benchmark.js
             - package.json
             - package-lock.json
+            - .github/workflows/*.yml
+            - .c8rc.coveralls.json
+            - test/test.js
+            - test/index.html
     pull_request:
         branches: [main]
         paths:
             - benchmark.js
             - package.json
             - package-lock.json
+            - test/test.js
+            - test/index.html
 jobs:
     fail-early:
         runs-on: ubuntu-latest
