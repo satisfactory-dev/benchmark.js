@@ -1410,7 +1410,7 @@
         }
         if (listeners) {
           if (listener) {
-            index = _.indexOf(listeners, listener);
+            index = listeners.indexOf(listener);
             if (index > -1) {
               listeners.splice(index, 1);
             }
