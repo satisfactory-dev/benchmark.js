@@ -819,11 +819,57 @@
           return (a.mean + a.moe > b.mean + b.moe ? 1 : -1) * (callback === 'fastest' ? 1 : -1);
         });
 
-        return _.filter(result, function(bench) {
+        return result.filter((bench) => {
           return result[0].compare(bench) == 0;
         });
       }
-      return _.filter(array, callback);
+
+      if (array instanceof Suite) {
+        /** @type {Benchmark[]} */
+        const result = [];
+        for (let i = 0; i < array.length; ++i) {
+          result.push(array[i]);
+        }
+
+        return result.filter((benchmark, index) => callback(benchmark, index, array));
+      }
+
+      if (!root.Array.isArray(array)) {
+        const {
+          isArrayLike,
+          result,
+        } = root.Object.entries(array)
+          .filter(([key, value]) => callback(
+            value,
+            (typeof key === 'string' && /^\d+/.test(key))
+              ? parseInt(key, 10)
+              : key,
+            array,
+          ))
+          .reduce(
+            (was, [key, value]) => {
+              if (typeof key === 'string' && /^\d+/.test(key)) {
+                ++was.currentIndex;
+
+                was.result[was.currentIndex] = value;
+              } else {
+                was.result[key] = value;
+                was.isArrayLike = false;
+              }
+
+              return was;
+            },
+            {
+              currentIndex: -1,
+              result: root.Object.create(null),
+              isArrayLike: true,
+            },
+          );
+
+          return isArrayLike ? root.Object.values(result) : result;
+      }
+
+      return array.filter(callback);
     }
 
     /**
