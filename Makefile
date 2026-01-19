@@ -1,6 +1,6 @@
 .PHONY: test coverage
 
-VERSIONS = 10 11 24 25
+VERSIONS = 20 21 22 23 24 25
 
 nvm:
 	@. ${NVM_DIR}/nvm.sh && nvm $(CMD)
@@ -9,12 +9,9 @@ nvm--install:
 	@make nvm CMD="install $(VERSION)"
 
 init:
-	@npm install
+	@make npm--exec VERSION=20 CMD="npm install"
 	@for version in $(VERSIONS); do make nvm--install VERSION="$$version"; done
-	@make nvm CMD="use 25"
-	@npm root -g | sed 's/^/NODE_PATH=/' | tee playwright-node.env
-	@npm install -g playwright
-	@playwright install --with-deps --only-shell chromium
+	@make npm--exec VERSION=20 CMD="./node_modules/.bin/playwright install --with-deps --only-shell chromium"
 
 nvm--run: nvm--install
 	@make nvm CMD="run $(VERSION) $(CMD)"
@@ -34,21 +31,18 @@ coverage--clean:
 	git clean -fxd ./coverage/node/ ./coverage/playwright/
 
 coverage--node:
-	@VERSION=10 CMD="npm install -g c8@7" make nvm--exec
-	@VERSION=10 CMD="c8 -c ./.c8rc.node.json node ./test/test.js" make nvm--exec
+	@VERSION=20 CMD="c8 -c ./.c8rc.node.json node ./test/test.js" make nvm--exec
 
 coverage--playwright:
-	@make nvm CMD="use 25"
-	@npm root -g | sed 's/^/NODE_PATH=/' | tee playwright-node.env
-	@node --env-file=playwright-node.env ./playwright.js
-	@VERSION=10 CMD="c8 -c ./.c8rc.playwright.json report" make nvm--exec
+	@node ./playwright.js
+	@VERSION=20 CMD="c8 -c ./.c8rc.playwright.json report" make nvm--exec
 
 coverage--merge:
 	git clean -fxd ./coverage/tmp/
 	cp -r ./coverage/*/tmp/*.json ./coverage/tmp
-	@VERSION=10 CMD="c8 report" make nvm--exec
+	@VERSION=20 CMD="c8 report" make nvm--exec
 
 docs:
-	@make nvm CMD="use 10"
+	@make nvm CMD="use 20"
 	@./node_modules/.bin/docdown benchmark.js doc/README.md style=github title="@satisfactory-dev/benchmark <span>$(shell git rev-parse HEAD)</span>" toc=categories url=https://github.com/satisfactory-dev/benchmark.js/blob/$(shell git rev-parse HEAD)/benchmark.js
 	@make nvm CMD="use 25"
