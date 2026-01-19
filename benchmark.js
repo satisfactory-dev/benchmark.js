@@ -577,8 +577,13 @@
      * @returns {string} The argument name.
      */
     function getFirstArgument(fn) {
-      return (!_.has(fn, 'toString') &&
-        (/^[\s(]*function[^(]*\(([^\s,)]+)/.exec(fn) || 0)[1]) || '';
+      return (
+        !_.has(fn, 'toString') &&
+        (
+          /^[\s(]*function[^(]*\(([^\s,)]+)/.exec(fn) ||
+          0
+        )[1]
+      ) || '';
     }
 
     /**
