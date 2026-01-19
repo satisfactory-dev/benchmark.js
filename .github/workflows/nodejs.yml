@@ -63,7 +63,7 @@ jobs:
                   cache: 'npm'
             - run: npm ci
             - name: Node Coverage
-              run: c8 -c ./.c8rc.node.json node ./test/test.js
+              run: ./node_modules/.bin/c8 -c ./.c8rc.node.json node ./test/test.js
             - uses: hoverkraft-tech/compose-action@05da55b2bb8a5a759d1c4732095044bd9018c050
               with:
                 services: tests
@@ -81,7 +81,7 @@ jobs:
             - run: cp -r ./coverage/*/tmp/*.json ./coverage/tmp
             - run: ls -R ./coverage/tmp/
             - name: Merge Coverage
-              run: c8 -c ./.c8rc.coveralls.json report
+              run: ./node_modules/.bin/c8 -c ./.c8rc.coveralls.json report
             - name: Coveralls GitHub Action
               uses: coverallsapp/github-action@v2.2.3
               with:
