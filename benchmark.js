@@ -741,7 +741,7 @@
         if (value != null) {
           // Add event listeners.
           if (/^on[A-Z]/.test(key)) {
-            _.each(key.split(' '), function(key) {
+            key.split(' ').forEach((key) => {
               object.on(key.slice(2).toLowerCase(), value);
             });
           } else if (!has(object, key)) {
@@ -1037,9 +1037,17 @@
           arrayLike = length === length >>> 0;
 
       separator2 || (separator2 = ': ');
-      _.each(object, function(value, key) {
+
+      const entries = (
+        root.Array.isArray(object)
+          ? object.map((value, key) => [key, value])
+          : root.Object.entries(object).filter(([key]) => has(object, key) && (!arrayLike || key !== 'length'))
+      );
+
+      entries.forEach(([key, value]) => {
         result.push(arrayLike ? value : key + separator2 + value);
       });
+
       return result.join(separator1 || ',');
     }
 
@@ -1258,12 +1266,14 @@
       delete event.result;
 
       if (events && (listeners = has(events, event.type) && events[event.type])) {
-        _.each(listeners.slice(), function(listener) {
+        for (const listener of [...listeners]) {
           if ((event.result = listener.apply(object, args)) === false) {
             event.cancelled = true;
           }
-          return !event.aborted;
-        });
+          if (event.aborted) {
+            break;
+          }
+        }
       }
       return event.result;
     }
@@ -1316,7 +1326,14 @@
       if (!events) {
         return object;
       }
-      _.each(type ? type.split(' ') : events, function(listeners, type) {
+
+      const loopOver = type ? type.split(' ') : events;
+
+      const entries = Array.isArray(loopOver)
+        ? loopOver.map((value, key) => [key, value])
+        : root.Object.entries(loopOver);
+
+      entries.forEach(function([type, listeners]) {
         var index;
         if (typeof listeners == 'string') {
           type = listeners;
@@ -1355,7 +1372,7 @@
       var object = this,
           events = object.events || (object.events = {});
 
-      _.each(type.split(' '), function(type) {
+      type.split(' ').forEach((type) => {
         (has(events, type)
           ? events[type]
           : (events[type] = [])
@@ -1555,7 +1572,7 @@
       // If changed emit the `reset` event and if it isn't cancelled reset the benchmark.
       if (changes.length &&
           (bench.emit(event = Event('reset')), !event.cancelled)) {
-        _.each(changes, function(data) {
+        changes.forEach((data) => {
           data.destination[data.key] = data.value;
         });
       }
@@ -2354,7 +2371,7 @@
     });
 
     // Add lodash methods to Benchmark.
-    _.each(['each', 'forEach', 'forOwn', 'has', 'indexOf', 'map', 'reduce'], function(methodName) {
+    ['each', 'forEach', 'forOwn', 'has', 'indexOf', 'map', 'reduce'].forEach((methodName) => {
       Benchmark[methodName] = _[methodName];
     });
 
@@ -2802,7 +2819,7 @@
     /*------------------------------------------------------------------------*/
 
     // Add lodash methods as Suite methods.
-    _.each(['each', 'forEach', 'indexOf', 'map', 'reduce'], function(methodName) {
+    ['each', 'forEach', 'indexOf', 'map', 'reduce'].forEach((methodName) => {
       var func = _[methodName];
       Suite.prototype[methodName] = function() {
         var args = [this];
@@ -2813,7 +2830,7 @@
 
     // Avoid array-like object bugs with `Array#shift` and `Array#splice`
     // in Firefox < 10 and IE < 9.
-    _.each(['pop', 'shift', 'splice'], function(methodName) {
+    ['pop', 'shift', 'splice'].forEach((methodName) => {
       var func = arrayRef[methodName];
 
       Suite.prototype[methodName] = function() {
