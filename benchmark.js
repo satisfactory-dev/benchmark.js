@@ -499,12 +499,18 @@
      * @param {*} value The value to clone.
      * @returns {*} The cloned value.
      */
-    var cloneDeep = _.partial(_.cloneDeepWith, _, function(value) {
-      // Only clone primitives, arrays, and plain objects.
-      if (!_.isArray(value) && !(typeof value === 'object')) {
-        return value;
+    var cloneDeep = (value) => {
+      if (_.isArray(value)) {
+        return [...value];
+      } else if (typeof value === 'object') {
+        return root.Object.fromEntries(
+          root.Object.entries(value)
+            .map(([key, value]) => [key, cloneDeep(value)]),
+        );
       }
-    });
+
+      return value;
+    };
 
     /**
      * Creates a function from the given arguments string and body.
