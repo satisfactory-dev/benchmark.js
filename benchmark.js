@@ -361,16 +361,16 @@
         return new Benchmark(name, fn, options);
       }
       // Juggle arguments.
-      if (_.isPlainObject(name)) {
+      if (typeof name === 'object') {
         // 1 argument (options).
         options = name;
       }
-      else if (_.isFunction(name)) {
+      else if (typeof name === 'function') {
         // 2 arguments (fn, options).
         options = fn;
         fn = name;
       }
-      else if (_.isPlainObject(fn)) {
+      else if (typeof fn === 'object') {
         // 2 arguments (name, options).
         options = fn;
         fn = null;
@@ -472,7 +472,7 @@
         return new Suite(name, options);
       }
       // Juggle arguments.
-      if (_.isPlainObject(name)) {
+      if (typeof name === 'object') {
         // 1 argument (options).
         options = name;
       } else {
@@ -494,7 +494,7 @@
      */
     var cloneDeep = _.partial(_.cloneDeepWith, _, function(value) {
       // Only clone primitives, arrays, and plain objects.
-      if (!_.isArray(value) && !_.isPlainObject(value)) {
+      if (!_.isArray(value) && !(typeof value === 'object')) {
         return value;
       }
     });
@@ -622,7 +622,7 @@
      * @returns {boolean} Returns `true` if the value can be coerced, else `false`.
      */
     function isStringable(value) {
-      return _.isString(value) || (_.has(value, 'toString') && _.isFunction(value.toString));
+      return _.isString(value) || (_.has(value, 'toString') && (typeof value.toString === 'function'));
     }
 
     /**
@@ -845,7 +845,9 @@
           listeners.splice(0, 0, listeners.pop());
         }
         // Execute method.
-        result[index] = _.isFunction(bench && bench[name]) ? bench[name].apply(bench, args) : undefined;
+        result[index] = (typeof (bench ? bench[name] : undefined) === 'function')
+          ? bench[name].apply(bench, args)
+          : undefined;
         // If synchronous return `true` until finished.
         return !async && getNext();
       }
@@ -1079,7 +1081,7 @@
       // Copy own properties.
       _.forOwn(suite, function(value, key) {
         if (!_.has(result, key)) {
-          result[key] = _.isFunction(_.get(value, 'clone'))
+          result[key] = (typeof _.get(value, 'clone') === 'function')
             ? value.clone()
             : cloneDeep(value);
         }
