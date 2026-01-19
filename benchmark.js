@@ -679,7 +679,7 @@
         return false;
       }
 
-      return _.isString(value) || (has(value, 'toString') && (typeof value.toString === 'function'));
+      return (typeof value === 'string') || (has(value, 'toString') && (typeof value.toString === 'function'));
     }
 
     /**
@@ -982,7 +982,7 @@
           : (index = false);
       }
       // Juggle arguments.
-      if (_.isString(name)) {
+      if ((typeof name === 'string')) {
         // 2 arguments (array, name).
         args = slice.call(arguments, 2);
       } else {
