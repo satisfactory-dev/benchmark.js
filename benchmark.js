@@ -136,6 +136,22 @@
   }
 
   /**
+   * @param {RegExp} regex
+   * @param {string} str
+   *
+   * @returns {string|null}
+   */
+  function getResult(regex, str) {
+    const match = regex.exec(str);
+
+    if (!match) {
+      return null;
+    }
+
+    return match[1];
+  }
+
+  /**
    * Create a new `Benchmark` function using the given `context` object.
    *
    * @static
@@ -622,7 +638,7 @@
         result = String(fn);
       } else if (support.decompilation) {
         // Escape the `{` for Firefox 1.
-        result = _.result(/^[^{]+\{([\s\S]*)\}\s*$/.exec(fn), 1);
+        result = getResult(/^[^{]+\{([\s\S]*)\}\s*$/, fn);
       }
       // Trim string.
       result = (result || '').replace(/^\s+|\s+$/g, '');
