@@ -133,7 +133,13 @@
     // after built-in constructors like `Object`, for the creation of literals.
     // ES5 clears this up by stating that literals must use built-in constructors.
     // See http://es5.github.io/#x11.1.5.
-    context = context ? _.defaults(root.Object(), context, _.pick(root, contextProps)) : root;
+    context = context
+      ? {
+        ...root.Object(),
+        ...context,
+        ...root.Object.fromEntries(contextProps.map((prop) => [prop, root[prop]])),
+      }
+      : root;
 
     /** Native constructor references. */
     var Array = context.Array,
