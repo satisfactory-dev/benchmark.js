@@ -526,6 +526,29 @@
       setOptions(suite, options);
     }
 
+    /**
+     * @param {(unknown[])|Suite|Object<number|'length', unknown>} array
+     *
+     * @returns {(unknown[])|(Benchmark[])}
+     */
+    function asArray(array) {
+      if (root.Array.isArray(array)) {
+        return [...array];
+      } else if (array instanceof Suite) {
+        const result = [];
+
+        for (let i = 0; i < array.length; ++i) {
+          result.push(array[i]);
+        }
+
+        return result;
+      }
+
+      return root.Object.keys(array || root.Object.create(null))
+        .filter((maybe) => /^\d+$/.test(maybe))
+        .map((key) => array[key]);
+    }
+
     /*------------------------------------------------------------------------*/
 
     /**
@@ -932,7 +955,7 @@
           index = -1,
           eventProps = { 'currentTarget': benches },
           options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
-          result = _.toArray(benches);
+          result = asArray(benches);
 
       /**
        * Invokes the method of the current object and if synchronous, fetches the next.
