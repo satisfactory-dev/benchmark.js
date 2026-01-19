@@ -142,32 +142,26 @@
       : root;
 
     /** Native constructor references. */
-    var Array = context.Array,
-        Date = context.Date,
+    var Date = context.Date,
         Function = context.Function,
         Math = context.Math,
         Object = context.Object,
-        RegExp = context.RegExp,
         String = context.String;
 
     /** Used for `Array` and `Object` method references. */
-    var arrayRef = [],
-        objectProto = Object.prototype;
+    var arrayRef = [];
 
     /** Native method shortcuts. */
     var abs = Math.abs,
         clearTimeout = context.clearTimeout,
         floor = Math.floor,
-        log = Math.log,
         max = Math.max,
         min = Math.min,
         pow = Math.pow,
         push = arrayRef.push,
-        setTimeout = context.setTimeout,
         shift = arrayRef.shift,
         slice = arrayRef.slice,
         sqrt = Math.sqrt,
-        toString = objectProto.toString,
         unshift = arrayRef.unshift;
 
     /** Used to avoid inclusion in Browserified bundles. */
@@ -600,18 +594,6 @@
       return /^(?:\/\*+[\w\W]*?\*\/|\/\/.*?[\n\r\u2028\u2029]|\s)*(["'])use strict\1;?$/.test(result)
         ? ''
         : result;
-    }
-
-    /**
-     * Checks if an object is of the specified class.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @param {string} name The name of the class.
-     * @returns {boolean} Returns `true` if the value is of the specified class, else `false`.
-     */
-    function isClassOf(value, name) {
-      return value != null && toString.call(value) == '[object ' + name + ']';
     }
 
     /**
