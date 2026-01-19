@@ -500,7 +500,7 @@
      * @returns {*} The cloned value.
      */
     var cloneDeep = (value) => {
-      if (_.isArray(value)) {
+      if (root.Array.isArray(value)) {
         return [...value];
       } else if (typeof value === 'object') {
         return root.Object.fromEntries(
@@ -945,7 +945,7 @@
         // 2 arguments (array, options).
         options = root.Object.assign(options, name);
         name = options.name;
-        args = _.isArray(args = 'args' in options ? options.args : []) ? args : [args];
+        args = root.Array.isArray(args = 'args' in options ? options.args : []) ? args : [args];
         queued = options.queued;
       }
       // Start iterating over the array.
@@ -1476,9 +1476,9 @@
             return;
           }
           if (_.isObjectLike(value)) {
-            if (_.isArray(value)) {
+            if (root.Array.isArray(value)) {
               // Check if an array value has changed to a non-array value.
-              if (!_.isArray(currValue)) {
+              if (!root.Array.isArray(currValue)) {
                 changed = true;
                 currValue = [];
               }
