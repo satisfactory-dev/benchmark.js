@@ -124,6 +124,18 @@
   }
 
   /**
+   * @param {*} maybe
+   * @param {string} prop
+   *
+   * @returns {boolean}
+   */
+  function has(maybe, prop) {
+    const canHaveProps = maybe && (typeof maybe === 'object' || typeof maybe === 'function');
+
+    return canHaveProps && maybe.hasOwnProperty(prop);
+  }
+
+  /**
    * Create a new `Benchmark` function using the given `context` object.
    *
    * @static
@@ -578,7 +590,7 @@
      */
     function getFirstArgument(fn) {
       return (
-        !_.has(fn, 'toString') &&
+        !has(fn, 'toString') &&
         (
           /^[\s(]*function[^(]*\(([^\s,)]+)/.exec(fn) ||
           0
@@ -649,7 +661,11 @@
      * @returns {boolean} Returns `true` if the value can be coerced, else `false`.
      */
     function isStringable(value) {
-      return _.isString(value) || (_.has(value, 'toString') && (typeof value.toString === 'function'));
+      if (null === value) {
+        return false;
+      }
+
+      return _.isString(value) || (has(value, 'toString') && (typeof value.toString === 'function'));
     }
 
     /**
@@ -714,7 +730,7 @@
             _.each(key.split(' '), function(key) {
               object.on(key.slice(2).toLowerCase(), value);
             });
-          } else if (!_.has(object, key)) {
+          } else if (!has(object, key)) {
             object[key] = cloneDeep(value);
           }
         }
@@ -1107,7 +1123,7 @@
 
       // Copy own properties.
       _.forOwn(suite, function(value, key) {
-        if (!_.has(result, key)) {
+        if (!has(result, key)) {
           result[key] = (typeof _.get(value, 'clone') === 'function')
             ? value.clone()
             : cloneDeep(value);
@@ -1227,7 +1243,7 @@
       event.target || (event.target = object);
       delete event.result;
 
-      if (events && (listeners = _.has(events, event.type) && events[event.type])) {
+      if (events && (listeners = has(events, event.type) && events[event.type])) {
         _.each(listeners.slice(), function(listener) {
           if ((event.result = listener.apply(object, args)) === false) {
             event.cancelled = true;
@@ -1250,7 +1266,7 @@
       var object = this,
           events = object.events || (object.events = {});
 
-      return _.has(events, type) ? events[type] : (events[type] = []);
+      return has(events, type) ? events[type] : (events[type] = []);
     }
 
     /**
@@ -1290,7 +1306,7 @@
         var index;
         if (typeof listeners == 'string') {
           type = listeners;
-          listeners = _.has(events, type) && events[type];
+          listeners = has(events, type) && events[type];
         }
         if (listeners) {
           if (listener) {
@@ -1326,7 +1342,7 @@
           events = object.events || (object.events = {});
 
       _.each(type.split(' '), function(type) {
-        (_.has(events, type)
+        (has(events, type)
           ? events[type]
           : (events[type] = [])
         ).push(listener);
@@ -1390,7 +1406,7 @@
 
       // Copy own custom properties.
       _.forOwn(bench, function(value, key) {
-        if (!_.has(result, key)) {
+        if (!has(result, key)) {
           result[key] = cloneDeep(value);
         }
       });
