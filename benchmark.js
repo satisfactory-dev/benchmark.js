@@ -1,5 +1,6 @@
 /*!
  * Benchmark.js
+ * Copyright 2026 SignpostMarv
  * Copyright 2010-2016 Mathias Bynens
  * Based on JSLitmus.js, copyright Robert Kieffer
  * Modified by John-David Dalton
