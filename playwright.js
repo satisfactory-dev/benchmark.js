@@ -4,7 +4,7 @@ const {
   webkit,
 } = require('playwright');
 
-const browsers = {
+let browsers = {
   chromium: [
     'Chromium',
     chromium,
@@ -18,6 +18,14 @@ const browsers = {
     webkit,
   ]
 };
+
+const specified_browser = (process.argv.find((maybe) => maybe.startsWith('--browser=')) || '').split('=')[1] || undefined;
+
+if (specified_browser && specified_browser in browsers) {
+  browsers = {
+    [specified_browser]: browsers[specified_browser],
+  };
+}
 
 const {
   writeFile,
@@ -39,7 +47,7 @@ async function maybeWithCoverage(browser) {
 
   const page = await browser.newPage();
 
-  const baseUrl = process.argv[2] || 'http://tests:80'
+  const baseUrl = process.argv.find((maybe) => maybe.startsWith('http://')) || 'http://tests:80'
 
   if (
     baseUrl !== 'http://tests:80'

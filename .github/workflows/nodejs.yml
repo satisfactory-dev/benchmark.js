@@ -57,6 +57,36 @@ jobs:
                   cache: 'npm'
             - run: npm ci
             - run: node ./test/test.js
+    playwright:
+        name: Playwright
+        runs-on: ubuntu-latest
+        needs: fail-early
+        strategy:
+            matrix:
+                browser:
+                    - firefox
+                    - webkit
+        steps:
+            - uses: actions/checkout@v4
+            - name: Use Node.js 20 (${{ matrix.browser }})
+              uses: actions/setup-node@v6
+              with:
+                  node-version: 20
+                  cache: 'npm'
+            - run: npm ci
+            - uses: hoverkraft-tech/compose-action@05da55b2bb8a5a759d1c4732095044bd9018c050
+              with:
+                services: tests
+                cwd: ./.devcontainer/
+                compose-file: ./docker-compose.yml
+            - name: http check
+              id: http-check
+              uses: fjogeleit/http-request-action@v1
+              with:
+                url: "http://localhost:8003"
+                method: GET
+            - run: ./node_modules/.bin/playwright install --with-deps --only-shell ${{ matrix.browser }}
+            - run: node ./playwright.js http://localhost:8003 --browser=${{ matrix.browser }}
     coverage:
         name: Coverage
         runs-on: ubuntu-latest
@@ -82,9 +112,9 @@ jobs:
               with:
                 url: "http://localhost:8003"
                 method: GET
-            - run: ./node_modules/.bin/playwright install --with-deps --only-shell chromium firefox webkit
+            - run: ./node_modules/.bin/playwright install --with-deps --only-shell chromium
             - name: Browser Coverage
-              run: NODE_PATH=$(npm root -g) node ./playwright.js http://localhost:8003
+              run: node ./playwright.js http://localhost:8003 --browser=chromium
             - run: cp -r ./coverage/*/tmp/*.json ./coverage/tmp
             - run: ls -R ./coverage/tmp/
             - name: Merge Coverage
