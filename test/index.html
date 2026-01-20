@@ -13,20 +13,40 @@
       QUnit.config.hidepassed = true;
       QUnit.urlParams.norequire = /[?&]norequire=true(?:&|$)/.test(location.search);
 
-      // Load test.js if not using require.js.
-      document.write(QUnit.urlParams.norequire
-        ? '<script src="../benchmark.js"><\/script><script src="test.js"><\/script>'
-        : '<script src="../node_modules/requirejs/require.js"><\/script>'
-      );
+      async function loading () {
+        for (const url of (
+          QUnit.urlParams.norequire
+            ? [
+              '../benchmark.js',
+              'test.js',
+            ]
+            : [
+              '../node_modules/requirejs/require.js',
+            ]
+        )) {
+          const script = document.createElement('script');
+          script.src = url;
+
+          await new Promise((yup, nope) => {
+            script.onload = () => yup();
+            script.onerror = (...args) => nope(args);
+            document.body.append(script);
+          });
+        }
+
+        console.log('done async loading');
+      }
     </script>
     <script>
       var benchmarkModule;
 
-      (function() {
+      (async function() {
+        QUnit.config.autostart = false;
+        await loading();
         if (!window.require) {
+          QUnit.start();
           return;
         }
-        QUnit.config.autostart = false;
 
         requirejs.config({
           'baseUrl': './',
