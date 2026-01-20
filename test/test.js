@@ -206,7 +206,7 @@
       }
     };
 
-    _.forOwn(tests, function(fn, title) {
+    Object.entries(tests).forEach(([title, fn]) => {
       QUnit.test('should have correct binding for ' + title, function(assert) {
         var bench = Benchmark({
           'setup': 'if(/ops/.test(this))this._setup=true;',
@@ -238,7 +238,7 @@
       'array-like-object': { '0': 'a', '1': 'b', '2': 'c',  '3': '', 'length': 4 }
     };
 
-    _.forOwn(objects, function(object, key) {
+    Object.entries(objects).forEach(([key, object]) => {
       QUnit.test('should providee the correct arguments when passing an ' + key, function(assert) {
         var args;
         Benchmark.filter(object, function() {
@@ -333,7 +333,7 @@
       'array-like-object': { '0': 'a', '1': ['b'], '2': 'c',  '3': null, 'length': 4 }
     };
 
-    _.forOwn(objects, function(object, key) {
+    Object.entries(objects).forEach(([key, object]) => {
       QUnit.test('should return the correct result when passing an ' + key, function(assert) {
         var actual = Benchmark.invoke(object, 'concat');
         assert.deepEqual(actual, ['a', ['b'], 'c', undefined]);
@@ -396,7 +396,7 @@
       'object': { 'a': '0', 'b': '1', '': '2' }
     };
 
-    _.forOwn(objects, function(object, key) {
+    Object.entries(objects).forEach(([key, object]) => {
       QUnit.test('should join correctly using the default separator when passing an ' + key, function(assert) {
         assert.strictEqual(Benchmark.join(object), key == 'object' ? 'a: 0,b: 1,: 2' : 'a,b,');
       });
@@ -523,11 +523,10 @@
 
   /*--------------------------------------------------------------------------*/
 
-  _.forOwn({
-    'Benchmark': Benchmark,
-    'Benchmark.Suite': Benchmark.Suite
-  },
-  function(Constructor, namespace) {
+  Object.entries({
+    Benchmark,
+    'Benchmark.Suite': Benchmark.Suite,
+  }).forEach(([namespace, Constructor]) => {
 
     QUnit.module(namespace + '#emit');
 
