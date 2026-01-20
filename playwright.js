@@ -51,10 +51,7 @@ const {
 async function maybeWithCoverage(browser) {
   const page = await browser.newPage();
 
-  const hasCoverage = (
-    page?.coverage?.startJSCoverage
-    && page?.coverage?.stopJSCoverage
-  );
+  const hasCoverage = browser === browsers?.chromium;
 
   let coverage;
 
