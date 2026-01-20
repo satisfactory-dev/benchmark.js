@@ -1942,7 +1942,9 @@
         timers.push({ 'ns': timer.ns,  'res': getRes('us'), 'unit': 'us' });
       }
       // Pick timer with highest resolution.
-      timer = _.minBy(timers, 'res');
+      timer = timers.sort(({res: a}, {res: b}) => {
+        return a - b;
+      })[0];
 
       // Error if there are no working timers.
       if (timer.res == Infinity) {
