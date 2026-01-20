@@ -1,5 +1,5 @@
 const {
-	chromium,
+  chromium,
   firefox,
   webkit,
 } = require('playwright');
@@ -20,12 +20,12 @@ const browsers = {
 };
 
 const {
-	writeFile,
+  writeFile,
   readFile,
 } = require('node:fs/promises');
 
 const {
-	pathToFileURL,
+  pathToFileURL,
 } = require('node:url');
 
 /**
@@ -36,64 +36,65 @@ async function maybeWithCoverage(browser) {
     browser?.coverage?.startJSCoverage
     && browser?.coverage?.stopJSCoverage
   );
-	const page = await browser.newPage();
+
+  const page = await browser.newPage();
 
   if (hasCoverage) {
-	await page.coverage.startJSCoverage();
+    await page.coverage.startJSCoverage();
   }
 
-	const url = process.argv[2] || 'http://tests:80'
+  const url = process.argv[2] || 'http://tests:80'
 
-	if (
-		url !== 'http://tests:80'
-		&& url !== 'http://localhost:8003'
-	) {
-		throw new Error(`Unsupported URL specified: ${url}`)
-	}
+  if (
+    url !== 'http://tests:80'
+    && url !== 'http://localhost:8003'
+  ) {
+    throw new Error(`Unsupported URL specified: ${url}`)
+  }
 
-	await page.goto(url)
-	await page.click('#qunit-userAgent')
-	await new Promise((yup) => {
-		page.on('console', (e) => {
-			if ('Finished running tests' === e.text()) {
-				yup()
-			}
-		})
-	});
+  await page.goto(url)
+  await page.click('#qunit-userAgent')
+  await new Promise((yup) => {
+    page.on('console', (e) => {
+      if ('Finished running tests' === e.text()) {
+        yup()
+      }
+    })
+  });
 
   if (hasCoverage) {
-	  return await page.coverage.stopJSCoverage();
+    return await page.coverage.stopJSCoverage();
   }
 }
 
 (async () => {
   const versions = [];
   for (const [label, [name, type]] of Object.entries(browsers)) {
-	  const browser = await type.launch();
+    const browser = await type.launch();
     versions.push(`${name} (${browser.version()})`);
     const coverage = await maybeWithCoverage(browser);
 
     if (coverage) {
-	await writeFile(
-		  `./coverage/playwright/tmp/playwright-${label}.json`,
-		JSON.stringify(
-			{
-				result: coverage
-					.filter((
-						maybe,
-					) => maybe.url.startsWith(`${url.replace(/:80$/, '')}/benchmark.js?`))
-					.map((e) => {
-						e.url = pathToFileURL(__dirname + '/benchmark.js')
+      await writeFile(
+        `./coverage/playwright/tmp/playwright-${label}.json`,
+        JSON.stringify(
+          {
+            result: coverage
+              .filter((
+                maybe,
+              ) => maybe.url.startsWith(`${url.replace(/:80$/, '')}/benchmark.js?`))
+              .map((e) => {
+                e.url = pathToFileURL(__dirname + '/benchmark.js')
 
-						return e;
-					}),
-			},
-			null,
-			'\t'
-		)
-	)
+                return e;
+              }),
+          },
+          null,
+          '\t'
+        )
+      )
     }
-	await browser.close();
+    await browser.close();
   }
 
   const readme = (await readFile(`${__dirname}/README.md`)).toString();
@@ -111,10 +112,7 @@ async function maybeWithCoverage(browser) {
     versions_from_Makefile
       .reduce(
         (was, is) => {
-          const [
-            start,
-            end,
-          ] = was[was.length - 1];
+          const [, end] = was[was.length - 1];
 
           if (is === end + 1) {
             was[was.length - 1][1] = is;
@@ -144,8 +142,8 @@ async function maybeWithCoverage(browser) {
   await writeFile(
     `${__dirname}/README.md`,
     readme.replace(
-        /<!-- #region Tested In -->\n(Tested in.+)\n<!-- #endregion Tested In -->/,
-        `
+      /<!-- #region Tested In -->\n(Tested in.+)\n<!-- #endregion Tested In -->/,
+      `
           <!-- #region Tested In -->
           Tested in ${version_info}
           <!-- #endregion Tested In -->
