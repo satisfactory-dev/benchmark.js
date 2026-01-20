@@ -343,90 +343,6 @@
 
   /*--------------------------------------------------------------------------*/
 
-  QUnit.module('Benchmark.invoke');
-
-  (function() {
-    var objects = {
-      'array': ['a', ['b'], 'c', null],
-      'array-like-object': { '0': 'a', '1': ['b'], '2': 'c',  '3': null, 'length': 4 }
-    };
-
-    Object.entries(objects).forEach(([key, object]) => {
-      QUnit.test('should return the correct result when passing an ' + key, function(assert) {
-        var actual = Benchmark.invoke(object, 'concat');
-        assert.deepEqual(actual, ['a', ['b'], 'c', undefined]);
-      });
-
-      QUnit.test('should provide the correct arguments to the invoked method when passing an ' + key, function(assert) {
-        var actual = Benchmark.invoke(object, 'concat', 'x', 'y', 'z');
-        assert.deepEqual(actual, ['axyz', ['b', 'x', 'y', 'z'], 'cxyz', undefined]);
-      });
-
-      QUnit.test('should handle options object with callbacks correctly when passing an ' + key, function(assert) {
-        function callback() {
-          callbacks.push(slice.call(arguments));
-        }
-
-        var callbacks = [];
-        var actual = Benchmark.invoke(object, {
-          'name': 'concat',
-          'args': ['x', 'y', 'z'],
-          'onStart': callback,
-          'onCycle': callback,
-          'onComplete': callback
-        });
-
-        assert.deepEqual(actual, ['axyz', ['b', 'x', 'y', 'z'], 'cxyz', undefined]);
-
-        assert.strictEqual(callbacks[0].length, 1);
-        assert.strictEqual(callbacks[0][0].target, 'a');
-        assert.deepEqual(callbacks[0][0].currentTarget, object);
-        assert.strictEqual(callbacks[0][0].type, 'start');
-        assert.strictEqual(callbacks[1][0].type, 'cycle');
-        assert.strictEqual(callbacks[5][0].type, 'complete');
-      });
-
-      QUnit.test('should support queuing when passing an ' + key, function(assert) {
-        var lengths = [];
-        var actual = Benchmark.invoke(object, {
-          'name': 'concat',
-          'queued': true,
-          'args': 'x',
-          'onCycle': function() {
-            lengths.push(object.length);
-          }
-        });
-
-        assert.deepEqual(lengths, [4, 3, 2, 1]);
-        assert.deepEqual(actual, ['ax', ['b', 'x'], 'cx', undefined]);
-      });
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Benchmark.join');
-
-  (function() {
-    var objects = {
-      'array': ['a', 'b', ''],
-      'array-like-object': { '0': 'a', '1': 'b', '2': '', 'length': 3 },
-      'object': { 'a': '0', 'b': '1', '': '2' }
-    };
-
-    Object.entries(objects).forEach(([key, object]) => {
-      QUnit.test('should join correctly using the default separator when passing an ' + key, function(assert) {
-        assert.strictEqual(Benchmark.join(object), key == 'object' ? 'a: 0,b: 1,: 2' : 'a,b,');
-      });
-
-      QUnit.test('should join correctly using a custom separator when passing an ' + key, function(assert) {
-        assert.strictEqual(Benchmark.join(object, '+', '@'), key == 'object' ? 'a@0+b@1+@2' :  'a+b+');
-      });
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
   QUnit.module('Benchmark#clone');
 
   (function() {
@@ -948,14 +864,19 @@
 
   (function() {
     QUnit.test('should reverses the element order', function(assert) {
-      var suite = Benchmark.Suite();
-      suite[0] = 0;
-      suite[1] = 1;
-      suite.length = 2;
+      var suite = new Benchmark.Suite();
+
+      suite.add('foo');
+      suite.add('bar');
+
+      let benchmarks = Benchmark.Suite.asArray(suite).map(({name}) => name);
+      assert.deepEqual(benchmarks, ['foo', 'bar']);
 
       var actual = suite.reverse();
       assert.strictEqual(actual, suite);
-      assert.deepEqual(slice.call(actual), [1, 0]);
+
+      benchmarks = Benchmark.Suite.asArray(suite).map(({name}) => name);
+      assert.deepEqual(benchmarks, ['bar', 'foo']);
     });
   }());
 
@@ -966,13 +887,18 @@
   (function() {
     QUnit.test('should remove the first element', function(assert) {
       var suite = Benchmark.Suite();
-      suite[0] = 0;
-      suite[1] = 1;
-      suite.length = 2;
+
+      suite.add('foo');
+      suite.add('bar');
+
+      let benchmarks = Benchmark.Suite.asArray(suite).map(({name}) => name);
+      assert.deepEqual(benchmarks, ['foo', 'bar']);
 
       var actual = suite.shift();
-      assert.strictEqual(actual, 0);
-      assert.deepEqual(slice.call(suite), [1]);
+      assert.strictEqual(actual.name, 'foo');
+
+      benchmarks = Benchmark.Suite.asArray(suite).map(({name}) => name);
+      assert.deepEqual(benchmarks, ['bar']);
     });
 
     QUnit.test('should shift an object with no elements', function(assert) {
@@ -985,111 +911,16 @@
 
     QUnit.test('should have no elements when length is `0` after shift', function(assert) {
       var suite = Benchmark.Suite();
-      suite[0] = 0;
+      assert.strictEqual(suite.length, 0);
+      suite.add('foo');
+      suite.add('bar');
+      assert.strictEqual(suite.length, 2);
       suite.length = 1;
+      assert.strictEqual(suite.length, 1);
       suite.shift();
 
       // ensure element is removed
-      assert.strictEqual('0' in suite, false);
       assert.strictEqual(suite.length, 0);
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Benchmark.Suite#splice');
-
-  (function() {
-    QUnit.test('should work with positive `start` argument', function(assert) {
-      var suite = Benchmark.Suite();
-      suite[0] = 0;
-      suite[1] = 3;
-      suite.length = 2;
-
-      var actual = suite.splice(1, 0, 1, 2);
-      assert.deepEqual(actual, []);
-      assert.deepEqual(slice.call(suite), [0, 1, 2, 3]);
-    });
-
-    QUnit.test('should work with positive `start` and `deleteCount` arguments', function(assert) {
-      var suite = Benchmark.Suite();
-      suite[0] = 0;
-      suite[1] = 3;
-      suite.length = 2;
-
-      var actual = suite.splice(1, 1, 1, 2);
-      assert.deepEqual(actual, [3]);
-      assert.deepEqual(slice.call(suite), [0, 1, 2]);
-    });
-
-    QUnit.test('should work with `deleteCount` values exceeding length', function(assert) {
-      var suite = Benchmark.Suite();
-      suite[0] = 0;
-      suite[1] = 3;
-      suite.length = 2;
-
-      var actual = suite.splice(1, 10, 1, 2);
-      assert.deepEqual(actual, [3]);
-      assert.deepEqual(slice.call(suite), [0, 1, 2]);
-    });
-
-    QUnit.test('should work with negative `start` and `deleteCount` arguments', function(assert) {
-      var suite = Benchmark.Suite();
-      suite[0] = 0;
-      suite[1] = 3;
-      suite.length = 2;
-
-      var actual = suite.splice(-1, -1, 1, 2);
-      assert.deepEqual(actual, []);
-      assert.deepEqual(slice.call(suite), [0, 1, 2, 3]);
-    });
-
-    QUnit.test('should work with an extreme negative `deleteCount` value', function(assert) {
-      var suite = Benchmark.Suite();
-      suite[0] = 0;
-      suite[1] = 3;
-      suite.length = 2;
-
-      var actual = suite.splice(0, -10, 1, 2);
-      assert.deepEqual(actual, []);
-      assert.deepEqual(slice.call(suite), [1, 2, 0, 3]);
-    });
-
-    QUnit.test('should have no elements when length is `0` after splice', function(assert) {
-      var suite = Benchmark.Suite();
-      suite[0] = 0;
-      suite.length = 1
-      suite.splice(0, 1);
-
-      // ensure element is removed
-      assert.strictEqual('0' in suite, false);
-      assert.strictEqual(suite.length, 0);
-    });
-  }());
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Benchmark.Suite#unshift');
-
-  (function() {
-    QUnit.test('should add a first element', function(assert) {
-      var suite = Benchmark.Suite();
-      suite[0] = 1;
-      suite.length = 1;
-
-      var actual = suite.unshift(0);
-      assert.strictEqual(actual, 2);
-      assert.deepEqual(slice.call(suite), [0, 1]);
-    });
-
-    QUnit.test('should add multiple elements to the front', function(assert) {
-      var suite = Benchmark.Suite();
-      suite[0] = 3;
-      suite.length = 1;
-
-      var actual = suite.unshift(0, 1, 2);
-      assert.strictEqual(actual, 4);
-      assert.deepEqual(slice.call(suite), [0, 1, 2, 3]);
     });
   }());
 

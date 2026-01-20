@@ -165,9 +165,6 @@
         Object = root.Object,
         String = root.String;
 
-    /** Used for `Array` and `Object` method references. */
-    var arrayRef = [];
-
     /** Native method shortcuts. */
     var abs = Math.abs,
         clearTimeout = root.clearTimeout,
@@ -175,11 +172,7 @@
         max = Math.max,
         min = Math.min,
         pow = Math.pow,
-        push = arrayRef.push,
-        shift = arrayRef.shift,
-        slice = arrayRef.slice,
-        sqrt = Math.sqrt,
-        unshift = arrayRef.unshift;
+        sqrt = Math.sqrt;
 
     /** Detect DOM document object. */
     var doc = isHostType(root, 'document') && root.document;
@@ -477,6 +470,7 @@
       if (!(suite instanceof Suite)) {
         return new Suite(name, options);
       }
+      this._benchmarks = [];
       // Juggle arguments.
       if (typeof name === 'object') {
         // 1 argument (options).
@@ -486,7 +480,42 @@
         suite.name = name;
       }
       setOptions(suite, options);
+
+      this.reverse = () => {
+        this._benchmarks.reverse();
+
+        return this;
+      }
+
+      this.shift = () => {
+        return this._benchmarks.shift();
+      }
     }
+
+    root.Object.defineProperty(Suite.prototype, 'benchmarks', {
+      get: function() {
+        return [...this._benchmarks];
+      },
+    });
+
+    root.Object.defineProperty(Suite.prototype, 'length', {
+      /**
+       * The number of benchmarks in the suite.
+       *
+       * @memberOf Benchmark.Suite
+       * @type number
+       */
+      get: function () {
+        return this._benchmarks.length;
+      },
+      set: function (value) {
+        if (undefined === this._benchmarks) {
+          this._benchmarks = [];
+        }
+
+        this._benchmarks.length = value;
+      },
+    });
 
     /**
      * Converts a Suite or Suite-like object/array to an array of values
@@ -503,13 +532,7 @@
       if (root.Array.isArray(array)) {
         return [...array];
       } else if (array instanceof Suite) {
-        const result = [];
-
-        for (let i = 0; i < array.length; ++i) {
-          result.push(array[i]);
-        }
-
-        return result;
+        return array.benchmarks;
       }
 
       return root.Object.keys(array || root.Object.create(null))
@@ -818,13 +841,7 @@
       }
 
       if (array instanceof Suite) {
-        /** @type {Benchmark[]} */
-        const result = [];
-        for (let i = 0; i < array.length; ++i) {
-          result.push(array[i]);
-        }
-
-        return result.filter((benchmark, index) => callback(benchmark, index, array));
+        return array.benchmarks.filter((benchmark, index) => callback(benchmark, index, array));
       }
 
       if (!root.Array.isArray(array)) {
@@ -964,7 +981,7 @@
         eventProps.type = 'cycle';
         eventProps.target = last;
         cycleEvent = Event(eventProps);
-        options.onCycle.call(benches, cycleEvent);
+        options.onCycle.call(benches._benchmarks, cycleEvent);
 
         // Choose next benchmark if not exiting early.
         if (!cycleEvent.aborted && raiseIndex() !== false) {
@@ -1013,7 +1030,7 @@
 
         // If queued remove the previous bench.
         if (queued && index > 0) {
-          shift.call(benches);
+          benches.shift();
         }
         // If we reached the last index then return `false`.
         return (queued ? benches.length : index < result.length)
@@ -1023,7 +1040,7 @@
       // Juggle arguments.
       if ((typeof name === 'string')) {
         // 2 arguments (array, name).
-        args = slice.call(arguments, 2);
+        args = root.Array.prototype.slice.call(arguments, 2);
       } else {
         // 2 arguments (array, options).
         options = root.Object.assign(options, name);
@@ -1034,7 +1051,8 @@
       // Start iterating over the array.
       if (raiseIndex() !== false) {
         // Emit "start" event.
-        bench = result[index];
+
+        bench = (result instanceof Suite ? result.benchmarks : result)[index];
         eventProps.type = 'start';
         eventProps.target = bench;
         options.onStart.call(benches, Event(eventProps));
@@ -1043,7 +1061,7 @@
         if (name == 'run' && (benches instanceof Suite) && benches.aborted) {
           // Emit "cycle" event.
           eventProps.type = 'cycle';
-          options.onCycle.call(benches, Event(eventProps));
+          options.onCycle.call(benches.benchmarks, Event(eventProps));
           // Emit "complete" event.
           eventProps.type = 'complete';
           options.onComplete.call(benches, Event(eventProps));
@@ -1165,7 +1183,7 @@
           event = Event({ 'type': 'add', 'target': bench });
 
       if (suite.emit(event), !event.cancelled) {
-        suite.push(bench);
+        this._benchmarks.push(bench);
       }
       return suite;
     }
@@ -1205,7 +1223,10 @@
       var suite = this,
           result = new suite.constructor(suite.options);
 
-      result.push.apply(result, filter(suite, callback));
+      const cb = filter(this, callback);
+
+      result._benchmarks.push(...cb);
+
       return result;
     }
 
@@ -2786,15 +2807,6 @@
     /*------------------------------------------------------------------------*/
 
     root.Object.assign(Suite.prototype, {
-
-      /**
-       * The number of benchmarks in the suite.
-       *
-       * @memberOf Benchmark.Suite
-       * @type number
-       */
-      'length': 0,
-
       /**
        * A flag to indicate if the suite is aborted.
        *
@@ -2818,20 +2830,11 @@
       'clone': cloneSuite,
       'emit': emit,
       'filter': filterSuite,
-      'join': arrayRef.join,
       'listeners': listeners,
       'off': off,
       'on': on,
-      'pop': arrayRef.pop,
-      'push': push,
       'reset': resetSuite,
       'run': runSuite,
-      'reverse': arrayRef.reverse,
-      'shift': shift,
-      'slice': slice,
-      'sort': arrayRef.sort,
-      'splice': arrayRef.splice,
-      'unshift': unshift
     });
 
     /*------------------------------------------------------------------------*/
