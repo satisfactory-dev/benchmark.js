@@ -1672,7 +1672,7 @@
         var errorStr;
         if (!(error && (typeof error === 'object' || typeof error === 'function'))) {
           errorStr = String(error);
-        } else if (!_.isError(Error)) {
+        } else if (!(error instanceof Error)) {
           errorStr = join(error);
         } else {
           // Error#name and Error#message properties are non-enumerable.
