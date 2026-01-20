@@ -1309,6 +1309,27 @@
 
   if (!document) {
     QUnit.config.noglobals = true;
+    QUnit.on('runEnd', ({
+      runtime,
+      status,
+      testCounts: {
+        passed,
+        failed,
+        skipped,
+        todo,
+        total,
+      }
+    }) => {
+      console.table({
+        failed,
+        passed,
+        skipped,
+        total,
+        todo,
+        runtime: `${runtime / 1000}s`,
+        status,
+      });
+    })
     QUnit.start();
   }
 }.call(this));
