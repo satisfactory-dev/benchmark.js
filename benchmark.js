@@ -51,13 +51,6 @@
   /** Used to make every compiled test unique. */
   var uidCounter = 0;
 
-  /** Used to assign default `context` object properties. */
-  var contextProps = [
-    'Array', 'Date', 'Function', 'Math', 'Object', 'RegExp', 'String',
-    'clearTimeout', 'chrome', 'chromium', 'document', 'navigator',
-    'process', 'runtime', 'setTimeout'
-  ];
-
   /** Used to avoid hz of Infinity. */
   var divisors = {
     '1': 4096,
@@ -153,45 +146,31 @@
   }
 
   /**
-   * Create a new `Benchmark` function using the given `context` object.
+   * Create a new `Benchmark` function using the given options.
    *
    * @static
    * @memberOf Benchmark
-   * @param {Object} [context=root] The context object.
    * @param {Object<now, () => number>} highestDefaultTimer
-   * @param {Object<now, () => number>} [usTimer]
+   * @param {Object<now, () => number>} [usTimer] A high-precision timer such as the one provided by microtime
    * @returns {Function} Returns a new `Benchmark` function.
    */
   function runInContext(
-    context,
     highestDefaultTimer = typeof root?.performance?.now === 'function' ? performance : Date,
     usTimer = undefined,
   ) {
-    // Avoid issues with some ES3 environments that attempt to use values, named
-    // after built-in constructors like `Object`, for the creation of literals.
-    // ES5 clears this up by stating that literals must use built-in constructors.
-    // See http://es5.github.io/#x11.1.5.
-    context = context
-      ? {
-        ...root.Object(),
-        ...context,
-        ...root.Object.fromEntries(contextProps.map((prop) => [prop, root[prop]])),
-      }
-      : root;
-
     /** Native constructor references. */
-    var Date = context.Date,
-        Function = context.Function,
-        Math = context.Math,
-        Object = context.Object,
-        String = context.String;
+    var Date = root.Date,
+        Function = root.Function,
+        Math = root.Math,
+        Object = root.Object,
+        String = root.String;
 
     /** Used for `Array` and `Object` method references. */
     var arrayRef = [];
 
     /** Native method shortcuts. */
     var abs = Math.abs,
-        clearTimeout = context.clearTimeout,
+        clearTimeout = root.clearTimeout,
         floor = Math.floor,
         max = Math.max,
         min = Math.min,
@@ -203,10 +182,10 @@
         unshift = arrayRef.unshift;
 
     /** Detect DOM document object. */
-    var doc = isHostType(context, 'document') && context.document;
+    var doc = isHostType(root, 'document') && root.document;
 
     /** Used to access Node.js's high resolution timer. */
-    var processObject = isHostType(context, 'process') && context.process;
+    var processObject = isHostType(root, 'process') && root.process;
 
     /** Used to prevent a `removeChild` memory leak in IE < 9. */
     var trash = doc && doc.createElement('div');
@@ -234,7 +213,7 @@
        * @memberOf Benchmark.support
        * @type boolean
        */
-      support.browser = doc && isHostType(context, 'navigator');
+      support.browser = doc && isHostType(root, 'navigator');
 
       /**
        * Detect if the Timers API exists.
@@ -242,7 +221,7 @@
        * @memberOf Benchmark.support
        * @type boolean
        */
-      support.timeout = isHostType(context, 'setTimeout') && isHostType(context, 'clearTimeout');
+      support.timeout = true;
 
       /**
        * Detect if function decompilation is support.
@@ -784,7 +763,7 @@
         cycle(deferred);
       }
       else if (++deferred.cycles < clone.count) {
-        clone.compiled.call(deferred, context, timer);
+        clone.compiled.call(deferred, root, timer);
       }
       else {
         timer.stop(deferred);
@@ -1745,7 +1724,7 @@
             // Pretest to determine if compiled code exits early, usually by a
             // rogue `return` statement, by checking for a return object with the uid.
             bench.count = 1;
-            compiled = decompilable && (compiled.call(bench, context, timer) || {}).uid == templateData.uid && compiled;
+            compiled = decompilable && (compiled.call(bench, root, timer) || {}).uid == templateData.uid && compiled;
             bench.count = count;
           }
         } catch(e) {
@@ -1768,7 +1747,7 @@
           try {
             // Pretest one more time to check for errors.
             bench.count = 1;
-            compiled.call(bench, context, timer);
+            compiled.call(bench, root, timer);
             bench.count = count;
             delete clone.error;
           }
@@ -1782,7 +1761,7 @@
         // If no errors run the full test loop.
         if (!clone.error) {
           compiled = bench.compiled = clone.compiled = createCompiled(bench, decompilable, deferred, funcBody);
-          result = compiled.call(deferred || bench, context, timer).elapsed;
+          result = compiled.call(deferred || bench, root, timer).elapsed;
         }
         return result;
       };
@@ -1929,7 +1908,7 @@
       // enable benchmarking via the --enable-benchmarking command
       // line switch in at least Chrome 7 to use chrome.Interval
       try {
-        if ((timer.ns = new (context.chrome || context.chromium).Interval)) {
+        if ((timer.ns = new (root.chrome || root.chromium).Interval)) {
           timers.push({ 'ns': timer.ns, 'res': getRes('us'), 'unit': 'us' });
         }
       } catch(e) {}
@@ -2195,7 +2174,7 @@
         // Start a new cycle.
         clone.count = count;
         if (deferred) {
-          clone.compiled.call(deferred, context, timer);
+          clone.compiled.call(deferred, root, timer);
         } else if (async) {
           delay(clone, function() { cycle(clone, options); });
         } else {
@@ -2900,8 +2879,7 @@
   if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
     // Define as an anonymous module so, through path mapping, it can be aliased.
     define(function() {
-      return runInContext({
-      });
+      return runInContext();
     });
   }
   else {

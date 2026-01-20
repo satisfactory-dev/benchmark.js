@@ -66,7 +66,6 @@ const maybe_microtime = microtime();
 if (maybe_microtime) {
 	Benchmark = Benchmark.runInContext(
 		undefined,
-		undefined,
 		maybe_microtime,
 	);
 }
