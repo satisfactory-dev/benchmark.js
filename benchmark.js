@@ -2843,32 +2843,6 @@
       'Suite': Suite
     });
 
-    /*------------------------------------------------------------------------*/
-
-    // Avoid array-like object bugs with `Array#shift` and `Array#splice`
-    // in Firefox < 10 and IE < 9.
-    ['pop', 'shift', 'splice'].forEach((methodName) => {
-      var func = arrayRef[methodName];
-
-      Suite.prototype[methodName] = function() {
-        var value = this,
-            result = func.apply(value, arguments);
-
-        if (value.length === 0) {
-          delete value[0];
-        }
-        return result;
-      };
-    });
-
-    // Avoid buggy `Array#unshift` in IE < 8 which doesn't return the new
-    // length of the array.
-    Suite.prototype.unshift = function() {
-      var value = this;
-      unshift.apply(value, arguments);
-      return value.length;
-    };
-
     return Benchmark;
   }
 
