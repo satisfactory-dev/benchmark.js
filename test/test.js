@@ -1307,28 +1307,28 @@
   QUnit.config.asyncRetries = 10;
   QUnit.config.hidepassed = true;
 
-    QUnit.on('runEnd', ({
-      runtime,
+  QUnit.on('runEnd', ({
+    runtime,
+    status,
+    testCounts: {
+      passed,
+      failed,
+      skipped,
+      todo,
+      total,
+    }
+  }) => {
+    console.table({
+      failed,
+      passed,
+      skipped,
+      total,
+      todo,
+      runtime: `${runtime / 1000}s`,
       status,
-      testCounts: {
-        passed,
-        failed,
-        skipped,
-        todo,
-        total,
-      }
-    }) => {
-      console.table({
-        failed,
-        passed,
-        skipped,
-        total,
-        todo,
-        runtime: `${runtime / 1000}s`,
-        status,
-      });
+    });
     console.log('Finished running tests')
-    })
+  })
   if (!document) {
     QUnit.config.noglobals = true;
     QUnit.start();

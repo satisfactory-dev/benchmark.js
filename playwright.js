@@ -60,17 +60,16 @@ async function maybeWithCoverage(browser) {
   ]) {
     console.log(`Running ${label}`);
 
-  await page.goto(url)
+    await page.goto(url)
 
-  await page.click('#qunit-userAgent')
-  await new Promise((yup) => {
-    page.on('console', (e) => {
-        console.log(e);
-      if ('Finished running tests' === e.text()) {
-        yup()
-      }
-    })
-  });
+    await page.click('#qunit-userAgent')
+    await new Promise((yup) => {
+      page.on('console', (e) => {
+        if ('Finished running tests' === e.text()) {
+          yup()
+        }
+      })
+    });
   }
 
   if (hasCoverage) {
