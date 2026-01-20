@@ -564,7 +564,7 @@
     var cloneDeep = (value) => {
       if (root.Array.isArray(value)) {
         return [...value];
-      } else if (typeof value === 'object') {
+      } else if (value && typeof value === 'object') {
         return root.Object.fromEntries(
           root.Object.entries(value)
             .map(([key, value]) => [key, cloneDeep(value)]),
