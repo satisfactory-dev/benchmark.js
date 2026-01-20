@@ -1918,8 +1918,18 @@
        * Interpolates a given template string.
        */
       function interpolate(string) {
+        function tagged(_, string) {
+          let result = string;
+
+          for (const [key, value] of Object.entries(templateData)) {
+            result = result.replaceAll(`\${${key}}`, value);
+          }
+
+          return result;
+        }
+
         // Replaces all occurrences of `#` with a unique number and template tokens with content.
-        return _.template(string.replace(/\#/g, /\d+/.exec(templateData.uid)))(templateData);
+        return tagged`${string.replace(/\#/g, /\d+/.exec(templateData.uid))}`;
       }
 
       /*----------------------------------------------------------------------*/
