@@ -53,7 +53,7 @@
   /** Used to assign default `context` object properties. */
   var contextProps = [
     'Array', 'Date', 'Function', 'Math', 'Object', 'RegExp', 'String',
-    'clearTimeout', 'chrome', 'chromium', 'document', 'navigator', 'phantom',
+    'clearTimeout', 'chrome', 'chromium', 'document', 'navigator',
     'process', 'runtime', 'setTimeout'
   ];
 
@@ -233,7 +233,7 @@
        * @memberOf Benchmark.support
        * @type boolean
        */
-      support.browser = doc && isHostType(context, 'navigator') && !isHostType(context, 'phantom');
+      support.browser = doc && isHostType(context, 'navigator');
 
       /**
        * Detect if the Timers API exists.

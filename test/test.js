@@ -7,9 +7,9 @@
   var root = (typeof global == 'object' && global) || this;
 
   /** Method and object shortcuts. */
-  var phantom = root.phantom,
+  var
       amd = root.define && define.amd,
-      document = !phantom && root.document,
+      document = root.document,
       slice = Array.prototype.slice;
 
   /** Load libraries. */
