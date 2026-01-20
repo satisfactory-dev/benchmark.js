@@ -1,22 +1,46 @@
 const {
 	chromium,
+  firefox,
+  webkit,
 } = require('playwright');
+
+const browsers = {
+  chromium: [
+    'Chromium',
+    chromium,
+  ],
+  firefox: [
+    'Firefox',
+    firefox,
+  ],
+  webkit: [
+    'WebKit',
+    webkit,
+  ]
+};
 
 const {
 	writeFile,
+  readFile,
 } = require('node:fs/promises');
 
 const {
 	pathToFileURL,
 } = require('node:url');
 
-(async () => {
-	/*
-	await chromium.connect('ws://playwright:3000/')
-	*/
-	const browser = await chromium.launch();
+/**
+ * @param {import('playwright').Browser} browser
+ */
+async function maybeWithCoverage(browser) {
+  const hasCoverage = (
+    browser?.coverage?.startJSCoverage
+    && browser?.coverage?.stopJSCoverage
+  );
 	const page = await browser.newPage();
+
+  if (hasCoverage) {
 	await page.coverage.startJSCoverage();
+  }
 
 	const url = process.argv[2] || 'http://tests:80'
 
@@ -36,9 +60,22 @@ const {
 			}
 		})
 	});
-	const coverage = await page.coverage.stopJSCoverage();
+
+  if (hasCoverage) {
+	  return await page.coverage.stopJSCoverage();
+  }
+}
+
+(async () => {
+  const versions = [];
+  for (const [label, [name, type]] of Object.entries(browsers)) {
+	  const browser = await type.launch();
+    versions.push(`${name} (${browser.version()})`);
+    const coverage = await maybeWithCoverage(browser);
+
+    if (coverage) {
 	await writeFile(
-		'./coverage/playwright/tmp/playwright.json',
+		  `./coverage/playwright/tmp/playwright-${label}.json`,
 		JSON.stringify(
 			{
 				result: coverage
@@ -55,6 +92,66 @@ const {
 			'\t'
 		)
 	)
+    }
 	await browser.close();
-	process.exit(0)
+  }
+
+  const readme = (await readFile(`${__dirname}/README.md`)).toString();
+  const Makefile = (await readFile(`${__dirname}/Makefile`)).toString();
+
+  const versions_from_Makefile = (
+    /VERSIONS =((?: \d+)+)/.exec(Makefile) || ['', '']
+  )[1]
+    .trim()
+    .split(' ')
+    .map((e) => parseInt(e, 10))
+    .sort();
+
+  const nodeVersions = versions_from_Makefile.length < 1 ? [] : (
+    versions_from_Makefile
+      .reduce(
+        (was, is) => {
+          const [
+            start,
+            end,
+          ] = was[was.length - 1];
+
+          if (is === end + 1) {
+            was[was.length - 1][1] = is;
+          } else if (is > end) {
+            was.push([is, is]);
+          }
+
+          return was;
+        },
+        [
+          [
+            versions_from_Makefile[0],
+            versions_from_Makefile[0],
+          ],
+        ],
+      )
+      .map(([start, end]) => start === end ? start : `${start}-${end}`)
+      .join(', ')
+  );
+
+  const version_info = `Tested in ${
+    versions.join(', ')
+  }, Node (${
+    nodeVersions
+  })`;
+
+  await writeFile(
+    `${__dirname}/README.md`,
+    readme.replace(
+        /<!-- #region Tested In -->\n(Tested in.+)\n<!-- #endregion Tested In -->/,
+        `
+          <!-- #region Tested In -->
+          Tested in ${version_info}
+          <!-- #endregion Tested In -->
+        `.replace(/^\s+/gm, '').trim()
+    )
+  );
+
+  process.exit(0)
 })();

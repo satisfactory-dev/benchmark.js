@@ -83,8 +83,6 @@ suite.add('RegExp#test', function() {
 
 ## Support
 
-Tested in Chrome 54-55, Firefox 49-50, IE 11, Edge 14, Safari 9-10, Node.js 6-7, & PhantomJS 2.1.1.
-
-## BestieJS
-
-Benchmark.js is part of the BestieJS *“Best in Class”* module collection. This means we promote solid browser/environment support, ES5+ precedents, unit testing, & plenty of documentation.
+<!-- #region Tested In -->
+Tested in Tested in Chromium (143.0.7499.4), Firefox (144.0.2), WebKit (26.0), Node (20-25)
+<!-- #endregion Tested In -->

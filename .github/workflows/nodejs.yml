@@ -81,7 +81,7 @@ jobs:
               with:
                 url: "http://localhost:8003"
                 method: GET
-            - run: ./node_modules/.bin/playwright install --with-deps --only-shell chromium
+            - run: ./node_modules/.bin/playwright install --with-deps --only-shell chromium firefox webkit
             - name: Browser Coverage
               run: NODE_PATH=$(npm root -g) node ./playwright.js http://localhost:8003
             - run: cp -r ./coverage/*/tmp/*.json ./coverage/tmp
