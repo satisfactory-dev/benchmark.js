@@ -12,7 +12,7 @@ nvm--run: nvm--install
 	@make nvm CMD="run $(VERSION) $(CMD)"
 
 nvm--exec: nvm--install
-	make nvm CMD="exec $(VERSION) $(CMD)"
+	@make nvm CMD="exec $(VERSION) $(CMD)"
 
 init:
 	@make nvm--exec VERSION=20 CMD="npm install"
@@ -20,15 +20,15 @@ init:
 	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/playwright install --with-deps --only-shell chromium firefox webkit"
 
 test--all-versions:
-	for version in $(VERSIONS); do make nvm--run VERSION="$$version" CMD="./test/test.js"; done
+	@for version in $(VERSIONS); do make nvm--run VERSION="$$version" CMD="./test/test.js"; done
 
 test:
-	node ./test/test.js
+	@node ./test/test.js
 
 coverage: coverage--clean coverage--node coverage--playwright coverage--merge
 
 coverage--clean:
-	git clean -fxd ./coverage/node/ ./coverage/playwright/
+	@git clean -fxd ./coverage/node/ ./coverage/playwright/
 
 coverage--node:
 	@make nvm--exec VERSION=20 CMD="npm ci --omit=optional"
@@ -41,8 +41,8 @@ coverage--playwright:
 	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/c8 -c ./.c8rc.playwright.json report"
 
 coverage--merge:
-	git clean -fxd ./coverage/tmp/
-	cp -r ./coverage/*/tmp/*.json ./coverage/tmp
+	@git clean -fxd ./coverage/tmp/
+	@cp -r ./coverage/*/tmp/*.json ./coverage/tmp
 	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/c8 report"
 
 docs:
