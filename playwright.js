@@ -39,42 +39,49 @@ async function maybeWithCoverage(browser) {
 
   const page = await browser.newPage();
 
+  const baseUrl = process.argv[2] || 'http://tests:80'
+
+  if (
+    baseUrl !== 'http://tests:80'
+    && baseUrl !== 'http://localhost:8003'
+  ) {
+    throw new Error(`Unsupported URL specified: ${baseUrl}`)
+  }
+
+  let coverage;
+
   if (hasCoverage) {
     await page.coverage.startJSCoverage();
   }
 
-  const url = process.argv[2] || 'http://tests:80'
-
-  if (
-    url !== 'http://tests:80'
-    && url !== 'http://localhost:8003'
-  ) {
-    throw new Error(`Unsupported URL specified: ${url}`)
-  }
+  for (const [label, url] of [
+    ['with require', baseUrl],
+    ['without require', `${baseUrl}?norequire=true`],
+  ]) {
+    console.log(`Running ${label}`);
 
   await page.goto(url)
-  await page.click('#qunit-userAgent')
-  await new Promise((yup) => {
-    page.on('console', (e) => {
-      if ('Finished running tests' === e.text()) {
-        yup()
-      }
-    })
-  });
 
-  await page.goto(`${url}?norequire=true`)
   await page.click('#qunit-userAgent')
   await new Promise((yup) => {
     page.on('console', (e) => {
+        console.log(e);
       if ('Finished running tests' === e.text()) {
         yup()
       }
     })
   });
+  }
 
   if (hasCoverage) {
-    return await page.coverage.stopJSCoverage();
+    coverage = await page.coverage.stopJSCoverage();
   }
+
+  console.log('closing page');
+
+  await page.close();
+
+  return coverage;
 }
 
 (async () => {
@@ -108,6 +115,7 @@ async function maybeWithCoverage(browser) {
         )
       )
     }
+    console.log('closing');
     await browser.close();
   }
 
