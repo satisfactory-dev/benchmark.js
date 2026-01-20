@@ -261,13 +261,15 @@
       var data = structuredClone(benchData),
           bench = Benchmark(data);
 
-      var other = Benchmark(_.merge(data, {
+      var other = Benchmark({
+        ...data,
         'hz': 500,
-        'stats': {
+        stats: {
+          ...data.stats,
           'mean': 2,
           'sample': [2, 2, 2, 2, 2]
         }
-      }));
+      });
 
       var actual = Benchmark.filter([bench, other], 'fastest');
       assert.deepEqual(actual, [bench], 'correctly detects the fastest');
@@ -279,19 +281,23 @@
     QUnit.test('should correctly detect the fastest/slowest benchmark for large sample sizes', function(assert) {
       var data = structuredClone(benchData);
 
-      var bench = Benchmark(_.merge(data, {
+      var bench = Benchmark({
+        ...data,
         'stats': {
+          ...data.stats,
           'sample': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         }
-      }));
+      });
 
-      var other = Benchmark(_.merge(data, {
+      var other = Benchmark({
+        ...data,
         'hz': 500,
         'stats': {
+          ...data.stats,
           'mean': 2,
           'sample': [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
         }
-      }));
+      });
 
       var actual = Benchmark.filter([bench, other], 'fastest');
       assert.deepEqual(actual, [bench], 'correctly detects the fastest');
@@ -442,13 +448,15 @@
       var data = structuredClone(benchData),
           bench = Benchmark(data);
 
-      var other = Benchmark(_.merge(data, {
+      var other = Benchmark({
+        ...data,
         'hz': 500,
         'stats': {
+          ...data.stats,
           'mean': 2,
           'sample': [2, 2, 2, 2, 2]
         }
-      }));
+      });
 
       assert.strictEqual(bench.compare(other), 1);
       assert.strictEqual(other.compare(bench), -1);
@@ -457,19 +465,23 @@
     QUnit.test('should correctly detect the faster benchmark for large sample sizes', function(assert) {
       var data = structuredClone(benchData);
 
-      var bench = Benchmark(_.merge(data, {
+      var bench = Benchmark({
+        ...data,
         'stats': {
+          ...data.stats,
           'sample': [1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1]
         }
-      }));
+      });
 
-      var other = Benchmark(_.merge(data, {
+      var other = Benchmark({
+        ...data,
         'hz': 500,
         'stats': {
+          ...data.stats,
           'mean': 2,
           'sample': [2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
         }
-      }));
+      });
 
       assert.strictEqual(bench.compare(other), 1);
       assert.strictEqual(other.compare(bench), -1);
