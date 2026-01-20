@@ -98,8 +98,11 @@ jobs:
               with:
                   node-version: 20
                   cache: 'npm'
+            - run: npm ci --omit=optional
+            - name: Node Coverage (without microtime)
+              run: ./node_modules/.bin/c8 -c ./.c8rc.node.json node ./test/test.js
             - run: npm ci
-            - name: Node Coverage
+            - name: Node Coverage (with microtime)
               run: ./node_modules/.bin/c8 -c ./.c8rc.node.json node ./test/test.js
             - uses: hoverkraft-tech/compose-action@05da55b2bb8a5a759d1c4732095044bd9018c050
               with:

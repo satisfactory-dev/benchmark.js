@@ -44,6 +44,34 @@ Optionally, use the [microtime module](https://github.com/wadey/node-microtime) 
 npm i --save microtime
 ```
 
+```js
+var Benchmark = require('benchmark');
+function microtime() {
+	try {
+		const result = require('microtime');
+
+		console.log('using microtime');
+
+		return result;
+	} catch {
+	}
+
+	console.log('not using microtime');
+
+	return undefined;
+}
+
+const maybe_microtime = microtime();
+
+if (maybe_microtime) {
+	Benchmark = Benchmark.runInContext(
+		undefined,
+		undefined,
+		maybe_microtime,
+	);
+}
+```
+
 Usage example:
 
 ```js

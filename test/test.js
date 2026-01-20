@@ -17,6 +17,31 @@
       Benchmark = root.Benchmark || require('../benchmark.js'),
       QUnit = root.QUnit || require('qunit');
 
+  function microtime() {
+    try {
+      const result = require('microtime');
+
+      console.log('using microtime');
+
+      return result;
+    } catch {
+    }
+
+    console.log('not using microtime');
+
+    return undefined;
+  }
+
+  const maybe_microtime = microtime();
+
+  if (maybe_microtime) {
+    Benchmark = Benchmark.runInContext(
+      undefined,
+      undefined,
+      maybe_microtime,
+    );
+  }
+
   /** Used to create dummy benchmarks for comparisons. */
   var benchData = {
     'hz': 1000,

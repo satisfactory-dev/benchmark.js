@@ -31,5 +31,8 @@
   },
   "files": [
     "benchmark.js"
-  ]
+  ],
+  "optionalDependencies": {
+    "microtime": "^3.1.1"
+  }
 }

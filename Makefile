@@ -31,7 +31,10 @@ coverage--clean:
 	git clean -fxd ./coverage/node/ ./coverage/playwright/
 
 coverage--node:
-	@VERSION=20 CMD="c8 -c ./.c8rc.node.json node ./test/test.js" make nvm--exec
+	@make nvm--exec VERSION=20 CMD="npm ci --omit=optional"
+	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/c8 -c ./.c8rc.node.json node ./test/test.js"
+	@make nvm--exec VERSION=20 CMD="npm ci"
+	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/c8 -c ./.c8rc.node.json node ./test/test.js"
 
 coverage--playwright:
 	@node ./playwright.js --browser=chromium
