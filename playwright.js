@@ -81,8 +81,12 @@ async function maybeWithCoverage(browser) {
   const versions = [];
   for (const [label, [name, type]] of Object.entries(browsers)) {
     const browser = await type.launch();
-    versions.push(`${name} (${browser.version()})`);
+    const version = `${name} (${browser.version()})`;
+    versions.push(version);
+    console.log(`Running tests in ${version}`);
+    const start = performance.now();
     const coverage = await maybeWithCoverage(browser);
+    console.log(`Tests in ${version} took ${performance.now() - start}`);
 
     if (coverage) {
       await writeFile(
