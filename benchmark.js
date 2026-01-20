@@ -158,11 +158,13 @@
    * @memberOf Benchmark
    * @param {Object} [context=root] The context object.
    * @param {Object<now, () => number>} highestDefaultTimer
+   * @param {Object<now, () => number>} [usTimer]
    * @returns {Function} Returns a new `Benchmark` function.
    */
   function runInContext(
     context,
     highestDefaultTimer = typeof root?.performance?.now === 'function' ? performance : Date,
+    usTimer = undefined,
   ) {
     // Avoid issues with some ES3 environments that attempt to use values, named
     // after built-in constructors like `Object`, for the creation of literals.
@@ -199,14 +201,8 @@
         sqrt = Math.sqrt,
         unshift = arrayRef.unshift;
 
-    /** Used to avoid inclusion in Browserified bundles. */
-    var req = require;
-
     /** Detect DOM document object. */
     var doc = isHostType(context, 'document') && context.document;
-
-    /** Used to access Wade Simmons' Node.js `microtime` module. */
-    var microtimeObject = req('microtime');
 
     /** Used to access Node.js's high resolution timer. */
     var processObject = isHostType(context, 'process') && context.process;
@@ -1953,8 +1949,8 @@
       if (processObject && typeof (timer.ns = processObject.hrtime) == 'function') {
         timers.push({ 'ns': timer.ns, 'res': getRes('ns'), 'unit': 'ns' });
       }
-      // Detect Wade Simmons' Node.js `microtime` module.
-      if (microtimeObject && typeof (timer.ns = microtimeObject.now) == 'function') {
+      // Detect a supplied us-scale timer
+      if (usTimer && typeof (timer.ns = usTimer) == 'function') {
         timers.push({ 'ns': timer.ns,  'res': getRes('us'), 'unit': 'us' });
       }
       // Pick timer with highest resolution.
