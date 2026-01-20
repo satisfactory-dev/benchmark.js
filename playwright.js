@@ -36,17 +36,6 @@ const {
   pathToFileURL,
 } = require('node:url');
 
-/**
- * @param {import('playwright').Browser} browser
- */
-async function maybeWithCoverage(browser) {
-  const hasCoverage = (
-    browser?.coverage?.startJSCoverage
-    && browser?.coverage?.stopJSCoverage
-  );
-
-  const page = await browser.newPage();
-
   const baseUrl = process.argv.find((maybe) => maybe.startsWith('http://')) || 'http://tests:80'
 
   if (
@@ -55,6 +44,17 @@ async function maybeWithCoverage(browser) {
   ) {
     throw new Error(`Unsupported URL specified: ${baseUrl}`)
   }
+
+/**
+ * @param {import('playwright').Browser} browser
+ */
+async function maybeWithCoverage(browser) {
+  const page = await browser.newPage();
+
+  const hasCoverage = (
+    page?.coverage?.startJSCoverage
+    && page?.coverage?.stopJSCoverage
+  );
 
   let coverage;
 
@@ -110,7 +110,7 @@ async function maybeWithCoverage(browser) {
             result: coverage
               .filter((
                 maybe,
-              ) => maybe.url.startsWith(`${url.replace(/:80$/, '')}/benchmark.js?`))
+              ) => maybe.url.startsWith(`${baseUrl.replace(/:80$/, '')}/benchmark.js?`))
               .map((e) => {
                 e.url = pathToFileURL(__dirname + '/benchmark.js')
 

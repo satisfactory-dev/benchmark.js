@@ -25,7 +25,7 @@ test--all-versions:
 test:
 	node ./test/test.js
 
-coverage: coverage--clean coverage--node coverage--playwright
+coverage: coverage--clean coverage--node coverage--playwright coverage--merge
 
 coverage--clean:
 	git clean -fxd ./coverage/node/ ./coverage/playwright/
@@ -34,13 +34,13 @@ coverage--node:
 	@VERSION=20 CMD="c8 -c ./.c8rc.node.json node ./test/test.js" make nvm--exec
 
 coverage--playwright:
-	@node ./playwright.js
-	@VERSION=20 CMD="c8 -c ./.c8rc.playwright.json report" make nvm--exec
+	@node ./playwright.js --browser=chromium
+	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/c8 -c ./.c8rc.playwright.json report"
 
 coverage--merge:
 	git clean -fxd ./coverage/tmp/
 	cp -r ./coverage/*/tmp/*.json ./coverage/tmp
-	@VERSION=20 CMD="c8 report" make nvm--exec
+	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/c8 report"
 
 docs:
 	@make nvm CMD="use 20"
