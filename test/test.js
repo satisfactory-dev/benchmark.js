@@ -13,7 +13,7 @@
       slice = Array.prototype.slice;
 
   /** Load libraries. */
-  var _ = root._ || require('lodash'),
+  var
       Benchmark = root.Benchmark || require('../benchmark.js'),
       QUnit = root.QUnit || require('qunit');
 
