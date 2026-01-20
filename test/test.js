@@ -68,18 +68,6 @@
         skipTest(assert);
       }
     });
-
-    QUnit.test('should support loading Platform.js as a module', function(assert) {
-      if (amd) {
-        var platform = (benchmarkModule || {}).platform || {},
-            name = platform.name;
-
-        assert.ok(typeof name == 'string' || name === null);
-      }
-      else {
-        skipTest(assert);
-      }
-    });
   }());
 
   /*--------------------------------------------------------------------------*/

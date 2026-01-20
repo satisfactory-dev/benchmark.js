@@ -54,7 +54,7 @@
   var contextProps = [
     'Array', 'Date', 'Function', 'Math', 'Object', 'RegExp', 'String',
     'clearTimeout', 'chrome', 'chromium', 'document', 'navigator', 'phantom',
-    'platform', 'process', 'runtime', 'setTimeout'
+    'process', 'runtime', 'setTimeout'
   ];
 
   /** Used to avoid hz of Infinity. */
@@ -2404,28 +2404,6 @@
       },
 
       /**
-       * Platform object with properties describing things like browser name,
-       * version, and operating system. See [`platform.js`](https://mths.be/platform).
-       *
-       * @static
-       * @memberOf Benchmark
-       * @type Object
-       */
-      'platform': context.platform || require('platform') || ({
-        'description': context.navigator && context.navigator.userAgent || null,
-        'layout': null,
-        'product': null,
-        'name': null,
-        'manufacturer': null,
-        'os': null,
-        'prerelease': null,
-        'version': null,
-        'toString': function() {
-          return this.description || '';
-        }
-      }),
-
-      /**
        * The semantic version number.
        *
        * @static
@@ -2920,9 +2898,8 @@
   // Some AMD build optimizers, like r.js, check for condition patterns like the following:
   if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
     // Define as an anonymous module so, through path mapping, it can be aliased.
-    define(['platform'], function(platform) {
+    define(function() {
       return runInContext({
-        'platform': platform
       });
     });
   }

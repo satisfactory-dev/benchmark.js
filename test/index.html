@@ -8,7 +8,6 @@
   <body>
     <div id="qunit"></div>
     <script src="../node_modules/qunit/qunit/qunit.js"></script>
-    <script src="../node_modules/platform/platform.js"></script>
     <script>
       QUnit.config.hidepassed = true;
       QUnit.urlParams.norequire = /[?&]norequire=true(?:&|$)/.test(location.search);
@@ -59,11 +58,6 @@
               'main': 'benchmark'
             },
             {
-              'name': 'platform',
-              'location': '../node_modules/platform',
-              'main': 'platform'
-            },
-            {
               'name': 'test',
               'location': '.',
               'main': 'test'
@@ -88,7 +82,7 @@
         var timeoutId = setInterval(function() {
           var ua = document.getElementById('qunit-userAgent');
           if (ua && (benchmarkModule || !window.require)) {
-            ua.innerHTML = platform;
+            ua.textContent = navigator.userAgent;
             clearInterval(timeoutId);
           }
         }, 16);

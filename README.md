@@ -9,14 +9,9 @@ Forked from [benchmark.js](https://github.com/bestiejs/benchmark.js)
 
 * [API Documentation](https://benchmarkjs.com/docs)
 
-## Installation
-
-Include [platform.js](https://mths.be/platform) to populate [Benchmark.platform](https://benchmarkjs.com/docs#platform).
-
 In a browser:
 
 ```html
-<script src="platform.js"></script>
 <script src="benchmark.js"></script>
 ```
 
@@ -26,7 +21,6 @@ In an AMD loader:
 require({
   'paths': {
     'benchmark': 'path/to/benchmark',
-    'platform': 'path/to/platform'
   }
 },
 ['benchmark'], function(Benchmark) {/*…*/});
