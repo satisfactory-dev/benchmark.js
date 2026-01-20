@@ -20,8 +20,7 @@
 
       <p class="meta">
         Test case created by <a href="https://mathiasbynens.be/">Mathias</a>
-        <time datetime="2010-08-02T18:45:23+02:00" pubdate>40 seconds ago</time>
-        and last updated <time datetime="2010-08-02T18:45:51+02:00">12 seconds ago</time>
+        <time datetime="2010-08-02T18:45:23+02:00" pubdate>6:45pm August 2nd, 2010</time>
       </p>
 
       <section>
@@ -72,12 +71,9 @@
 
       <section id="runner">
         <h2>Test runner</h2>
-        <p id="firebug">
-          <strong>Warning! For accurate results, please disable Firebug before running the tests. <a href="https://jsperf.com/faq#firebug-warning">(Why?)</a></strong>
-        </p>
         <p id="status">
           <noscript>
-            <strong>To run the tests, please <a href="http://enable-javascript.com/">enable JavaScript</a> and reload the page.</strong>
+            <strong>To run the tests, please enable JavaScript and reload the page.</strong>
           </noscript>
         </p>
         <div id="controls">
@@ -171,67 +167,26 @@
           </tr>
           </tbody>
         </table>
-
-        <p>
-          You can <a href="#" rel="nofollow">edit these tests or add even more tests to this page</a>
-          by appending <code>/edit</code> to the URL.
-        </p>
-      </section>
-
-      <section>
-        <h2 id="results">Compare results of other browsers</h2>
-        <div id="bs-results"></div>
-      </section>
-
-      <section id="comments">
-        <h1>0 comments</h1>
-        <div id="comments-wrapper">
-          <form action="#comment-form" method="post" id="comment-form">
-            <fieldset>
-              <h2>Add a comment</h2>
-              <div>
-                <label for="author">Name <em title="This field is required">*</em></label>
-                <input type="text" name="author" id="author" required>
-              </div>
-              <div>
-                <label for="author-email">Email <em title="This field is required">*</em></label>
-                <label class="inline">
-                  <input type="email" name="author-email" id="author-email" required> (only used for Gravatar)
-                </label>
-              </div>
-              <div>
-                <label for="author-url">URL </label>
-                <input type="url" name="author-url" id="author-url">
-              </div>
-              <div>
-                <label for="message">Message <em title="This field is required">*</em><span>Markdown syntax is allowed</span></label>
-                <textarea name="message" id="message" required></textarea>
-              </div>
-              <div class="buttons">
-                <input type="submit" class="submit" value="Add comment">
-              </div>
-            </fieldset>
-          </form>
-        </div>
       </section>
     </article>
 
     <footer>
-      &copy; 2014 <a href="https://jsperf.com/">jsPerf.com</a>
-      &middot; <a href="https://jsperf.com/browse">Browse</a>
-      &middot; <a href="https://jsperf.com/popular">Popular tests</a>
-      &middot; <a href="https://jsperf.com/faq">FAQ</a>
-      &middot; <a href="https://jsperf.com/faq#donate">Donate</a>
+        <p>
+              &copy; 2014 <a href="https://web.archive.org/web/20200425102129/https://jsperf.com/">jsPerf.com</a>
       &middot; <a href="http://twitter.com/jsperf" rel="nofollow">twitter: @jsperf</a>
-      &middot; <a href="https://benchmarkjs.com/">Benchmark.js</a>
+              &middot; Forked from <a href="https://benchmarkjs.com/">Benchmark.js</a>
       &middot; by <a href="https://mathiasbynens.be/" title="Mathias Bynens, front-end web developer">@mathias</a>
+        </p>
+        <p>
+            &copy; 2026 <a href="https://github.com/SignpostMarv/">SignpostMarv</a>
+            &middot; <a href="https://satisfactory.dev/">@satisfactory-dev</a>/<a href="https://github.com/satisfactory-dev/benchmark.js">benchmark.js</a>
+        </p>
     </footer>
 
     <script src="../../node_modules/lodash/lodash.js"></script>
     <script src="../../node_modules/platform/platform.js"></script>
     <script src="../../benchmark.js"></script>
     <script src="ui.js"></script>
-    <script src="../../plugin/ui.browserscope.js"></script>
     <script>
       var arr = [1, 5, 4, 2, 3];
 
@@ -240,9 +195,6 @@
       }
     </script>
     <script>
-      ui.browserscope.key = 'agt1YS1wcm9maWxlcnIRCxIEVGVzdBiAgICAiI2QCgw';
-      ui.browserscope.selector = '#bs-results';
-
       ui.add('Normal', '\
         x.sort(function(a, b) {\n\
           return a - b;\n\

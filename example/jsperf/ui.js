@@ -184,13 +184,9 @@
           filterBy = params.filterby;
 
       if (pageLoaded) {
-        // configure browserscope
-        ui.browserscope.postable = has.runner && !('nopost' in params);
-
         // configure chart renderer
         if (chart || filterBy) {
           scrollTop = $('results').offsetTop;
-          ui.browserscope.render({ 'chart': chart, 'filterBy': filterBy });
         }
         if (has.runner) {
           // call user provided init() function
@@ -224,24 +220,6 @@
 
         setHTML('run', texts.run.ready);
         setStatus(texts.status.ready);
-
-        // prefill author details
-        if (has.localStorage) {
-          _.each([$('author'), $('author-email'), $('author-url')], function(element) {
-            element.value = localStorage[element.id] || '';
-            element.oninput = element.onkeydown = function(event) {
-              event && event.type < 'k' && (element.onkeydown = null);
-              localStorage[element.id] = element.value;
-            };
-          });
-        }
-        // show warning when Firebug is enabled (avoids showing for Firebug Lite)
-        try {
-          // Firebug 1.9 no longer has `console.firebug`
-          if (console.firebug || /firebug/i.test(console.table())) {
-            addClass('firebug', classNames.show);
-          }
-        } catch(e) {}
       }
       // clear length so tests can be manually queued
       ui.length = 0;
@@ -500,7 +478,7 @@
         }
         else {
           // status: pending
-          if (ui.running && ui.indexOf(bench) > -1) {
+          if (ui.running) {
             setHTML(cell, 'pending&hellip;');
           }
           // status: ready
@@ -578,8 +556,6 @@
         appendHTML(cell, '<span>' + text + '</span>');
       }
     });
-
-    ui.browserscope.post();
   });
 
   /*--------------------------------------------------------------------------*/
@@ -622,40 +598,6 @@
 
   // parse location hash string
   ui.parseHash();
-
-  // provide a simple UI for toggling between chart types and filtering results
-  // (assumes ui.js is just before </body>)
-  (function() {
-    var sibling = $('bs-results'),
-        p = createElement('p');
-
-    p.innerHTML =
-      '<span id=charts><strong>Chart type:</strong> <a href=#>bar</a>, ' +
-      '<a href=#>column</a>, <a href=#>line</a>, <a href=#>pie</a>, ' +
-      '<a href=#>table</a></span><br>' +
-      '<span id=filters><strong>Filter:</strong> <a href=#>popular</a>, ' +
-      '<a href=#>all</a>, <a href=#>desktop</a>, <a href=#>family</a>, ' +
-      '<a href=#>major</a>, <a href=#>minor</a>, <a href=#>mobile</a>, ' +
-      '<a href=#>prerelease</a></span>';
-
-    sibling.parentNode.insertBefore(p, sibling);
-
-    // use DOM0 event handler to simplify canceling the default action
-    $('charts').onclick =
-    $('filters').onclick = function(event) {
-      event || (event = window.event);
-      var target = event.target || event.srcElement;
-      if (target.href || (target = target.parentNode).href) {
-        ui.browserscope.render(
-          target.parentNode.id == 'charts'
-            ? { 'chart': target.innerHTML }
-            : { 'filterBy': target.innerHTML }
-        );
-      }
-      // cancel the default action
-      return false;
-    };
-  }());
 
   /*--------------------------------------------------------------------------*/
 
@@ -703,7 +645,6 @@
     ui.off('start cycle complete');
     setTimeout(function() {
       ui.off();
-      ui.browserscope.post = function() {};
       _.invokeMap(ui.benchmarks, 'off');
     }, 1);
   }

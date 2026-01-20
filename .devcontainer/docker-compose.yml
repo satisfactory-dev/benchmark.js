@@ -25,3 +25,11 @@ services:
         volumes:
             - ./tests.conf:/etc/nginx/conf.d/default.conf
             - ../:/app/
+    examples:
+        image: nginxinc/nginx-unprivileged:1.29-alpine
+        restart: unless-stopped
+        ports:
+            - '${PORT_EXAMPLES:-8004}:80'
+        volumes:
+            - ./examples.conf:/etc/nginx/conf.d/default.conf
+            - ../:/app/
