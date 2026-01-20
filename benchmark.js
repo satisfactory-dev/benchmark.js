@@ -1666,7 +1666,7 @@
           stats = bench.stats,
           size = stats.sample.length,
           pm = '\xb1',
-          result = bench.name || (_.isNaN(id) ? id : '<Test #' + id + '>');
+          result = bench.name || (root.isNaN(id) ? id : '<Test #' + id + '>');
 
       if (error) {
         var errorStr;
