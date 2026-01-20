@@ -8,16 +8,16 @@ nvm:
 nvm--install:
 	@make nvm CMD="install $(VERSION)"
 
-init:
-	@make npm--exec VERSION=20 CMD="npm install"
-	@for version in $(VERSIONS); do make nvm--install VERSION="$$version"; done
-	@make npm--exec VERSION=20 CMD="./node_modules/.bin/playwright install --with-deps --only-shell chromium firefox webkit"
-
 nvm--run: nvm--install
 	@make nvm CMD="run $(VERSION) $(CMD)"
 
 nvm--exec: nvm--install
 	make nvm CMD="exec $(VERSION) $(CMD)"
+
+init:
+	@make nvm--exec VERSION=20 CMD="npm install"
+	@for version in $(VERSIONS); do make nvm--install VERSION="$$version"; done
+	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/playwright install --with-deps --only-shell chromium firefox webkit"
 
 test--all-versions:
 	for version in $(VERSIONS); do make nvm--run VERSION="$$version" CMD="./test/test.js"; done
