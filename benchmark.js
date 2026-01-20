@@ -1632,7 +1632,7 @@
           }
           // Register a changed primitive.
           else if (
-            !_.eq(currValue, value) &&
+            !(currValue === value) &&
             value !== undefined
           ) {
             changes.push({ 'destination': destination, 'key': key, 'value': value });
