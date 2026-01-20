@@ -38,6 +38,8 @@ const {
 
   const baseUrl = process.argv.find((maybe) => maybe.startsWith('http://')) || 'http://tests:80'
 
+const filter_by = `${baseUrl.replace(/:80$/, '')}/benchmark.js`;
+
   if (
     baseUrl !== 'http://tests:80'
     && baseUrl !== 'http://localhost:8003'
@@ -47,11 +49,13 @@ const {
 
 /**
  * @param {import('playwright').Browser} browser
+ * @param {boolean} manually specify whether browser has coverage
  */
-async function maybeWithCoverage(browser) {
+async function maybeWithCoverage(
+  browser,
+  hasCoverage,
+) {
   const page = await browser.newPage();
-
-  const hasCoverage = browser === browsers?.chromium;
 
   let coverage;
 
@@ -96,10 +100,11 @@ async function maybeWithCoverage(browser) {
     versions.push(version);
     console.log(`Running tests in ${version}`);
     const start = performance.now();
-    const coverage = await maybeWithCoverage(browser);
+    const coverage = await maybeWithCoverage(browser, type === (browsers?.chromium || ['', ''])[1]);
     console.log(`Tests in ${version} took ${performance.now() - start}`);
 
     if (coverage) {
+      console.log(`${version} has generated coverage`);
       await writeFile(
         `./coverage/playwright/tmp/playwright-${label}.json`,
         JSON.stringify(
@@ -107,7 +112,7 @@ async function maybeWithCoverage(browser) {
             result: coverage
               .filter((
                 maybe,
-              ) => maybe.url.startsWith(`${baseUrl.replace(/:80$/, '')}/benchmark.js?`))
+              ) => maybe.url.startsWith(filter_by))
               .map((e) => {
                 e.url = pathToFileURL(__dirname + '/benchmark.js')
 
@@ -118,6 +123,8 @@ async function maybeWithCoverage(browser) {
           '\t'
         )
       )
+    } else {
+      console.log(`${version} has not generated coverage`);
     }
     console.log('closing');
     await browser.close();
