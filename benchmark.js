@@ -157,9 +157,13 @@
    * @static
    * @memberOf Benchmark
    * @param {Object} [context=root] The context object.
+   * @param {Object<now, () => number>} highestDefaultTimer
    * @returns {Function} Returns a new `Benchmark` function.
    */
-  function runInContext(context) {
+  function runInContext(
+    context,
+    highestDefaultTimer = typeof root?.performance?.now === 'function' ? performance : Date,
+  ) {
     // Avoid issues with some ES3 environments that attempt to use values, named
     // after built-in constructors like `Object`, for the creation of literals.
     // ES5 clears this up by stating that literals must use built-in constructors.
@@ -280,7 +284,7 @@
        * @memberOf timer
        * @type {Function|Object}
        */
-      'ns': Date,
+      'ns': highestDefaultTimer,
 
       /**
        * Starts the deferred timer.
