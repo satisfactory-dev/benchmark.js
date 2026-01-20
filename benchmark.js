@@ -306,13 +306,6 @@
     /**
      * The Benchmark constructor.
      *
-     * Note: The Benchmark constructor exposes a handful of lodash methods to
-     * make working with arrays, collections, and objects easier. The lodash
-     * methods are:
-     * [`each/forEach`](https://lodash.com/docs#forEach), [`forOwn`](https://lodash.com/docs#forOwn),
-     * [`has`](https://lodash.com/docs#has), [`indexOf`](https://lodash.com/docs#indexOf),
-     * [`map`](https://lodash.com/docs#map), and [`reduce`](https://lodash.com/docs#reduce)
-     *
      * @constructor
      * @param {string} name A name to identify the benchmark.
      * @param {Function|string} fn The test to benchmark.
@@ -462,11 +455,6 @@
 
     /**
      * The Suite constructor.
-     *
-     * Note: Each Suite instance has a handful of wrapped lodash methods to
-     * make working with Suites easier. The wrapped lodash methods are:
-     * [`each/forEach`](https://lodash.com/docs#forEach), [`indexOf`](https://lodash.com/docs#indexOf),
-     * [`map`](https://lodash.com/docs#map), and [`reduce`](https://lodash.com/docs#reduce)
      *
      * @constructor
      * @memberOf Benchmark

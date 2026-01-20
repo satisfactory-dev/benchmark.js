@@ -124,7 +124,7 @@
 
       if (stopped) {
         logError({ 'clear': true });
-        ui.push.apply(ui, _.filter(ui.benchmarks, function(bench) {
+        ui.push.apply(ui, ui.benchmarks.filter((bench) => {
           return !bench.error && bench.reset();
         }));
         ui.run(runOptions);
@@ -169,43 +169,6 @@
   };
 
   handlers.window = {
-
-    /**
-     * The window hashchange event handler supported by Chrome 5+, Firefox 3.6+, and IE8+.
-     *
-     * @private
-     */
-    'hashchange': function() {
-      ui.parseHash();
-
-      var scrollTop,
-          params = ui.params,
-          chart = params.chart,
-          filterBy = params.filterby;
-
-      if (pageLoaded) {
-        // configure chart renderer
-        if (chart || filterBy) {
-          scrollTop = $('results').offsetTop;
-        }
-        if (has.runner) {
-          // call user provided init() function
-          if (isFunction(window.init)) {
-            init();
-          }
-          // auto-run
-          if ('run' in params) {
-            scrollTop = $('runner').offsetTop;
-            setTimeout(handlers.button.run, 1);
-          }
-          // scroll to the relevant section
-          if (scrollTop) {
-            scrollEl.scrollTop = scrollTop;
-          }
-        }
-      }
-    },
-
     /**
      * The window load event handler used to initialize the UI.
      *
@@ -225,9 +188,8 @@
       ui.length = 0;
 
       // evaluate hash values after all other "load" events have fired
-      _.defer(function() {
+      requestIdleCallback(function() {
         pageLoaded = true;
-        handlers.window.hashchange();
       });
     }
   };
@@ -388,7 +350,7 @@
       div.className = div.innerHTML = '';
       errors.length = 0;
     }
-    if ('text' in options && _.indexOf(errors, text) < 0) {
+    if ('text' in options && errors.indexOf(text) < 0) {
       errors.push(text);
       addClass(div, classNames.show);
       appendHTML(div, text);
@@ -408,31 +370,6 @@
   /*--------------------------------------------------------------------------*/
 
   /**
-   * Parses the window.location.hash value into an object assigned to `ui.params`.
-   *
-   * @static
-   * @memberOf ui
-   * @returns {Object} The suite instance.
-   */
-  function parseHash() {
-    var me = this,
-        hashes = location.hash.slice(1).split('&'),
-        params = me.params || (me.params = {});
-
-    // remove old params
-    _.forOwn(params, function(value, key) {
-      delete params[key];
-    });
-
-    // add new params
-    _.each(hashes[0] && hashes, function(value) {
-      value = value.split('=');
-      params[value[0].toLowerCase()] = (value[1] || '').toLowerCase();
-    });
-    return me;
-  }
-
-  /**
    * Renders the results table cell of the corresponding benchmark(s).
    *
    * @static
@@ -441,7 +378,7 @@
    * @returns {Object} The suite instance.
    */
   function render(index) {
-    _.each(index == null ? (index = 0, ui.benchmarks) : [ui.benchmarks[index]], function(bench) {
+    (index == null ? (index = 0, ui.benchmarks) : [ui.benchmarks[index]]).forEach((bench) => {
       var parsed,
           cell = $(prefix + (++index)),
           error = bench.error,
@@ -527,15 +464,15 @@
     setStatus(texts.status.again);
 
     // highlight result cells
-    _.each(benches, function(bench) {
-      var cell = $(prefix + (_.indexOf(ui.benchmarks, bench) + 1)),
+    benches.forEach((bench) => {
+      var cell = $(prefix + (ui.benchmarks.indexOf(bench) + 1)),
           fastestHz = getHz(fastest[0]),
           hz = getHz(bench),
           percent = (1 - (hz / fastestHz)) * 100,
           span = cell.getElementsByTagName('span')[0],
           text = 'fastest';
 
-      if (_.indexOf(fastest, bench) > -1) {
+      if (fastest.indexOf(bench) > -1) {
         // mark fastest
         addClass(cell, text);
       }
@@ -545,7 +482,7 @@
           : '';
 
         // mark slowest
-        if (_.indexOf(slowest, bench) > -1) {
+        if (slowest.indexOf(bench) > -1) {
           addClass(cell, 'slowest');
         }
       }
@@ -576,9 +513,6 @@
    */
   ui.params = {};
 
-  // parse query params into ui.params hash
-  ui.parseHash = parseHash;
-
   // (re)render the results of one or more benchmarks
   ui.render = render;
 
@@ -595,9 +529,6 @@
 
   // bootstrap onload
   addListener(window, 'load', handlers.window.load);
-
-  // parse location hash string
-  ui.parseHash();
 
   /*--------------------------------------------------------------------------*/
 
@@ -645,7 +576,9 @@
     ui.off('start cycle complete');
     setTimeout(function() {
       ui.off();
-      _.invokeMap(ui.benchmarks, 'off');
+      Object.values(ui.benchmarks).forEach((benchmark) => {
+        benchmark.off();
+      })
     }, 1);
   }
 

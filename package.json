@@ -20,7 +20,6 @@
   },
   "funding": "https://github.com/satisfactory-dev/benchmark.js?sponsor=1",
   "dependencies": {
-    "lodash": "^4.17.10",
     "platform": "^1.3.5"
   },
   "devDependencies": {
