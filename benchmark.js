@@ -1670,7 +1670,7 @@
 
       if (error) {
         var errorStr;
-        if (!_.isObject(error)) {
+        if (!(error && (typeof error === 'object' || typeof error === 'function'))) {
           errorStr = String(error);
         } else if (!_.isError(Error)) {
           errorStr = join(error);
