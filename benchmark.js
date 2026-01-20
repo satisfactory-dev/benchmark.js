@@ -155,11 +155,11 @@
    * @returns {Function} Returns a new `Benchmark` function.
    */
   function runInContext(
-    highestDefaultTimer = typeof root?.performance?.now === 'function' ? performance : Date,
+    highestDefaultTimer = performance,
     usTimer = undefined,
   ) {
     /** Native constructor references. */
-    var Date = root.Date,
+    var
         Function = root.Function,
         Math = root.Math,
         Object = root.Object,
