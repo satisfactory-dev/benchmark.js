@@ -258,7 +258,7 @@
     });
 
     QUnit.test('should correctly detect the fastest/slowest benchmark for small sample sizes', function(assert) {
-      var data = _.cloneDeep(benchData),
+      var data = structuredClone(benchData),
           bench = Benchmark(data);
 
       var other = Benchmark(_.merge(data, {
@@ -277,7 +277,7 @@
     });
 
     QUnit.test('should correctly detect the fastest/slowest benchmark for large sample sizes', function(assert) {
-      var data = _.cloneDeep(benchData);
+      var data = structuredClone(benchData);
 
       var bench = Benchmark(_.merge(data, {
         'stats': {
@@ -439,7 +439,7 @@
     });
 
     QUnit.test('should correctly detect the faster benchmark for small sample sizes', function(assert) {
-      var data = _.cloneDeep(benchData),
+      var data = structuredClone(benchData),
           bench = Benchmark(data);
 
       var other = Benchmark(_.merge(data, {
@@ -455,7 +455,7 @@
     });
 
     QUnit.test('should correctly detect the faster benchmark for large sample sizes', function(assert) {
-      var data = _.cloneDeep(benchData);
+      var data = structuredClone(benchData);
 
       var bench = Benchmark(_.merge(data, {
         'stats': {
