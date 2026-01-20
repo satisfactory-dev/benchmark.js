@@ -1097,7 +1097,7 @@
 
       suite.on('complete', function() {
         suite.off();
-        assert.deepEqual(this.filter('fastest').map('name'), ['a']);
+        assert.deepEqual(Benchmark.Suite.asArray(this.filter('fastest')).map(({name}) => name), ['a']);
         done();
       })
       .run({ 'async': true });
@@ -1108,7 +1108,7 @@
 
       suite.on('complete', function() {
         suite.off();
-        assert.deepEqual(this.filter('slowest').map('name'), ['b']);
+        assert.deepEqual(Benchmark.Suite.asArray(this.filter('slowest')).map(({name}) => name), ['b']);
         done();
       })
       .run({ 'async': true });
@@ -1119,7 +1119,7 @@
 
       suite.on('complete', function() {
         suite.off();
-        assert.deepEqual(this.filter('successful').map('name'), ['a', 'b']);
+        assert.deepEqual(Benchmark.Suite.asArray(this.filter('successful')).map(({name}) => name), ['a', 'b']);
         done();
       })
       .run({ 'async': true });

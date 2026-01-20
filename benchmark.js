@@ -52,7 +52,7 @@
 
   /** Used to assign default `context` object properties. */
   var contextProps = [
-    'Array', 'Date', 'Function', 'Math', 'Object', 'RegExp', 'String', '_',
+    'Array', 'Date', 'Function', 'Math', 'Object', 'RegExp', 'String',
     'clearTimeout', 'chrome', 'chromium', 'document', 'navigator', 'phantom',
     'platform', 'process', 'runtime', 'setTimeout'
   ];
@@ -160,12 +160,6 @@
    * @returns {Function} Returns a new `Benchmark` function.
    */
   function runInContext(context) {
-    // Exit early if unable to acquire lodash.
-    var _ = context && context._ || require('lodash') || root._;
-    if (!_) {
-      Benchmark.runInContext = runInContext;
-      return Benchmark;
-    }
     // Avoid issues with some ES3 environments that attempt to use values, named
     // after built-in constructors like `Object`, for the creation of literals.
     // ES5 clears this up by stating that literals must use built-in constructors.
@@ -527,6 +521,12 @@
     }
 
     /**
+     * Converts a Suite or Suite-like object/array to an array of values
+     *
+     * @memberOf Benchmark.Suite
+     *
+     * @static
+     *
      * @param {(unknown[])|Suite|Object<number|'length', unknown>} array
      *
      * @returns {(unknown[])|(Benchmark[])}
@@ -548,6 +548,8 @@
         .filter((maybe) => /^\d+$/.test(maybe))
         .map((key) => array[key]);
     }
+
+    Suite.asArray = asArray;
 
     /*------------------------------------------------------------------------*/
 
@@ -2454,11 +2456,6 @@
       'support': support
     });
 
-    // Add lodash methods to Benchmark.
-    ['each', 'forEach', 'forOwn', 'has', 'indexOf', 'map', 'reduce'].forEach((methodName) => {
-      Benchmark[methodName] = _[methodName];
-    });
-
     /*------------------------------------------------------------------------*/
 
     root.Object.assign(Benchmark.prototype, {
@@ -2902,16 +2899,6 @@
 
     /*------------------------------------------------------------------------*/
 
-    // Add lodash methods as Suite methods.
-    ['each', 'forEach', 'indexOf', 'map', 'reduce'].forEach((methodName) => {
-      var func = _[methodName];
-      Suite.prototype[methodName] = function() {
-        var args = [this];
-        push.apply(args, arguments);
-        return func.apply(_, args);
-      };
-    });
-
     // Avoid array-like object bugs with `Array#shift` and `Array#splice`
     // in Firefox < 10 and IE < 9.
     ['pop', 'shift', 'splice'].forEach((methodName) => {
@@ -2945,9 +2932,8 @@
   // Some AMD build optimizers, like r.js, check for condition patterns like the following:
   if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
     // Define as an anonymous module so, through path mapping, it can be aliased.
-    define(['lodash', 'platform'], function(_, platform) {
+    define(['platform'], function(platform) {
       return runInContext({
-        '_': _,
         'platform': platform
       });
     });
