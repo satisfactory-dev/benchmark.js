@@ -37,7 +37,7 @@ coverage--node:
 	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/c8 -c ./.c8rc.node.json node ./test/test.js"
 
 coverage--playwright:
-	@node ./playwright.js --browser=chromium
+	@make nvm--exec VERSION=20 CMD="node ./playwright.js --browser=chromium"
 	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/c8 -c ./.c8rc.playwright.json report"
 
 coverage--merge:
