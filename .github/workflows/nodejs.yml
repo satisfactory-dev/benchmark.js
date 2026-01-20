@@ -12,6 +12,7 @@ on:
             - .c8rc.coveralls.json
             - test/test.js
             - test/index.html
+            - playwright.js
     pull_request:
         branches: [main]
         paths:
