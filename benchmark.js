@@ -718,6 +718,188 @@
       }
 
       /**
+       * Invokes a method on all items in an array.
+       *
+       * @static
+       * @memberOf Benchmark
+       * @param {Array} benches Array of benchmarks to iterate over.
+       * @param {Object|string} name The name of the method to invoke OR options object.
+       * @param {...*} [args] Arguments to invoke the method with.
+       * @returns {Array} A new array of values returned from each method invoked.
+       * @example
+       *
+       * // invoke `reset` on all benchmarks
+       * Benchmark.invoke(benches, 'reset');
+       *
+       * // invoke `emit` with arguments
+       * Benchmark.invoke(benches, 'emit', 'complete', listener);
+       *
+       * // invoke `run(true)`, treat benchmarks as a queue, and register invoke callbacks
+       * Benchmark.invoke(benches, {
+       *
+       *   // invoke the `run` method
+       *   'name': 'run',
+       *
+       *   // pass a single argument
+       *   'args': true,
+       *
+       *   // treat as queue, removing benchmarks from front of `benches` until empty
+       *   'queued': true,
+       *
+       *   // called before any benchmarks have been invoked.
+       *   'onStart': onStart,
+       *
+       *   // called between invoking benchmarks
+       *   'onCycle': onCycle,
+       *
+       *   // called after all benchmarks have been invoked.
+       *   'onComplete': onComplete
+       * });
+       */
+      static invoke(benches, name) {
+        var args,
+            bench,
+            queued,
+            index = -1,
+            eventProps = { 'currentTarget': benches },
+            options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
+            result = asArray(benches);
+
+        /**
+         * Invokes the method of the current object and if synchronous, fetches the next.
+         */
+        function execute() {
+          var listeners,
+              async = isAsync(bench);
+
+          if (async) {
+            // Use `getNext` as the first listener.
+            bench.on('complete', getNext);
+            listeners = bench.events.complete;
+            listeners.splice(0, 0, listeners.pop());
+          }
+          // Execute method.
+          result[index] = (typeof (bench ? bench[name] : undefined) === 'function')
+            ? bench[name].apply(bench, args)
+            : undefined;
+          // If synchronous return `true` until finished.
+          return !async && getNext();
+        }
+
+        /**
+         * Fetches the next bench or executes `onComplete` callback.
+         */
+        function getNext(event) {
+          var cycleEvent,
+              last = bench,
+              async = isAsync(last);
+
+          if (async) {
+            last.off('complete', getNext);
+            last.emit(new Event('complete'));
+          }
+          // Emit "cycle" event.
+          eventProps.type = 'cycle';
+          eventProps.target = last;
+          cycleEvent = new Event(eventProps);
+          options.onCycle.call(benches._benchmarks, cycleEvent);
+
+          // Choose next benchmark if not exiting early.
+          if (!cycleEvent.aborted && raiseIndex() !== false) {
+            bench = queued ? benches[0] : result[index];
+            if (isAsync(bench)) {
+              delay(bench, execute);
+            }
+            else if (async) {
+              // Resume execution if previously asynchronous but now synchronous.
+              while (execute()) {}
+            }
+            else {
+              // Continue synchronous execution.
+              return true;
+            }
+          } else {
+            // Emit "complete" event.
+            eventProps.type = 'complete';
+            options.onComplete.call(benches, new Event(eventProps));
+          }
+          // When used as a listener `event.aborted = true` will cancel the rest of
+          // the "complete" listeners because they were already called above and when
+          // used as part of `getNext` the `return false` will exit the execution while-loop.
+          if (event) {
+            event.aborted = true;
+          } else {
+            return false;
+          }
+        }
+
+        /**
+         * Checks if invoking `Benchmark#run` with asynchronous cycles.
+         */
+        function isAsync(object) {
+          // Avoid using `instanceof` here because of IE memory leak issues with host objects.
+          var async = args[0] && args[0].async;
+          return name == 'run' && (object instanceof Benchmark) &&
+            ((async == null ? object.options.async : async) && Support.timeout || object.defer);
+        }
+
+        /**
+         * Raises `index` to the next defined index or returns `false`.
+         */
+        function raiseIndex() {
+          index++;
+
+          // If queued remove the previous bench.
+          if (queued && index > 0) {
+            benches.shift();
+          }
+          // If we reached the last index then return `false`.
+          return (queued ? benches.length : index < result.length)
+            ? index
+            : (index = false);
+        }
+        // Juggle arguments.
+        if ((typeof name === 'string')) {
+          // 2 arguments (array, name).
+          args = root.Array.prototype.slice.call(arguments, 2);
+        } else {
+          // 2 arguments (array, options).
+          options = root.Object.assign(options, name);
+          name = options.name;
+          args = root.Array.isArray(args = 'args' in options ? options.args : []) ? args : [args];
+          queued = options.queued;
+        }
+        // Start iterating over the array.
+        if (raiseIndex() !== false) {
+          // Emit "start" event.
+
+          bench = (result instanceof Suite ? result.benchmarks : result)[index];
+          eventProps.type = 'start';
+          eventProps.target = bench;
+          options.onStart.call(benches, new Event(eventProps));
+
+          // End early if the suite was aborted in an "onStart" listener.
+          if (name == 'run' && (benches instanceof Suite) && benches.aborted) {
+            // Emit "cycle" event.
+            eventProps.type = 'cycle';
+            options.onCycle.call(benches.benchmarks, new Event(eventProps));
+            // Emit "complete" event.
+            eventProps.type = 'complete';
+            options.onComplete.call(benches, new Event(eventProps));
+          }
+          // Start method execution.
+          else {
+            if (isAsync(bench)) {
+              delay(bench, execute);
+            } else {
+              while (execute()) {}
+            }
+          }
+        }
+        return result;
+      }
+
+      /**
        * The Benchmark constructor.
        *
        * @param {string} name A name to identify the benchmark.
@@ -1044,188 +1226,6 @@
 
 
     /**
-     * Invokes a method on all items in an array.
-     *
-     * @static
-     * @memberOf Benchmark
-     * @param {Array} benches Array of benchmarks to iterate over.
-     * @param {Object|string} name The name of the method to invoke OR options object.
-     * @param {...*} [args] Arguments to invoke the method with.
-     * @returns {Array} A new array of values returned from each method invoked.
-     * @example
-     *
-     * // invoke `reset` on all benchmarks
-     * Benchmark.invoke(benches, 'reset');
-     *
-     * // invoke `emit` with arguments
-     * Benchmark.invoke(benches, 'emit', 'complete', listener);
-     *
-     * // invoke `run(true)`, treat benchmarks as a queue, and register invoke callbacks
-     * Benchmark.invoke(benches, {
-     *
-     *   // invoke the `run` method
-     *   'name': 'run',
-     *
-     *   // pass a single argument
-     *   'args': true,
-     *
-     *   // treat as queue, removing benchmarks from front of `benches` until empty
-     *   'queued': true,
-     *
-     *   // called before any benchmarks have been invoked.
-     *   'onStart': onStart,
-     *
-     *   // called between invoking benchmarks
-     *   'onCycle': onCycle,
-     *
-     *   // called after all benchmarks have been invoked.
-     *   'onComplete': onComplete
-     * });
-     */
-    function invoke(benches, name) {
-      var args,
-          bench,
-          queued,
-          index = -1,
-          eventProps = { 'currentTarget': benches },
-          options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
-          result = asArray(benches);
-
-      /**
-       * Invokes the method of the current object and if synchronous, fetches the next.
-       */
-      function execute() {
-        var listeners,
-            async = isAsync(bench);
-
-        if (async) {
-          // Use `getNext` as the first listener.
-          bench.on('complete', getNext);
-          listeners = bench.events.complete;
-          listeners.splice(0, 0, listeners.pop());
-        }
-        // Execute method.
-        result[index] = (typeof (bench ? bench[name] : undefined) === 'function')
-          ? bench[name].apply(bench, args)
-          : undefined;
-        // If synchronous return `true` until finished.
-        return !async && getNext();
-      }
-
-      /**
-       * Fetches the next bench or executes `onComplete` callback.
-       */
-      function getNext(event) {
-        var cycleEvent,
-            last = bench,
-            async = isAsync(last);
-
-        if (async) {
-          last.off('complete', getNext);
-          last.emit(new Event('complete'));
-        }
-        // Emit "cycle" event.
-        eventProps.type = 'cycle';
-        eventProps.target = last;
-        cycleEvent = new Event(eventProps);
-        options.onCycle.call(benches._benchmarks, cycleEvent);
-
-        // Choose next benchmark if not exiting early.
-        if (!cycleEvent.aborted && raiseIndex() !== false) {
-          bench = queued ? benches[0] : result[index];
-          if (isAsync(bench)) {
-            delay(bench, execute);
-          }
-          else if (async) {
-            // Resume execution if previously asynchronous but now synchronous.
-            while (execute()) {}
-          }
-          else {
-            // Continue synchronous execution.
-            return true;
-          }
-        } else {
-          // Emit "complete" event.
-          eventProps.type = 'complete';
-          options.onComplete.call(benches, new Event(eventProps));
-        }
-        // When used as a listener `event.aborted = true` will cancel the rest of
-        // the "complete" listeners because they were already called above and when
-        // used as part of `getNext` the `return false` will exit the execution while-loop.
-        if (event) {
-          event.aborted = true;
-        } else {
-          return false;
-        }
-      }
-
-      /**
-       * Checks if invoking `Benchmark#run` with asynchronous cycles.
-       */
-      function isAsync(object) {
-        // Avoid using `instanceof` here because of IE memory leak issues with host objects.
-        var async = args[0] && args[0].async;
-        return name == 'run' && (object instanceof Benchmark) &&
-          ((async == null ? object.options.async : async) && Support.timeout || object.defer);
-      }
-
-      /**
-       * Raises `index` to the next defined index or returns `false`.
-       */
-      function raiseIndex() {
-        index++;
-
-        // If queued remove the previous bench.
-        if (queued && index > 0) {
-          benches.shift();
-        }
-        // If we reached the last index then return `false`.
-        return (queued ? benches.length : index < result.length)
-          ? index
-          : (index = false);
-      }
-      // Juggle arguments.
-      if ((typeof name === 'string')) {
-        // 2 arguments (array, name).
-        args = root.Array.prototype.slice.call(arguments, 2);
-      } else {
-        // 2 arguments (array, options).
-        options = root.Object.assign(options, name);
-        name = options.name;
-        args = root.Array.isArray(args = 'args' in options ? options.args : []) ? args : [args];
-        queued = options.queued;
-      }
-      // Start iterating over the array.
-      if (raiseIndex() !== false) {
-        // Emit "start" event.
-
-        bench = (result instanceof Suite ? result.benchmarks : result)[index];
-        eventProps.type = 'start';
-        eventProps.target = bench;
-        options.onStart.call(benches, new Event(eventProps));
-
-        // End early if the suite was aborted in an "onStart" listener.
-        if (name == 'run' && (benches instanceof Suite) && benches.aborted) {
-          // Emit "cycle" event.
-          eventProps.type = 'cycle';
-          options.onCycle.call(benches.benchmarks, new Event(eventProps));
-          // Emit "complete" event.
-          eventProps.type = 'complete';
-          options.onComplete.call(benches, new Event(eventProps));
-        }
-        // Start method execution.
-        else {
-          if (isAsync(bench)) {
-            delay(bench, execute);
-          } else {
-            while (execute()) {}
-          }
-        }
-      }
-      return result;
-    }
-
-    /**
      * Creates a string of joined array values or object key-value pairs.
      *
      * @static
@@ -1280,7 +1280,7 @@
 
           if (!resetting) {
             suite.aborted = true;
-            invoke(suite, 'abort');
+            Benchmark.invoke(suite, 'abort');
           }
         }
       }
@@ -1400,7 +1400,7 @@
           (suite.emit(event = new Event('reset')), !event.cancelled)) {
         suite.aborted = suite.running = false;
         if (!aborting) {
-          invoke(suite, 'reset');
+          Benchmark.invoke(suite, 'reset');
         }
       }
       return suite;
@@ -1428,7 +1428,7 @@
       suite.running = true;
       options || (options = {});
 
-      invoke(suite, {
+      Benchmark.invoke(suite, {
         'name': 'run',
         'args': options,
         'queued': options.queued,
@@ -2248,7 +2248,7 @@
 
       // Init queue and begin.
       enqueue();
-      invoke(queue, {
+      Benchmark.invoke(queue, {
         'name': 'run',
         'args': { 'async': async },
         'queued': true,
@@ -2410,7 +2410,6 @@
     /*------------------------------------------------------------------------*/
 
     root.Object.assign(Benchmark, {
-      'invoke': invoke,
       'join': join,
       'runInContext': runInContext,
       'support': Support
