@@ -732,10 +732,6 @@
     function Suite(name, options) {
       var suite = this;
 
-      // Allow instance creation without the `new` operator.
-      if (!(suite instanceof Suite)) {
-        return new Suite(name, options);
-      }
       this._benchmarks = [];
       // Juggle arguments.
       if (typeof name === 'object') {

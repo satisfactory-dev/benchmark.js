@@ -749,7 +749,7 @@
   (function() {
     QUnit.test('should ignore abort calls when the suite isn\'t running', function(assert) {
       var fired = false;
-      var suite = Benchmark.Suite('suite', {
+      var suite = new Benchmark.Suite('suite', {
         'onAbort': function() { fired = true; }
       });
 
@@ -760,7 +760,7 @@
 
     QUnit.test('should ignore abort calls from `Benchmark.Suite#reset` when the suite isn\'t running', function(assert) {
       var fired = false;
-      var suite = Benchmark.Suite('suite', {
+      var suite = new Benchmark.Suite('suite', {
         'onAbort': function() { fired = true; }
       });
 
@@ -774,9 +774,9 @@
 
       var fired = false;
 
-      Benchmark.Suite({
+      (new Benchmark.Suite({
         'onAbort': function() { fired = true; }
-      })
+      }))
       .on('start', function() {
         this.abort();
       })
@@ -793,9 +793,9 @@
 
       var fired = false;
 
-      Benchmark.Suite({
+      (new Benchmark.Suite({
         'onAbort': function() { fired = true; }
-      })
+      }))
       .on('start', function() {
         this.reset();
       })
@@ -811,7 +811,7 @@
       var done = assert.async();
 
       var fired = false,
-          suite = Benchmark.Suite();
+          suite = new Benchmark.Suite();
 
       suite.on('complete', function() {
         assert.strictEqual(fired, false);
@@ -873,7 +873,7 @@
 
   (function() {
     QUnit.test('should remove the first element', function(assert) {
-      var suite = Benchmark.Suite();
+      var suite = new Benchmark.Suite();
 
       suite.add('foo');
       suite.add('bar');
@@ -889,7 +889,7 @@
     });
 
     QUnit.test('should shift an object with no elements', function(assert) {
-      var suite = Benchmark.Suite(),
+      var suite = new Benchmark.Suite(),
           actual = suite.shift();
 
       assert.strictEqual(actual, undefined);
@@ -897,7 +897,7 @@
     });
 
     QUnit.test('should have no elements when length is `0` after shift', function(assert) {
-      var suite = Benchmark.Suite();
+      var suite = new Benchmark.Suite();
       assert.strictEqual(suite.length, 0);
       suite.add('foo');
       suite.add('bar');
@@ -917,7 +917,7 @@
 
   (function() {
     var count = 0,
-        suite = Benchmark.Suite();
+        suite = new Benchmark.Suite();
 
     suite.add('a', function() {
       for (var i = 0; i < 1e5; i++) {
@@ -975,7 +975,7 @@
     var events = [],
         callback = function(event) { events.push(event); };
 
-    var suite = Benchmark.Suite('suite', {
+    var suite = new Benchmark.Suite('suite', {
       'onAdd': callback,
       'onAbort': callback,
       'onClone': callback,
