@@ -406,16 +406,40 @@
       bench.times = cloneDeep(bench.times);
     }
 
+    class Deferred {
     /**
      * The Deferred constructor.
      *
-     * @constructor
      * @memberOf Benchmark
      * @param {Benchmark} clone The cloned benchmark instance.
      */
-    function Deferred(clone) {
+      constructor(clone) {
       this.benchmark = clone;
       clock(this);
+    }
+      /**
+       * Handles cycling/completing the deferred benchmark.
+       */
+      resolve() {
+        var deferred = this,
+            clone = deferred.benchmark,
+            bench = clone._original;
+
+        if (bench.aborted) {
+          // cycle() -> clone cycle/complete event -> compute()'s invoked bench.run() cycle/complete.
+          deferred.teardown();
+          clone.running = false;
+          cycle(deferred);
+        }
+        else if (++deferred.cycles < clone.count) {
+          clone.compiled.call(deferred, root, timer);
+        }
+        else {
+          timer.stop(deferred);
+          deferred.teardown();
+          delay(clone, function() { cycle(deferred); });
+        }
+      }
     }
 
     class Event {
@@ -811,34 +835,6 @@
           }
         }
       });
-    }
-
-    /*------------------------------------------------------------------------*/
-
-    /**
-     * Handles cycling/completing the deferred benchmark.
-     *
-     * @memberOf Benchmark.Deferred
-     */
-    function resolve() {
-      var deferred = this,
-          clone = deferred.benchmark,
-          bench = clone._original;
-
-      if (bench.aborted) {
-        // cycle() -> clone cycle/complete event -> compute()'s invoked bench.run() cycle/complete.
-        deferred.teardown();
-        clone.running = false;
-        cycle(deferred);
-      }
-      else if (++deferred.cycles < clone.count) {
-        clone.compiled.call(deferred, root, timer);
-      }
-      else {
-        timer.stop(deferred);
-        deferred.teardown();
-        delay(clone, function() { cycle(deferred); });
-      }
     }
 
     /*------------------------------------------------------------------------*/
@@ -2762,10 +2758,6 @@
        * @type number
        */
       'timeStamp': 0
-    });
-
-    root.Object.assign(Deferred.prototype, {
-      'resolve': resolve
     });
 
     /*------------------------------------------------------------------------*/
