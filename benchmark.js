@@ -630,8 +630,6 @@
       /**
        * A generic `Array#filter` like method.
        *
-       * @static
-       * @memberOf Benchmark
        * @param {Array} array The array to iterate over.
        * @param {Function|string} callback The function/alias called per iteration.
        * @returns {Array} A new array of values that passed callback filter.
@@ -715,8 +713,6 @@
       /**
        * Converts a number to a more readable comma-separated string representation.
        *
-       * @static
-       * @memberOf Benchmark
        * @param {number} number The number to convert.
        * @returns {string} The more readable string representation.
        */
@@ -729,8 +725,6 @@
       /**
        * Invokes a method on all items in an array.
        *
-       * @static
-       * @memberOf Benchmark
        * @param {Array} benches Array of benchmarks to iterate over.
        * @param {Object|string} name The name of the method to invoke OR options object.
        * @param {...*} [args] Arguments to invoke the method with.
@@ -911,8 +905,6 @@
       /**
        * Creates a string of joined array values or object key-value pairs.
        *
-       * @static
-       * @memberOf Benchmark
        * @param {Array|Object} object The object to operate on.
        * @param {string} [separator1=','] The separator used between key-value pairs.
        * @param {string} [separator2=': '] The separator used between keys and values.
