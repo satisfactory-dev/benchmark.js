@@ -141,20 +141,6 @@
 
     return match[1];
   }
-
-  /**
-   * Create a new `Benchmark` function using the given options.
-   *
-   * @static
-   * @memberOf Benchmark
-   * @param {Object<now, () => number>} highestDefaultTimer
-   * @param {Object<now, () => number>} [usTimer] A high-precision timer such as the one provided by microtime
-   * @returns {Function} Returns a new `Benchmark` function.
-   */
-  function runInContext(
-    highestDefaultTimer = performance,
-    usTimer = undefined,
-  ) {
     /** Detect DOM document object. */
     var doc = isHostType(root, 'document') && root.document;
 
@@ -209,7 +195,7 @@
       }
 
       /**
-       * Detect if function decompilation is support.
+       * Detect if function decompilation is supported.
        *
        * @returns {boolean}
        */
@@ -234,14 +220,230 @@
       }
     }
 
-    /**
-     * An object used to flag environments/features.
-     *
-     * @static
-     * @memberOf Benchmark
-     */
-    var support = Support;
+  /*------------------------------------------------------------------------*/
 
+  /**
+   * A specialized version of lodash's `cloneDeep` which only clones arrays and plain
+   * objects assigning all other values by reference.
+   *
+   * @private
+   * @param {*} value The value to clone.
+   * @returns {*} The cloned value.
+   */
+  var cloneDeep = (value) => {
+    if (root.Array.isArray(value)) {
+      return [...value];
+    } else if (value && typeof value === 'object') {
+      return root.Object.fromEntries(
+        root.Object.entries(value)
+          .map(([key, value]) => [key, cloneDeep(value)]),
+      );
+    }
+
+    return value;
+  };
+
+  /**
+   * Creates a function from the given arguments string and body.
+   *
+   * @private
+   * @param {string} args The comma separated function arguments.
+   * @param {string} body The function body.
+   * @returns {Function} The new function.
+   */
+  function createFunction() {
+    // Lazy define.
+    createFunction = function(args, body) {
+      var result,
+          anchor = freeDefine ? freeDefine.amd : Benchmark,
+          prop = uid + 'createFunction';
+
+      runScript((freeDefine ? 'define.amd.' : 'Benchmark.') + prop + '=function(' + args + '){' + body + '}');
+      result = anchor[prop];
+      delete anchor[prop];
+      return result;
+    };
+    // Fix JaegerMonkey bug.
+    // For more information see http://bugzil.la/639720.
+    createFunction = Support.browser && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : root.Function;
+    return createFunction.apply(null, arguments);
+  }
+
+  /**
+   * Delay the execution of a function based on the benchmark's `delay` property.
+   *
+   * @private
+   * @param {Object} bench The benchmark instance.
+   * @param {Object} fn The function to execute.
+   */
+  function delay(bench, fn) {
+    bench._timerId = root.setTimeout(() => fn(), bench.delay * 1e3);
+  }
+
+  /**
+   * Destroys the given element.
+   *
+   * @private
+   * @param {Element} element The element to destroy.
+   */
+  function destroyElement(element) {
+    trash.appendChild(element);
+    trash.innerHTML = '';
+  }
+
+  /**
+   * Gets the name of the first argument from a function's source.
+   *
+   * @private
+   * @param {Function} fn The function.
+   * @returns {string} The argument name.
+   */
+  function getFirstArgument(fn) {
+    return (
+      !has(fn, 'toString') &&
+      (
+        /^[\s(]*function[^(]*\(([^\s,)]+)/.exec(fn) ||
+        0
+      )[1]
+    ) || '';
+  }
+
+  /**
+   * Computes the arithmetic mean of a sample.
+   *
+   * @private
+   * @param {[number, ...number[]]} sample The sample.
+   * @returns {number} The mean.
+   */
+  function getMean(sample) {
+    return sample.reduce((sum, x) => sum + x, 0) / sample.length;
+  }
+
+  /**
+   * Gets the source code of a function.
+   *
+   * @private
+   * @param {Function} fn The function.
+   * @returns {string} The function's source code.
+   */
+  function getSource(fn) {
+    var result = '';
+    if (isStringable(fn)) {
+      result = root.String(fn);
+    } else if (Support.decompilation) {
+      // Escape the `{` for Firefox 1.
+      result = getResult(/^[^{]+\{([\s\S]*)\}\s*$/, fn);
+    }
+    // Trim string.
+    result = (result || '').replace(/^\s+|\s+$/g, '');
+
+    // Detect strings containing only the "use strict" directive.
+    return /^(?:\/\*+[\w\W]*?\*\/|\/\/.*?[\n\r\u2028\u2029]|\s)*(["'])use strict\1;?$/.test(result)
+      ? ''
+      : result;
+  }
+
+  /**
+   * Host objects can return type values that are different from their actual
+   * data type. The objects we are concerned with usually return non-primitive
+   * types of "object", "function", or "unknown".
+   *
+   * @private
+   * @param {*} object The owner of the property.
+   * @param {string} property The property to check.
+   * @returns {boolean} Returns `true` if the property value is a non-primitive, else `false`.
+   */
+  function isHostType(object, property) {
+    if (object == null) {
+      return false;
+    }
+    var type = typeof object[property];
+    return !rePrimitive.test(type) && (type != 'object' || !!object[property]);
+  }
+
+  /**
+   * Checks if a value can be safely coerced to a string.
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the value can be coerced, else `false`.
+   */
+  function isStringable(value) {
+    if (null === value) {
+      return false;
+    }
+
+    return (typeof value === 'string') || (has(value, 'toString') && (typeof value.toString === 'function'));
+  }
+
+  /**
+   * Runs a snippet of JavaScript via script injection.
+   *
+   * @private
+   * @param {string} code The code to run.
+   */
+  function runScript(code) {
+    var anchor = freeDefine ? define.amd : Benchmark,
+        script = doc.createElement('script'),
+        sibling = doc.getElementsByTagName('script')[0],
+        parent = sibling.parentNode,
+        prop = uid + 'runScript',
+        prefix = '(' + (freeDefine ? 'define.amd.' : 'Benchmark.') + prop + '||function(){})();';
+
+    // Firefox 2.0.0.2 cannot use script injection as intended because it executes
+    // asynchronously, but that's OK because script injection is only used to avoid
+    // the previously commented JaegerMonkey bug.
+    try {
+      // Remove the inserted script *before* running the code to avoid differences
+      // in the expected script element count/order of the document.
+      script.appendChild(doc.createTextNode(prefix + code));
+      anchor[prop] = function() { destroyElement(script); };
+    } catch(e) {
+      parent = parent.cloneNode(false);
+      sibling = null;
+      script.text = code;
+    }
+    parent.insertBefore(script, sibling);
+    delete anchor[prop];
+  }
+
+  /**
+   * A helper function for setting options/event handlers.
+   *
+   * @private
+   * @param {Object} object The benchmark or suite instance.
+   * @param {Object} [options={}] Options object.
+   */
+  function setOptions(object, options) {
+    options = object.options = root.Object.assign({}, cloneDeep(object.constructor.options), cloneDeep(options));
+
+    root.Object.entries(options).forEach(([key, value]) => {
+      if (value != null) {
+        // Add event listeners.
+        if (/^on[A-Z]/.test(key)) {
+          key.split(' ').forEach((key) => {
+            object.on(key.slice(2).toLowerCase(), value);
+          });
+        } else if (!has(object, key)) {
+          object[key] = cloneDeep(value);
+        }
+      }
+    });
+  }
+
+  /**
+   * Create a new `Benchmark` function using the given options.
+   *
+   * @static
+   * @memberOf Benchmark
+   * @param {Object<now, () => number>} highestDefaultTimer
+   * @param {Object<now, () => number>} [usTimer] A high-precision timer such as the one provided by microtime
+   * @returns {Function} Returns a new `Benchmark` function.
+   */
+  function runInContext(
+    highestDefaultTimer = performance,
+    usTimer = undefined,
+  ) {
     /**
      * Timer object used by `clock()` and `Deferred#resolve`.
      *
@@ -613,217 +815,6 @@
     /*------------------------------------------------------------------------*/
 
     /**
-     * A specialized version of lodash's `cloneDeep` which only clones arrays and plain
-     * objects assigning all other values by reference.
-     *
-     * @private
-     * @param {*} value The value to clone.
-     * @returns {*} The cloned value.
-     */
-    var cloneDeep = (value) => {
-      if (root.Array.isArray(value)) {
-        return [...value];
-      } else if (value && typeof value === 'object') {
-        return root.Object.fromEntries(
-          root.Object.entries(value)
-            .map(([key, value]) => [key, cloneDeep(value)]),
-        );
-      }
-
-      return value;
-    };
-
-    /**
-     * Creates a function from the given arguments string and body.
-     *
-     * @private
-     * @param {string} args The comma separated function arguments.
-     * @param {string} body The function body.
-     * @returns {Function} The new function.
-     */
-    function createFunction() {
-      // Lazy define.
-      createFunction = function(args, body) {
-        var result,
-            anchor = freeDefine ? freeDefine.amd : Benchmark,
-            prop = uid + 'createFunction';
-
-        runScript((freeDefine ? 'define.amd.' : 'Benchmark.') + prop + '=function(' + args + '){' + body + '}');
-        result = anchor[prop];
-        delete anchor[prop];
-        return result;
-      };
-      // Fix JaegerMonkey bug.
-      // For more information see http://bugzil.la/639720.
-      createFunction = support.browser && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : root.Function;
-      return createFunction.apply(null, arguments);
-    }
-
-    /**
-     * Delay the execution of a function based on the benchmark's `delay` property.
-     *
-     * @private
-     * @param {Object} bench The benchmark instance.
-     * @param {Object} fn The function to execute.
-     */
-    function delay(bench, fn) {
-      bench._timerId = root.setTimeout(() => fn(), bench.delay * 1e3);
-    }
-
-    /**
-     * Destroys the given element.
-     *
-     * @private
-     * @param {Element} element The element to destroy.
-     */
-    function destroyElement(element) {
-      trash.appendChild(element);
-      trash.innerHTML = '';
-    }
-
-    /**
-     * Gets the name of the first argument from a function's source.
-     *
-     * @private
-     * @param {Function} fn The function.
-     * @returns {string} The argument name.
-     */
-    function getFirstArgument(fn) {
-      return (
-        !has(fn, 'toString') &&
-        (
-          /^[\s(]*function[^(]*\(([^\s,)]+)/.exec(fn) ||
-          0
-        )[1]
-      ) || '';
-    }
-
-    /**
-     * Computes the arithmetic mean of a sample.
-     *
-     * @private
-     * @param {[number, ...number[]]} sample The sample.
-     * @returns {number} The mean.
-     */
-    function getMean(sample) {
-      return sample.reduce((sum, x) => sum + x, 0) / sample.length;
-    }
-
-    /**
-     * Gets the source code of a function.
-     *
-     * @private
-     * @param {Function} fn The function.
-     * @returns {string} The function's source code.
-     */
-    function getSource(fn) {
-      var result = '';
-      if (isStringable(fn)) {
-        result = root.String(fn);
-      } else if (support.decompilation) {
-        // Escape the `{` for Firefox 1.
-        result = getResult(/^[^{]+\{([\s\S]*)\}\s*$/, fn);
-      }
-      // Trim string.
-      result = (result || '').replace(/^\s+|\s+$/g, '');
-
-      // Detect strings containing only the "use strict" directive.
-      return /^(?:\/\*+[\w\W]*?\*\/|\/\/.*?[\n\r\u2028\u2029]|\s)*(["'])use strict\1;?$/.test(result)
-        ? ''
-        : result;
-    }
-
-    /**
-     * Host objects can return type values that are different from their actual
-     * data type. The objects we are concerned with usually return non-primitive
-     * types of "object", "function", or "unknown".
-     *
-     * @private
-     * @param {*} object The owner of the property.
-     * @param {string} property The property to check.
-     * @returns {boolean} Returns `true` if the property value is a non-primitive, else `false`.
-     */
-    function isHostType(object, property) {
-      if (object == null) {
-        return false;
-      }
-      var type = typeof object[property];
-      return !rePrimitive.test(type) && (type != 'object' || !!object[property]);
-    }
-
-    /**
-     * Checks if a value can be safely coerced to a string.
-     *
-     * @private
-     * @param {*} value The value to check.
-     * @returns {boolean} Returns `true` if the value can be coerced, else `false`.
-     */
-    function isStringable(value) {
-      if (null === value) {
-        return false;
-      }
-
-      return (typeof value === 'string') || (has(value, 'toString') && (typeof value.toString === 'function'));
-    }
-
-    /**
-     * Runs a snippet of JavaScript via script injection.
-     *
-     * @private
-     * @param {string} code The code to run.
-     */
-    function runScript(code) {
-      var anchor = freeDefine ? define.amd : Benchmark,
-          script = doc.createElement('script'),
-          sibling = doc.getElementsByTagName('script')[0],
-          parent = sibling.parentNode,
-          prop = uid + 'runScript',
-          prefix = '(' + (freeDefine ? 'define.amd.' : 'Benchmark.') + prop + '||function(){})();';
-
-      // Firefox 2.0.0.2 cannot use script injection as intended because it executes
-      // asynchronously, but that's OK because script injection is only used to avoid
-      // the previously commented JaegerMonkey bug.
-      try {
-        // Remove the inserted script *before* running the code to avoid differences
-        // in the expected script element count/order of the document.
-        script.appendChild(doc.createTextNode(prefix + code));
-        anchor[prop] = function() { destroyElement(script); };
-      } catch(e) {
-        parent = parent.cloneNode(false);
-        sibling = null;
-        script.text = code;
-      }
-      parent.insertBefore(script, sibling);
-      delete anchor[prop];
-    }
-
-    /**
-     * A helper function for setting options/event handlers.
-     *
-     * @private
-     * @param {Object} object The benchmark or suite instance.
-     * @param {Object} [options={}] Options object.
-     */
-    function setOptions(object, options) {
-      options = object.options = root.Object.assign({}, cloneDeep(object.constructor.options), cloneDeep(options));
-
-      root.Object.entries(options).forEach(([key, value]) => {
-        if (value != null) {
-          // Add event listeners.
-          if (/^on[A-Z]/.test(key)) {
-            key.split(' ').forEach((key) => {
-              object.on(key.slice(2).toLowerCase(), value);
-            });
-          } else if (!has(object, key)) {
-            object[key] = cloneDeep(value);
-          }
-        }
-      });
-    }
-
-    /*------------------------------------------------------------------------*/
-
-    /**
      * A generic `Array#filter` like method.
      *
      * @static
@@ -1045,7 +1036,7 @@
         // Avoid using `instanceof` here because of IE memory leak issues with host objects.
         var async = args[0] && args[0].async;
         return name == 'run' && (object instanceof Benchmark) &&
-          ((async == null ? object.options.async : async) && support.timeout || object.defer);
+          ((async == null ? object.options.async : async) && Support.timeout || object.defer);
       }
 
       /**
@@ -1488,7 +1479,7 @@
           bench.reset();
           delete calledBy.abort;
 
-          if (support.timeout) {
+          if (Support.timeout) {
             root.clearTimeout(bench._timerId);
             delete bench._timerId;
           }
@@ -1728,7 +1719,7 @@
         var bench = clone._original,
             stringable = isStringable(bench.fn),
             count = bench.count = clone.count,
-            decompilable = stringable || (support.decompilation && (clone.setup !== noop || clone.teardown !== noop)),
+            decompilable = stringable || (Support.decompilation && (clone.setup !== noop || clone.teardown !== noop)),
             id = bench.id,
             name = bench.name || (typeof id == 'number' ? '<Test #' + id + '>' : id),
             result = 0;
@@ -2230,7 +2221,7 @@
       else {
         // Fix TraceMonkey bug associated with clock fallbacks.
         // For more information see http://bugzil.la/509069.
-        if (support.browser) {
+        if (Support.browser) {
           runScript(uid + '=1;delete ' + uid);
         }
         // We're done.
@@ -2268,7 +2259,7 @@
       bench.emit(event);
 
       if (!event.cancelled) {
-        options = { 'async': ((options = options && options.async) == null ? bench.async : options) && support.timeout };
+        options = { 'async': ((options = options && options.async) == null ? bench.async : options) && Support.timeout };
 
         // For clones created within `compute()`.
         if (bench._original) {
@@ -2445,7 +2436,7 @@
       'invoke': invoke,
       'join': join,
       'runInContext': runInContext,
-      'support': support
+      'support': Support
     });
 
     /*------------------------------------------------------------------------*/
