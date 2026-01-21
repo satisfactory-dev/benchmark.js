@@ -422,6 +422,56 @@
       clock(deferred);
     }
 
+    class Event {
+      /**
+       * A flag to indicate if the emitters listener iteration is aborted.
+       *
+       * @type boolean
+       */
+      aborted = false;
+
+      /**
+       * A flag to indicate if the default action is cancelled.
+       *
+       * @type boolean
+       */
+      cancelled = false;
+
+      /**
+       * The object whose listeners are currently being processed.
+       *
+       * @type Object
+       */
+      currentTarget = undefined;
+
+      /**
+       * The return value of the last executed listener.
+       *
+       * @type Mixed
+       */
+      result = undefined;
+
+      /**
+       * The object to which the event was originally emitted.
+       *
+       * @type Object
+       */
+      target = undefined;
+
+      /**
+       * A timestamp of when the event was created (ms).
+       *
+       * @type number
+       */
+      timeStamp = 0;
+
+      /**
+       * The event type.
+       *
+       * @type string
+       */
+      type;
+
     /**
      * The Event constructor.
      *
@@ -429,7 +479,7 @@
      * @memberOf Benchmark
      * @param {Object|string} type The event type.
      */
-    function Event(type) {
+      constructor(type) {
       root.Object.assign(this, {
           timeStamp: +root.Date.now(),
           ...(
@@ -438,6 +488,7 @@
               : type
           ),
       });
+    }
     }
 
     /**
@@ -2720,67 +2771,6 @@
 
     root.Object.assign(Deferred.prototype, {
       'resolve': resolve
-    });
-
-    /*------------------------------------------------------------------------*/
-
-    root.Object.assign(Event.prototype, {
-
-      /**
-       * A flag to indicate if the emitters listener iteration is aborted.
-       *
-       * @memberOf Benchmark.Event
-       * @type boolean
-       */
-      'aborted': false,
-
-      /**
-       * A flag to indicate if the default action is cancelled.
-       *
-       * @memberOf Benchmark.Event
-       * @type boolean
-       */
-      'cancelled': false,
-
-      /**
-       * The object whose listeners are currently being processed.
-       *
-       * @memberOf Benchmark.Event
-       * @type Object
-       */
-      'currentTarget': undefined,
-
-      /**
-       * The return value of the last executed listener.
-       *
-       * @memberOf Benchmark.Event
-       * @type Mixed
-       */
-      'result': undefined,
-
-      /**
-       * The object to which the event was originally emitted.
-       *
-       * @memberOf Benchmark.Event
-       * @type Object
-       */
-      'target': undefined,
-
-      /**
-       * A timestamp of when the event was created (ms).
-       *
-       * @memberOf Benchmark.Event
-       * @type number
-       */
-      'timeStamp': 0,
-
-      /**
-       * The event type.
-       *
-       * @memberOf Benchmark.Event
-       * @type string
-       */
-      'type': ''
     });
 
     /*------------------------------------------------------------------------*/
