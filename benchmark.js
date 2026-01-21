@@ -704,6 +704,20 @@
       }
 
       /**
+       * Converts a number to a more readable comma-separated string representation.
+       *
+       * @static
+       * @memberOf Benchmark
+       * @param {number} number The number to convert.
+       * @returns {string} The more readable string representation.
+       */
+      static formatNumber(number) {
+        number = root.String(number).split('.');
+        return number[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',') +
+          (number[1] ? '.' + number[1] : '');
+      }
+
+      /**
        * The Benchmark constructor.
        *
        * @param {string} name A name to identify the benchmark.
@@ -1028,20 +1042,6 @@
 
     /*------------------------------------------------------------------------*/
 
-
-    /**
-     * Converts a number to a more readable comma-separated string representation.
-     *
-     * @static
-     * @memberOf Benchmark
-     * @param {number} number The number to convert.
-     * @returns {string} The more readable string representation.
-     */
-    function formatNumber(number) {
-      number = root.String(number).split('.');
-      return number[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',') +
-        (number[1] ? '.' + number[1] : '');
-    }
 
     /**
      * Invokes a method on all items in an array.
@@ -1818,7 +1818,7 @@
         result += ': ' + errorStr;
       }
       else {
-        result += ' x ' + formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) + ' ops/sec ' + pm +
+        result += ' x ' + Benchmark.formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) + ' ops/sec ' + pm +
           stats.rme.toFixed(2) + '% (' + size + ' run' + (size == 1 ? '' : 's') + ' sampled)';
       }
       return result;
@@ -2410,7 +2410,6 @@
     /*------------------------------------------------------------------------*/
 
     root.Object.assign(Benchmark, {
-      'formatNumber': formatNumber,
       'invoke': invoke,
       'join': join,
       'runInContext': runInContext,
