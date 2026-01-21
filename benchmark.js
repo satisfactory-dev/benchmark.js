@@ -411,15 +411,11 @@
      *
      * @constructor
      * @memberOf Benchmark
-     * @param {Object} clone The cloned benchmark instance.
+     * @param {Benchmark} clone The cloned benchmark instance.
      */
     function Deferred(clone) {
-      var deferred = this;
-      if (!(deferred instanceof Deferred)) {
-        return new Deferred(clone);
-      }
-      deferred.benchmark = clone;
-      clock(deferred);
+      this.benchmark = clone;
+      clock(this);
     }
 
     class Event {
@@ -2298,7 +2294,7 @@
         // For clones created within `compute()`.
         if (bench._original) {
           if (bench.defer) {
-            Deferred(bench);
+            new Deferred(bench);
           } else {
             cycle(bench, options);
           }
