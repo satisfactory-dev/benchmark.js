@@ -589,16 +589,17 @@
     }
 
     class Deferred {
-    /**
-     * The Deferred constructor.
-     *
-     * @memberOf Benchmark
-     * @param {Benchmark} clone The cloned benchmark instance.
-     */
+      /**
+       * The Deferred constructor.
+       *
+       * @memberOf Benchmark
+       * @param {Benchmark} clone The cloned benchmark instance.
+       */
       constructor(clone) {
-      this.benchmark = clone;
-      clock(this);
-    }
+        this.benchmark = clone;
+        clock(this);
+      }
+
       /**
        * Handles cycling/completing the deferred benchmark.
        */
