@@ -36,9 +36,6 @@
     root = freeGlobal;
   }
 
-  /** Detect free variable `require`. */
-  var freeRequire = typeof require == 'function' && require;
-
   /** Used to assign each benchmark an incremented id. */
   var counter = 0;
 
@@ -719,20 +716,6 @@
       }
 
       return (typeof value === 'string') || (has(value, 'toString') && (typeof value.toString === 'function'));
-    }
-
-    /**
-     * A wrapper around `require` to suppress `module missing` errors.
-     *
-     * @private
-     * @param {string} id The module id.
-     * @returns {*} The exported module or `null`.
-     */
-    function require(id) {
-      try {
-        var result = freeExports && freeRequire(id);
-      } catch(e) {}
-      return result || null;
     }
 
     /**
