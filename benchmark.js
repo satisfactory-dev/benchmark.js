@@ -900,6 +900,36 @@
       }
 
       /**
+       * Creates a string of joined array values or object key-value pairs.
+       *
+       * @static
+       * @memberOf Benchmark
+       * @param {Array|Object} object The object to operate on.
+       * @param {string} [separator1=','] The separator used between key-value pairs.
+       * @param {string} [separator2=': '] The separator used between keys and values.
+       * @returns {string} The joined result.
+       */
+      static join(object, separator1, separator2) {
+        var result = [],
+            length = (object = root.Object(object)).length,
+            arrayLike = length === length >>> 0;
+
+        separator2 || (separator2 = ': ');
+
+        const entries = (
+          root.Array.isArray(object)
+            ? object.map((value, key) => [key, value])
+            : root.Object.entries(object).filter(([key]) => has(object, key) && (!arrayLike || key !== 'length'))
+        );
+
+        entries.forEach(([key, value]) => {
+          result.push(arrayLike ? value : key + separator2 + value);
+        });
+
+        return result.join(separator1 || ',');
+      }
+
+      /**
        * The Benchmark constructor.
        *
        * @param {string} name A name to identify the benchmark.
@@ -1224,36 +1254,6 @@
 
     /*------------------------------------------------------------------------*/
 
-
-    /**
-     * Creates a string of joined array values or object key-value pairs.
-     *
-     * @static
-     * @memberOf Benchmark
-     * @param {Array|Object} object The object to operate on.
-     * @param {string} [separator1=','] The separator used between key-value pairs.
-     * @param {string} [separator2=': '] The separator used between keys and values.
-     * @returns {string} The joined result.
-     */
-    function join(object, separator1, separator2) {
-      var result = [],
-          length = (object = root.Object(object)).length,
-          arrayLike = length === length >>> 0;
-
-      separator2 || (separator2 = ': ');
-
-      const entries = (
-        root.Array.isArray(object)
-          ? object.map((value, key) => [key, value])
-          : root.Object.entries(object).filter(([key]) => has(object, key) && (!arrayLike || key !== 'length'))
-      );
-
-      entries.forEach(([key, value]) => {
-        result.push(arrayLike ? value : key + separator2 + value);
-      });
-
-      return result.join(separator1 || ',');
-    }
 
     /*------------------------------------------------------------------------*/
 
@@ -1810,10 +1810,10 @@
         if (!(error && (typeof error === 'object' || typeof error === 'function'))) {
           errorStr = root.String(error);
         } else if (!(error instanceof Error)) {
-          errorStr = join(error);
+          errorStr = Benchmark.join(error);
         } else {
           // Error#name and Error#message properties are non-enumerable.
-          errorStr = join(root.Object.assign({ 'name': error.name, 'message': error.message }, error));
+          errorStr = Benchmark.join(root.Object.assign({ 'name': error.name, 'message': error.message }, error));
         }
         result += ': ' + errorStr;
       }
@@ -2410,7 +2410,6 @@
     /*------------------------------------------------------------------------*/
 
     root.Object.assign(Benchmark, {
-      'join': join,
       'runInContext': runInContext,
       'support': Support
     });
