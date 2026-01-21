@@ -155,22 +155,6 @@
     highestDefaultTimer = performance,
     usTimer = undefined,
   ) {
-    /** Native constructor references. */
-    var
-        Function = root.Function,
-        Math = root.Math,
-        Object = root.Object,
-        String = root.String;
-
-    /** Native method shortcuts. */
-    var abs = Math.abs,
-        clearTimeout = root.clearTimeout,
-        floor = Math.floor,
-        max = Math.max,
-        min = Math.min,
-        pow = Math.pow,
-        sqrt = Math.sqrt;
-
     /** Detect DOM document object. */
     var doc = isHostType(root, 'document') && root.document;
 
@@ -236,7 +220,7 @@
             // See http://webk.it/11609 for more details.
             // Firefox 3.6 and Opera 9.25 strip grouping parentheses from `Function#toString` results.
             // See http://bugzil.la/559438 for more details.
-            this.#decompilation = Function(
+            this.#decompilation = root.Function(
               ('return (' + (function(x) { return { 'x': '' + (1 + x) + '', 'y': 0 }; }) + ')')
               // Avoid issues with code added by Istanbul.
               .replace(/__cov__[^;]+;/g, '')
@@ -671,7 +655,7 @@
       };
       // Fix JaegerMonkey bug.
       // For more information see http://bugzil.la/639720.
-      createFunction = support.browser && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : Function;
+      createFunction = support.browser && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : root.Function;
       return createFunction.apply(null, arguments);
     }
 
@@ -735,7 +719,7 @@
     function getSource(fn) {
       var result = '';
       if (isStringable(fn)) {
-        result = String(fn);
+        result = root.String(fn);
       } else if (support.decompilation) {
         // Escape the `{` for Firefox 1.
         result = getResult(/^[^{]+\{([\s\S]*)\}\s*$/, fn);
@@ -933,7 +917,7 @@
      * @returns {string} The more readable string representation.
      */
     function formatNumber(number) {
-      number = String(number).split('.');
+      number = root.String(number).split('.');
       return number[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',') +
         (number[1] ? '.' + number[1] : '');
     }
@@ -1132,7 +1116,7 @@
      */
     function join(object, separator1, separator2) {
       var result = [],
-          length = (object = Object(object)).length,
+          length = (object = root.Object(object)).length,
           arrayLike = length === length >>> 0;
 
       separator2 || (separator2 = ': ');
@@ -1505,7 +1489,7 @@
           delete calledBy.abort;
 
           if (support.timeout) {
-            clearTimeout(bench._timerId);
+            root.clearTimeout(bench._timerId);
             delete bench._timerId;
           }
           if (!resetting) {
@@ -1566,11 +1550,11 @@
           sample2 = other.stats.sample,
           size1 = sample1.length,
           size2 = sample2.length,
-          maxSize = max(size1, size2),
-          minSize = min(size1, size2),
+          maxSize = root.Math.max(size1, size2),
+          minSize = root.Math.min(size1, size2),
           u1 = getU(sample1, sample2),
           u2 = getU(sample2, sample1),
-          u = min(u1, u2);
+          u = root.Math.min(u1, u2);
 
       function getScore(xA, sampleB) {
         return sampleB.reduce((total, xB) => {
@@ -1585,7 +1569,7 @@
       }
 
       function getZ(u) {
-        return (u - ((size1 * size2) / 2)) / sqrt((size1 * size2 * (size1 + size2 + 1)) / 12);
+        return (u - ((size1 * size2) / 2)) / root.Math.sqrt((size1 * size2 * (size1 + size2 + 1)) / 12);
       }
       // Reject the null hypothesis the two samples come from the
       // same population (i.e. have the same median) if...
@@ -1593,7 +1577,7 @@
         // ...the z-stat is greater than 1.96 or less than -1.96
         // http://www.statisticslectures.com/topics/mannwhitneyu/
         zStat = getZ(u);
-        return abs(zStat) > 1.96 ? (u == u1 ? 1 : -1) : 0;
+        return root.Math.abs(zStat) > 1.96 ? (u == u1 ? 1 : -1) : 0;
       }
       // ...the U value is less than or equal the critical U value.
       critical = maxSize < 5 || minSize < 3 ? 0 : uTable[maxSize][minSize - 3];
@@ -1703,7 +1687,7 @@
       if (error) {
         var errorStr;
         if (!(error && (typeof error === 'object' || typeof error === 'function'))) {
-          errorStr = String(error);
+          errorStr = root.String(error);
         } else if (!(error instanceof Error)) {
           errorStr = join(error);
         } else {
@@ -1731,7 +1715,7 @@
     function clock() {
       var options = Benchmark.options,
           templateData = {},
-          timers = [{ 'ns': timer.ns, 'res': max(0.0015, getRes('ms')), 'unit': 'ms' }];
+          timers = [{ 'ns': timer.ns, 'res': root.Math.max(0.0015, getRes('ms')), 'unit': 'ms' }];
 
       // Lazy define for hi-res timers.
       clock = function(clone) {
@@ -1791,7 +1775,7 @@
           }
         } catch(e) {
           compiled = null;
-          clone.error = e || new Error(String(e));
+          clone.error = e || new Error(root.String(e));
           bench.count = count;
         }
         // Fallback when a test exits early or errors during pretest.
@@ -1816,7 +1800,7 @@
           catch(e) {
             bench.count = count;
             if (!clone.error) {
-              clone.error = e || new Error(String(e));
+              clone.error = e || new Error(root.String(e));
             }
           }
         }
@@ -1953,7 +1937,7 @@
         function tagged(_, string) {
           let result = string;
 
-          for (const [key, value] of Object.entries(templateData)) {
+          for (const [key, value] of root.Object.entries(templateData)) {
             result = result.replaceAll(`\${${key}}`, value);
           }
 
@@ -1994,7 +1978,7 @@
       }
       // Resolve time span required to achieve a percent uncertainty of at most 1%.
       // For more information see http://spiff.rit.edu/classes/phys273/uncert/uncert.html.
-      options.minTime || (options.minTime = max(timer.res / 2 / 0.01, 0.05));
+      options.minTime || (options.minTime = root.Math.max(timer.res / 2 / 0.01, 0.05));
       return clock.apply(null, arguments);
     }
 
@@ -2081,7 +2065,7 @@
             size = sample.push(clone.times.period),
             maxedOut = size >= minSamples && (elapsed += now - clone.times.timeStamp) / 1e3 > bench.maxTime,
             times = bench.times,
-            varOf = function(sum, x) { return sum + pow(x - mean, 2); };
+            varOf = function(sum, x) { return sum + root.Math.pow(x - mean, 2); };
 
         // Exit early for aborted or unclockable tests.
         if (done || clone.hz == Infinity) {
@@ -2094,13 +2078,13 @@
           // Compute the sample variance (estimate of the population variance).
           variance = sample.reduce(varOf, 0) / (size - 1) || 0;
           // Compute the sample standard deviation (estimate of the population standard deviation).
-          sd = sqrt(variance);
+          sd = root.Math.sqrt(variance);
           // Compute the standard error of the mean (a.k.a. the standard deviation of the sampling distribution of the sample mean).
-          sem = sd / sqrt(size);
+          sem = sd / root.Math.sqrt(size);
           // Compute the degrees of freedom.
           df = size - 1;
           // Compute the critical value.
-          critical = tTable[Math.round(df) || 1] || tTable.infinity;
+          critical = tTable[root.Math.round(df) || 1] || tTable.infinity;
           // Compute the margin of error.
           moe = sem * critical;
           // Compute the relative margin of error.
@@ -2216,11 +2200,11 @@
           // Tests may clock at `0` when `initCount` is a small number,
           // to avoid that we set its count to something a bit higher.
           if (!clocked && (divisor = divisors[clone.cycles]) != null) {
-            count = floor(4e6 / divisor);
+            count = root.Math.floor(4e6 / divisor);
           }
           // Calculate how many more iterations it will take to achieve the `minTime`.
           if (count <= clone.count) {
-            count += Math.ceil((minTime - clocked) / period);
+            count += root.Math.ceil((minTime - clocked) / period);
           }
           clone.running = count != Infinity;
         }
