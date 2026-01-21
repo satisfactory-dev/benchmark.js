@@ -619,7 +619,13 @@
        */
       static version = '2.1.4';
 
-      static runInContext = runInContext;
+      static get runInContext() {
+        return runInContext;
+      }
+
+      static get support() {
+        return Support;
+      }
 
       /**
        * A generic `Array#filter` like method.
@@ -2409,12 +2415,6 @@
       }
       return bench;
     }
-
-    /*------------------------------------------------------------------------*/
-
-    root.Object.assign(Benchmark, {
-      'support': Support
-    });
 
     /*------------------------------------------------------------------------*/
 
