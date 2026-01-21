@@ -480,110 +480,110 @@
     /*------------------------------------------------------------------------*/
 
     class Benchmark {
-    /**
-     * The Benchmark constructor.
-     *
-     * @param {string} name A name to identify the benchmark.
-     * @param {Function|string} fn The test to benchmark.
-     * @param {Object} [options={}] Options object.
-     * @example
-     *
-     * // basic usage (the `new` operator is optional)
-     * var bench = new Benchmark(fn);
-     *
-     * // or using a name first
-     * var bench = new Benchmark('foo', fn);
-     *
-     * // or with options
-     * var bench = new Benchmark('foo', fn, {
-     *
-     *   // displayed by `Benchmark#toString` if `name` is not available
-     *   'id': 'xyz',
-     *
-     *   // called when the benchmark starts running
-     *   'onStart': onStart,
-     *
-     *   // called after each run cycle
-     *   'onCycle': onCycle,
-     *
-     *   // called when aborted
-     *   'onAbort': onAbort,
-     *
-     *   // called when a test errors
-     *   'onError': onError,
-     *
-     *   // called when reset
-     *   'onReset': onReset,
-     *
-     *   // called when the benchmark completes running
-     *   'onComplete': onComplete,
-     *
-     *   // compiled/called before the test loop
-     *   'setup': setup,
-     *
-     *   // compiled/called after the test loop
-     *   'teardown': teardown
-     * });
-     *
-     * // or name and options
-     * var bench = new Benchmark('foo', {
-     *
-     *   // a flag to indicate the benchmark is deferred
-     *   'defer': true,
-     *
-     *   // benchmark test function
-     *   'fn': function(deferred) {
-     *     // call `Deferred#resolve` when the deferred test is finished
-     *     deferred.resolve();
-     *   }
-     * });
-     *
-     * // or options only
-     * var bench = new Benchmark({
-     *
-     *   // benchmark name
-     *   'name': 'foo',
-     *
-     *   // benchmark test as a string
-     *   'fn': '[1,2,3,4].sort()'
-     * });
-     *
-     * // a test's `this` binding is set to the benchmark instance
-     * var bench = new Benchmark('foo', function() {
-     *   'My name is '.concat(this.name); // "My name is foo"
-     * });
-     */
+      /**
+       * The Benchmark constructor.
+       *
+       * @param {string} name A name to identify the benchmark.
+       * @param {Function|string} fn The test to benchmark.
+       * @param {Object} [options={}] Options object.
+       * @example
+       *
+       * // basic usage (the `new` operator is optional)
+       * var bench = new Benchmark(fn);
+       *
+       * // or using a name first
+       * var bench = new Benchmark('foo', fn);
+       *
+       * // or with options
+       * var bench = new Benchmark('foo', fn, {
+       *
+       *   // displayed by `Benchmark#toString` if `name` is not available
+       *   'id': 'xyz',
+       *
+       *   // called when the benchmark starts running
+       *   'onStart': onStart,
+       *
+       *   // called after each run cycle
+       *   'onCycle': onCycle,
+       *
+       *   // called when aborted
+       *   'onAbort': onAbort,
+       *
+       *   // called when a test errors
+       *   'onError': onError,
+       *
+       *   // called when reset
+       *   'onReset': onReset,
+       *
+       *   // called when the benchmark completes running
+       *   'onComplete': onComplete,
+       *
+       *   // compiled/called before the test loop
+       *   'setup': setup,
+       *
+       *   // compiled/called after the test loop
+       *   'teardown': teardown
+       * });
+       *
+       * // or name and options
+       * var bench = new Benchmark('foo', {
+       *
+       *   // a flag to indicate the benchmark is deferred
+       *   'defer': true,
+       *
+       *   // benchmark test function
+       *   'fn': function(deferred) {
+       *     // call `Deferred#resolve` when the deferred test is finished
+       *     deferred.resolve();
+       *   }
+       * });
+       *
+       * // or options only
+       * var bench = new Benchmark({
+       *
+       *   // benchmark name
+       *   'name': 'foo',
+       *
+       *   // benchmark test as a string
+       *   'fn': '[1,2,3,4].sort()'
+       * });
+       *
+       * // a test's `this` binding is set to the benchmark instance
+       * var bench = new Benchmark('foo', function() {
+       *   'My name is '.concat(this.name); // "My name is foo"
+       * });
+       */
       constructor(name, fn, options) {
-      var bench = this;
+        var bench = this;
 
-      // Juggle arguments.
-      if (typeof name === 'object') {
-        // 1 argument (options).
-        options = name;
-      }
-      else if (typeof name === 'function') {
-        // 2 arguments (fn, options).
-        options = fn;
-        fn = name;
-      }
-      else if (typeof fn === 'object') {
-        // 2 arguments (name, options).
-        options = fn;
-        fn = null;
-        bench.name = name;
-      }
-      else {
-        // 3 arguments (name, fn [, options]).
-        bench.name = name;
-      }
-      setOptions(bench, options);
+        // Juggle arguments.
+        if (typeof name === 'object') {
+          // 1 argument (options).
+          options = name;
+        }
+        else if (typeof name === 'function') {
+          // 2 arguments (fn, options).
+          options = fn;
+          fn = name;
+        }
+        else if (typeof fn === 'object') {
+          // 2 arguments (name, options).
+          options = fn;
+          fn = null;
+          bench.name = name;
+        }
+        else {
+          // 3 arguments (name, fn [, options]).
+          bench.name = name;
+        }
+        setOptions(bench, options);
 
-      bench.id || (bench.id = ++counter);
-      bench.fn == null && (bench.fn = fn);
+        bench.id || (bench.id = ++counter);
+        bench.fn == null && (bench.fn = fn);
 
-      bench.stats = cloneDeep(bench.stats);
-      bench.times = cloneDeep(bench.times);
-    }
+        bench.stats = cloneDeep(bench.stats);
+        bench.times = cloneDeep(bench.times);
+      }
     }
 
     class Deferred {
