@@ -471,7 +471,6 @@
       /**
        * The Event constructor.
        *
-       * @constructor
        * @memberOf Benchmark
        * @param {Object|string} type The event type.
        */
