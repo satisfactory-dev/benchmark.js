@@ -559,10 +559,6 @@
     function Benchmark(name, fn, options) {
       var bench = this;
 
-      // Allow instance creation without the `new` operator.
-      if (!(bench instanceof Benchmark)) {
-        return new Benchmark(name, fn, options);
-      }
       // Juggle arguments.
       if (typeof name === 'object') {
         // 1 argument (options).

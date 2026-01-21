@@ -58,7 +58,7 @@
   };
 
   // Init Benchmark.options.minTime.
-  Benchmark(function() { throw 0; }).run();
+  new Benchmark(function() { throw 0; }).run();
 
   // Set a shorter max time.
   Benchmark.options.maxTime = Benchmark.options.minTime * 5;
@@ -99,37 +99,33 @@
   QUnit.module('Benchmark constructor');
 
   (function() {
-    QUnit.test('should create a new instance when called without the `new` operator', function(assert) {
-      assert.ok(Benchmark() instanceof Benchmark);
-    });
-
     QUnit.test('should support passing an options object', function(assert) {
-      var bench = Benchmark({ 'name': 'foo', 'fn': function() {} });
+      var bench = new Benchmark({ 'name': 'foo', 'fn': function() {} });
       assert.ok(bench.fn && bench.name == 'foo');
     });
 
     QUnit.test('should support passing a "name" and "fn" argument', function(assert) {
-      var bench = Benchmark('foo', function() {});
+      var bench = new Benchmark('foo', function() {});
       assert.ok(bench.fn && bench.name == 'foo');
     });
 
     QUnit.test('should support passing a "name" argument and an options object', function(assert) {
-      var bench = Benchmark('foo', { 'fn': function() {} });
+      var bench = new Benchmark('foo', { 'fn': function() {} });
       assert.ok(bench.fn && bench.name == 'foo');
     });
 
     QUnit.test('should support passing a "name" argument and an options object', function(assert) {
-      var bench = Benchmark('foo', function() {}, { 'id': 'bar' });
+      var bench = new Benchmark('foo', function() {}, { 'id': 'bar' });
       assert.ok(bench.fn && bench.name == 'foo' && bench.id == 'bar');
     });
 
     QUnit.test('should support passing an empty string for the "fn" options property', function(assert) {
-      var bench = Benchmark({ 'fn': '' }).run();
+      var bench = new Benchmark({ 'fn': '' }).run();
       assert.ok(!bench.error);
     });
 
     QUnit.test('should detect dead code', function(assert) {
-      var bench = Benchmark(function() {}).run();
+      var bench = new Benchmark(function() {}).run();
       assert.ok(/setup\(\)/.test(bench.compiled) ? !bench.error : bench.error);
     });
   }());
@@ -140,7 +136,7 @@
 
   (function() {
     QUnit.test('should compile using the default "toString" method', function(assert) {
-      var bench = Benchmark({
+      var bench = new Benchmark({
         'setup': function() { var a = 1; },
         'fn': function() { throw a; },
         'teardown': function() { a = 2; }
@@ -156,7 +152,7 @@
     });
 
     QUnit.test('should compile using a custom "toString" method', function(assert) {
-      var bench = Benchmark({
+      var bench = new Benchmark({
         'setup': function() {},
         'fn': function() {},
         'teardown': function() {}
@@ -177,7 +173,7 @@
     });
 
     QUnit.test('should compile using a string value', function(assert) {
-      var bench = Benchmark({
+      var bench = new Benchmark({
         'setup': 'var a = 1;',
         'fn': 'throw a;',
         'teardown': 'a = 2;'
@@ -220,7 +216,7 @@
 
     Object.entries(tests).forEach(([title, fn]) => {
       QUnit.test('should have correct binding for ' + title, function(assert) {
-        var bench = Benchmark({
+        var bench = new Benchmark({
           'setup': 'if(/ops/.test(this))this._setup=true;',
           'fn': fn,
           'teardown': 'if(/ops/.test(this))this._teardown=true;',
@@ -271,9 +267,9 @@
 
     QUnit.test('should correctly detect the fastest/slowest benchmark for small sample sizes', function(assert) {
       var data = structuredClone(benchData),
-          bench = Benchmark(data);
+          bench = new Benchmark(data);
 
-      var other = Benchmark({
+      var other = new Benchmark({
         ...data,
         'hz': 500,
         stats: {
@@ -293,7 +289,7 @@
     QUnit.test('should correctly detect the fastest/slowest benchmark for large sample sizes', function(assert) {
       var data = structuredClone(benchData);
 
-      var bench = Benchmark({
+      var bench = new Benchmark({
         ...data,
         'stats': {
           ...data.stats,
@@ -301,7 +297,7 @@
         }
       });
 
-      var other = Benchmark({
+      var other = new Benchmark({
         ...data,
         'hz': 500,
         'stats': {
@@ -346,7 +342,7 @@
   QUnit.module('Benchmark#clone');
 
   (function() {
-    var bench = Benchmark(function() { this.count += 0; }).run();
+    var bench = new Benchmark(function() { this.count += 0; }).run();
 
     QUnit.test('should return the correct result passing no arguments', function(assert) {
       var clone = bench.clone();
@@ -368,15 +364,15 @@
 
   (function() {
     QUnit.test('should return `0` when compared to itself', function(assert) {
-      var bench = Benchmark(benchData);
+      var bench = new Benchmark(benchData);
       assert.strictEqual(bench.compare(bench), 0);
     });
 
     QUnit.test('should correctly detect the faster benchmark for small sample sizes', function(assert) {
       var data = structuredClone(benchData),
-          bench = Benchmark(data);
+          bench = new Benchmark(data);
 
-      var other = Benchmark({
+      var other = new Benchmark({
         ...data,
         'hz': 500,
         'stats': {
@@ -393,7 +389,7 @@
     QUnit.test('should correctly detect the faster benchmark for large sample sizes', function(assert) {
       var data = structuredClone(benchData);
 
-      var bench = Benchmark({
+      var bench = new Benchmark({
         ...data,
         'stats': {
           ...data.stats,
@@ -401,7 +397,7 @@
         }
       });
 
-      var other = Benchmark({
+      var other = new Benchmark({
         ...data,
         'hz': 500,
         'stats': {
@@ -425,7 +421,7 @@
       var handler = function() {};
       Benchmark.options.onStart = handler;
 
-      var bench = Benchmark(),
+      var bench = new Benchmark(),
           clone = bench.clone({ 'events': { 'cycle': [function() {}] } });
 
       clone.reset();
@@ -442,7 +438,7 @@
   (function() {
     var data = { 'onComplete': 0, 'onCycle': 0, 'onStart': 0 };
 
-    var bench = Benchmark({
+    var bench = new Benchmark({
       'fn': function() {
         this.count += 0;
       },
@@ -473,7 +469,7 @@
     (function() {
       QUnit.test('should emit with no listeners', function(assert) {
         var event = new Benchmark.Event('empty'),
-            object = Constructor();
+            object = new Constructor();
 
         object.emit(event);
         assert.strictEqual(event.cancelled, false);
@@ -481,7 +477,7 @@
 
       QUnit.test('should emit with an event type of "toString"', function(assert) {
         var event = new Benchmark.Event('toString'),
-            object = Constructor();
+            object = new Constructor();
 
         object.emit(event);
         assert.strictEqual(event.cancelled, false);
@@ -489,7 +485,7 @@
 
       QUnit.test('should returns the last listeners returned value', function(assert) {
         var event = new Benchmark.Event('result'),
-            object = Constructor();
+            object = new Constructor();
 
         object.on('result', function() { return 'x'; });
         object.on('result', function() { return 'y'; });
@@ -498,7 +494,7 @@
 
       QUnit.test('should abort the emitters listener iteration when `event.aborted` is `true`', function(assert) {
         var event = new Benchmark.Event('aborted'),
-            object = Constructor();
+            object = new Constructor();
 
         object.on('aborted', function(event) {
           event.aborted = true;
@@ -517,7 +513,7 @@
 
       QUnit.test('should cancel the event if a listener explicitly returns `false`', function(assert) {
         var event = new Benchmark.Event('cancel'),
-            object = Constructor();
+            object = new Constructor();
 
         object.on('cancel', function() { return false; });
         object.on('cancel', function() { return true; });
@@ -528,7 +524,7 @@
       QUnit.test('should use a shallow clone of the listeners when emitting', function(assert) {
         var event,
             listener2 = function(eventObject) { eventObject.listener2 = true },
-            object = Constructor();
+            object = new Constructor();
 
         object.on('shallowclone', function(eventObject) {
           event = eventObject;
@@ -542,7 +538,7 @@
 
       QUnit.test('should emit a custom event object', function(assert) {
         var event = new Benchmark.Event('custom'),
-            object = Constructor();
+            object = new Constructor();
 
         object.on('custom', function(eventObject) { eventObject.touched = true; });
         object.emit(event);
@@ -551,7 +547,7 @@
 
       QUnit.test('should set `event.result` correctly', function(assert) {
         var event = new Benchmark.Event('result'),
-            object = Constructor();
+            object = new Constructor();
 
         object.on('result', function() { return 'x'; });
         object.emit(event);
@@ -560,7 +556,7 @@
 
       QUnit.test('should correctly set `event.type`', function(assert) {
         var event,
-            object = Constructor();
+            object = new Constructor();
 
         object.on('type', function(eventObj) {
           event = eventObj;
@@ -578,14 +574,14 @@
     (function() {
       QUnit.test('should return the correct listeners', function(assert) {
         var listener = function() {},
-            object = Constructor();
+            object = new Constructor();
 
         object.on('x', listener);
         assert.deepEqual(object.listeners('x'), [listener]);
       });
 
       QUnit.test('should return an array and initializes previously uninitialized listeners', function(assert) {
-        var object = Constructor();
+        var object = new Constructor();
         assert.deepEqual(object.listeners('x'), []);
         assert.deepEqual(object.events, { 'x': [] });
       });
@@ -598,7 +594,7 @@
     (function() {
       QUnit.test('should return the benchmark', function(assert) {
         var listener = function() {},
-            object = Constructor();
+            object = new Constructor();
 
         object.on('x', listener);
         assert.strictEqual(object.off('x', listener), object);
@@ -607,7 +603,7 @@
       QUnit.test('should ignore inherited properties of the event cache', function(assert) {
         var Dummy = function() {},
             listener = function() {},
-            object = Constructor();
+            object = new Constructor();
 
         Dummy.prototype.x = [listener];
         object.events = new Dummy;
@@ -618,7 +614,7 @@
 
       QUnit.test('should handle an event type and listener', function(assert) {
         var listener = function() {},
-            object = Constructor();
+            object = new Constructor();
 
         object.on('x', listener);
         object.off('x', listener);
@@ -627,7 +623,7 @@
 
       QUnit.test('should handle unregistering duplicate listeners', function(assert) {
         var listener = function() {},
-            object = Constructor();
+            object = new Constructor();
 
         object.on('x', listener);
         object.on('x', listener);
@@ -641,14 +637,14 @@
       });
 
       QUnit.test('should handle a non-registered listener', function(assert) {
-        var object = Constructor();
+        var object = new Constructor();
         object.off('x', function() {});
         assert.strictEqual(object.events, undefined);
       });
 
       QUnit.test('should handle space separated event type and listener', function(assert) {
         var listener = function() {},
-            object = Constructor();
+            object = new Constructor();
 
         object.on('x', listener);
         object.on('y', listener);
@@ -662,7 +658,7 @@
       QUnit.test('should handle space separated event type and no listener', function(assert) {
         var listener1 = function() {},
             listener2 = function() {},
-            object = Constructor();
+            object = new Constructor();
 
         object.on('x', listener1);
         object.on('y', listener2);
@@ -677,7 +673,7 @@
         var listener1 = function() {},
             listener2 = function() {},
             listener3 = function() {},
-            object = Constructor();
+            object = new Constructor();
 
         object.on('x', listener1);
         object.on('y', listener2);
@@ -698,7 +694,7 @@
     (function() {
       QUnit.test('should return the benchmark', function(assert) {
         var listener = function() {},
-            object = Constructor();
+            object = new Constructor();
 
         assert.strictEqual(object.on('x', listener), object);
       });
@@ -707,7 +703,7 @@
         var Dummy = function() {},
             listener1 = function() {},
             listener2 = function() {},
-            object = Constructor();
+            object = new Constructor();
 
         Dummy.prototype.x = [listener1];
         object.events = new Dummy;
@@ -718,7 +714,7 @@
 
       QUnit.test('should handle an event type and listener', function(assert) {
         var listener = function() {},
-            object = Constructor();
+            object = new Constructor();
 
         object.on('x', listener);
         assert.deepEqual(object.events.x, [listener]);
@@ -726,7 +722,7 @@
 
       QUnit.test('should handle registering duplicate listeners', function(assert) {
         var listener = function() {},
-            object = Constructor();
+            object = new Constructor();
 
         object.on('x', listener);
         object.on('x', listener);
@@ -735,7 +731,7 @@
 
       QUnit.test('should handle space separated event type and listener', function(assert) {
         var listener = function() {},
-            object = Constructor();
+            object = new Constructor();
 
         object.on('x y', listener);
 
@@ -1081,7 +1077,7 @@
     QUnit.test('should run a deferred benchmark correctly', function(assert) {
       var done = assert.async();
 
-      Benchmark(function(deferred) {
+      new Benchmark(function(deferred) {
         setTimeout(function() { deferred.resolve(); }, 1e3);
       }, {
         'defer': true,
@@ -1096,7 +1092,7 @@
     QUnit.test('should run with string values for "fn", "setup", and "teardown"', function(assert) {
       var done = assert.async();
 
-      Benchmark({
+      new Benchmark({
         'defer': true,
         'setup': 'var x = [3, 2, 1];',
         'fn': 'setTimeout(function() { x.sort(); deferred.resolve(); }, 10);',
@@ -1114,7 +1110,7 @@
 
       var fired = [];
 
-      Benchmark({
+      new Benchmark({
         'defer': true,
         'setup': function() {
           fired.push('setup');
