@@ -618,6 +618,90 @@
        * @todo replace with json-derived version built from npm version/git hash
        */
       static version = '2.1.4';
+      /**
+       * A generic `Array#filter` like method.
+       *
+       * @static
+       * @memberOf Benchmark
+       * @param {Array} array The array to iterate over.
+       * @param {Function|string} callback The function/alias called per iteration.
+       * @returns {Array} A new array of values that passed callback filter.
+       * @example
+       *
+       * // get odd numbers
+       * Benchmark.filter([1, 2, 3, 4, 5], function(n) {
+       *   return n % 2;
+       * }); // -> [1, 3, 5];
+       *
+       * // get fastest benchmarks
+       * Benchmark.filter(benches, 'fastest');
+       *
+       * // get slowest benchmarks
+       * Benchmark.filter(benches, 'slowest');
+       *
+       * // get benchmarks that completed without erroring
+       * Benchmark.filter(benches, 'successful');
+       */
+      static filter(array, callback) {
+        if (callback === 'successful') {
+          // Callback to exclude those that are errored, unrun, or have hz of Infinity.
+          callback = function(bench) {
+            return bench.cycles && root.isFinite(bench.hz) && !bench.error;
+          };
+        }
+        else if (callback === 'fastest' || callback === 'slowest') {
+          // Get successful, sort by period + margin of error, and filter fastest/slowest.
+          var result = this.filter(array, 'successful').sort(function(a, b) {
+            a = a.stats; b = b.stats;
+            return (a.mean + a.moe > b.mean + b.moe ? 1 : -1) * (callback === 'fastest' ? 1 : -1);
+          });
+
+          return result.filter((bench) => {
+            return result[0].compare(bench) == 0;
+          });
+        }
+
+        if (array instanceof Suite) {
+          return array.benchmarks.filter((benchmark, index) => callback(benchmark, index, array));
+        }
+
+        if (!root.Array.isArray(array)) {
+          const {
+            isArrayLike,
+            result,
+          } = root.Object.entries(array)
+            .filter(([key, value]) => callback(
+              value,
+              (typeof key === 'string' && /^\d+/.test(key))
+                ? parseInt(key, 10)
+                : key,
+              array,
+            ))
+            .reduce(
+              (was, [key, value]) => {
+                if (typeof key === 'string' && /^\d+/.test(key)) {
+                  ++was.currentIndex;
+
+                  was.result[was.currentIndex] = value;
+                } else {
+                  was.result[key] = value;
+                  was.isArrayLike = false;
+                }
+
+                return was;
+              },
+              {
+                currentIndex: -1,
+                result: root.Object.create(null),
+                isArrayLike: true,
+              },
+            );
+
+            return isArrayLike ? root.Object.values(result) : result;
+        }
+
+        return array.filter(callback);
+      }
 
       /**
        * The Benchmark constructor.
@@ -944,90 +1028,6 @@
 
     /*------------------------------------------------------------------------*/
 
-    /**
-     * A generic `Array#filter` like method.
-     *
-     * @static
-     * @memberOf Benchmark
-     * @param {Array} array The array to iterate over.
-     * @param {Function|string} callback The function/alias called per iteration.
-     * @returns {Array} A new array of values that passed callback filter.
-     * @example
-     *
-     * // get odd numbers
-     * Benchmark.filter([1, 2, 3, 4, 5], function(n) {
-     *   return n % 2;
-     * }); // -> [1, 3, 5];
-     *
-     * // get fastest benchmarks
-     * Benchmark.filter(benches, 'fastest');
-     *
-     * // get slowest benchmarks
-     * Benchmark.filter(benches, 'slowest');
-     *
-     * // get benchmarks that completed without erroring
-     * Benchmark.filter(benches, 'successful');
-     */
-    function filter(array, callback) {
-      if (callback === 'successful') {
-        // Callback to exclude those that are errored, unrun, or have hz of Infinity.
-        callback = function(bench) {
-          return bench.cycles && root.isFinite(bench.hz) && !bench.error;
-        };
-      }
-      else if (callback === 'fastest' || callback === 'slowest') {
-        // Get successful, sort by period + margin of error, and filter fastest/slowest.
-        var result = filter(array, 'successful').sort(function(a, b) {
-          a = a.stats; b = b.stats;
-          return (a.mean + a.moe > b.mean + b.moe ? 1 : -1) * (callback === 'fastest' ? 1 : -1);
-        });
-
-        return result.filter((bench) => {
-          return result[0].compare(bench) == 0;
-        });
-      }
-
-      if (array instanceof Suite) {
-        return array.benchmarks.filter((benchmark, index) => callback(benchmark, index, array));
-      }
-
-      if (!root.Array.isArray(array)) {
-        const {
-          isArrayLike,
-          result,
-        } = root.Object.entries(array)
-          .filter(([key, value]) => callback(
-            value,
-            (typeof key === 'string' && /^\d+/.test(key))
-              ? parseInt(key, 10)
-              : key,
-            array,
-          ))
-          .reduce(
-            (was, [key, value]) => {
-              if (typeof key === 'string' && /^\d+/.test(key)) {
-                ++was.currentIndex;
-
-                was.result[was.currentIndex] = value;
-              } else {
-                was.result[key] = value;
-                was.isArrayLike = false;
-              }
-
-              return was;
-            },
-            {
-              currentIndex: -1,
-              result: root.Object.create(null),
-              isArrayLike: true,
-            },
-          );
-
-          return isArrayLike ? root.Object.values(result) : result;
-      }
-
-      return array.filter(callback);
-    }
 
     /**
      * Converts a number to a more readable comma-separated string representation.
@@ -1370,7 +1370,7 @@
       var suite = this,
           result = new suite.constructor(suite.options);
 
-      const cb = filter(this, callback);
+      const cb = Benchmark.filter(this, callback);
 
       result._benchmarks.push(...cb);
 
@@ -2410,7 +2410,6 @@
     /*------------------------------------------------------------------------*/
 
     root.Object.assign(Benchmark, {
-      'filter': filter,
       'formatNumber': formatNumber,
       'invoke': invoke,
       'join': join,
