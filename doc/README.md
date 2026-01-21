@@ -1,4 +1,4 @@
-# @satisfactory-dev/benchmark <span>8cc032b70962810a85c3ef06f08012ba909f6fab</span>
+# @satisfactory-dev/benchmark <span>2c1ca1b20c71c22143012b49e6edb2d3303c3a4f</span>
 
 <!-- div class="toc-container" -->
 
@@ -27,7 +27,7 @@
 * <a href="#benchmarkoptionsonerror">`Benchmark.options.onError`</a>
 * <a href="#benchmarkoptionsonreset">`Benchmark.options.onReset`</a>
 * <a href="#benchmarkoptionsonstart">`Benchmark.options.onStart`</a>
-* <a href="#benchmarkrunincontextcontextroot-highestdefaulttimer-ustimer">`Benchmark.runInContext`</a>
+* <a href="#benchmarkrunincontexthighestdefaulttimer-ustimer">`Benchmark.runInContext`</a>
 * <a href="#benchmarkprototypeabort">`Benchmark.prototype.abort`</a>
 * <a href="#benchmarkprototypecloneoptions">`Benchmark.prototype.clone`</a>
 * <a href="#benchmarkprototypecompareother">`Benchmark.prototype.compare`</a>
@@ -60,7 +60,7 @@
 * <a href="#benchmarksuiteoptions">`Benchmark.Suite.options`</a>
 * <a href="#benchmarksuiteoptionsname">`Benchmark.Suite.options.name`</a>
 * <a href="#benchmarksuiteprototypeaborted">`Benchmark.Suite.prototype.aborted`</a>
-* <a href="#benchmarksuiteprototypelength">`Benchmark.Suite.prototype.length`</a>
+* <a href="#benchmarksuiteprototypeget">`Benchmark.Suite.prototype.get`</a>
 * <a href="#benchmarksuiteprototyperunning">`Benchmark.Suite.prototype.running`</a>
 * <a href="#benchmarkoptions">`Benchmark.options`</a>
 * <a href="#benchmarkoptionsasync">`Benchmark.options.async`</a>
@@ -79,14 +79,14 @@
 * <a href="#benchmarkprototypecount">`Benchmark.prototype.count`</a>
 * <a href="#benchmarkprototypecycles">`Benchmark.prototype.cycles`</a>
 * <a href="#benchmarksupportdecompilation">`Benchmark.support.decompilation`</a>
+* <a href="#benchmarkprototypeerror">`Benchmark.prototype.error`</a>
 * <a href="#benchmarkprototypefn">`Benchmark.prototype.fn`</a>
+* <a href="#benchmarkprototypehz">`Benchmark.prototype.hz`</a>
 * <a href="#benchmarkprototypesetup">`Benchmark.prototype.setup`</a>
 * <a href="#benchmarkprototypestats">`Benchmark.prototype.stats`</a>
 * <a href="#benchmarkprototypeteardown">`Benchmark.prototype.teardown`</a>
 * <a href="#benchmarksupporttimeout">`Benchmark.support.timeout`</a>
 * <a href="#benchmarkversion">`Benchmark.version`</a>
-* <a href="#benchmarkprototypeerror">`Benchmark.prototype.error`</a>
-* <a href="#benchmarkprototypehz">`Benchmark.prototype.hz`</a>
 * <a href="#benchmarkprototyperunning">`Benchmark.prototype.running`</a>
 * <a href="#benchmarkprototypetimes">`Benchmark.prototype.times`</a>
 * <a href="#benchmark-statsdeviation">`Benchmark#stats.deviation`</a>
@@ -100,7 +100,6 @@
 * <a href="#benchmark-timeselapsed">`Benchmark#times.elapsed`</a>
 * <a href="#benchmark-timesperiod">`Benchmark#times.period`</a>
 * <a href="#benchmark-timestimestamp">`Benchmark#times.timeStamp`</a>
-* <a href="#result">`result`</a>
 
 <!-- /div -->
 
@@ -115,7 +114,7 @@
 <!-- div -->
 
 <h3 id="benchmarkname-fn-options"><code>Benchmark(name, fn, [options={}])</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L380 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L353 [&#x24C9;][1]
 
 The Benchmark constructor.
 
@@ -198,7 +197,7 @@ var bench = new Benchmark('foo', function() {
 <!-- div -->
 
 <h3 id="benchmarkdeferredclone"><code>Benchmark.Deferred(clone)</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L423 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L396 [&#x24C9;][1]
 
 The Deferred constructor.
 
@@ -212,7 +211,7 @@ The Deferred constructor.
 <!-- div -->
 
 <h3 id="benchmarkdeferredprototyperesolve"><code>Benchmark.Deferred.prototype.resolve()</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L774 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L777 [&#x24C9;][1]
 
 Handles cycling/completing the deferred benchmark.
 
@@ -223,7 +222,7 @@ Handles cycling/completing the deferred benchmark.
 <!-- div -->
 
 <h3 id="benchmarkeventtype"><code>Benchmark.Event(type)</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L439 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L412 [&#x24C9;][1]
 
 The Event constructor.
 
@@ -237,7 +236,7 @@ The Event constructor.
 <!-- div -->
 
 <h3 id="benchmarksuitename-options"><code>Benchmark.Suite(name, [options={}])</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L493 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L466 [&#x24C9;][1]
 
 The Suite constructor.
 
@@ -282,7 +281,7 @@ var suite = new Benchmark.Suite('foo', {
 <!-- div -->
 
 <h3 id="benchmarksuiteasarrayarray"><code>Benchmark.Suite.asArray(array)</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L522 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L531 [&#x24C9;][1]
 
 Converts a Suite or Suite-like object/array to an array of values
 
@@ -300,7 +299,7 @@ Converts a Suite or Suite-like object/array to an array of values
 <!-- div -->
 
 <h3 id="benchmarksuiteprototypeabort"><code>Benchmark.Suite.prototype.abort()</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1122 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1120 [&#x24C9;][1]
 
 Aborts all benchmarks in the suite.
 
@@ -314,7 +313,7 @@ Aborts all benchmarks in the suite.
 <!-- div -->
 
 <h3 id="benchmarksuiteprototypeaddname-fn-options"><code>Benchmark.Suite.prototype.add(name, fn, [options={}])</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1182 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1180 [&#x24C9;][1]
 
 Adds a test to the benchmark suite.
 
@@ -362,7 +361,7 @@ suite.add({
 <!-- div -->
 
 <h3 id="benchmarksuiteprototypecloneoptions"><code>Benchmark.Suite.prototype.clone(options)</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1201 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1199 [&#x24C9;][1]
 
 Creates a new suite with cloned benchmarks.
 
@@ -379,7 +378,7 @@ Creates a new suite with cloned benchmarks.
 <!-- div -->
 
 <h3 id="benchmarksuiteprototypefiltercallback"><code>Benchmark.Suite.prototype.filter(callback)</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1224 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1222 [&#x24C9;][1]
 
 An `Array#filter` like method.
 
@@ -396,7 +395,7 @@ An `Array#filter` like method.
 <!-- div -->
 
 <h3 id="benchmarksuiteprototypereset"><code>Benchmark.Suite.prototype.reset()</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1239 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1240 [&#x24C9;][1]
 
 Resets all benchmarks in the suite.
 
@@ -410,7 +409,7 @@ Resets all benchmarks in the suite.
 <!-- div -->
 
 <h3 id="benchmarksuiteprototyperunoptions"><code>Benchmark.Suite.prototype.run([options={}])</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1276 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1277 [&#x24C9;][1]
 
 Runs the suite.
 
@@ -435,7 +434,7 @@ suite.run({ 'async': true, 'queued': true });
 <!-- div -->
 
 <h3 id="benchmarkfilterarray-callback"><code>Benchmark.filter(array, callback)</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L821 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L824 [&#x24C9;][1]
 
 A generic `Array#filter` like method.
 
@@ -469,7 +468,7 @@ Benchmark.filter(benches, 'successful');
 <!-- div -->
 
 <h3 id="benchmarkformatnumbernumber"><code>Benchmark.formatNumber(number)</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L896 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L893 [&#x24C9;][1]
 
 Converts a number to a more readable comma-separated string representation.
 
@@ -486,7 +485,7 @@ Converts a number to a more readable comma-separated string representation.
 <!-- div -->
 
 <h3 id="benchmarkinvokebenches-name-args"><code>Benchmark.invoke(benches, name, [args])</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L941 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L938 [&#x24C9;][1]
 
 Invokes a method on all items in an array.
 
@@ -535,7 +534,7 @@ Benchmark.invoke(benches, {
 <!-- div -->
 
 <h3 id="benchmarkjoinobject-separator1-separator2:"><code>Benchmark.join(object, [separator1=','], [separator2=': '])</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1093 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1091 [&#x24C9;][1]
 
 Creates a string of joined array values or object key-value pairs.
 
@@ -554,7 +553,7 @@ Creates a string of joined array values or object key-value pairs.
 <!-- div -->
 
 <h3 id="benchmarkoptionsonabort"><code>Benchmark.options.onAbort</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2363 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2364 [&#x24C9;][1]
 
 An event listener called when the benchmark is aborted.
 
@@ -565,7 +564,7 @@ An event listener called when the benchmark is aborted.
 <!-- div -->
 
 <h3 id="benchmarkoptionsoncomplete"><code>Benchmark.options.onComplete</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2371 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2372 [&#x24C9;][1]
 
 An event listener called when the benchmark completes running.
 
@@ -576,7 +575,7 @@ An event listener called when the benchmark completes running.
 <!-- div -->
 
 <h3 id="benchmarkoptionsoncycle"><code>Benchmark.options.onCycle</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2379 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2380 [&#x24C9;][1]
 
 An event listener called after each run cycle.
 
@@ -587,7 +586,7 @@ An event listener called after each run cycle.
 <!-- div -->
 
 <h3 id="benchmarkoptionsonerror"><code>Benchmark.options.onError</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2387 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2388 [&#x24C9;][1]
 
 An event listener called when a test errors.
 
@@ -598,7 +597,7 @@ An event listener called when a test errors.
 <!-- div -->
 
 <h3 id="benchmarkoptionsonreset"><code>Benchmark.options.onReset</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2395 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2396 [&#x24C9;][1]
 
 An event listener called when the benchmark is reset.
 
@@ -609,7 +608,7 @@ An event listener called when the benchmark is reset.
 <!-- div -->
 
 <h3 id="benchmarkoptionsonstart"><code>Benchmark.options.onStart</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2403 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2404 [&#x24C9;][1]
 
 An event listener called when the benchmark starts running.
 
@@ -619,15 +618,14 @@ An event listener called when the benchmark starts running.
 
 <!-- div -->
 
-<h3 id="benchmarkrunincontextcontextroot-highestdefaulttimer-ustimer"><code>Benchmark.runInContext([context=root], highestDefaultTimer, [usTimer])</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L164 [&#x24C9;][1]
+<h3 id="benchmarkrunincontexthighestdefaulttimer-ustimer"><code>Benchmark.runInContext(highestDefaultTimer, [usTimer])</code></h3>
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L157 [&#x24C9;][1]
 
-Create a new `Benchmark` function using the given `context` object.
+Create a new `Benchmark` function using the given options.
 
 #### Arguments
-1. `[context=root]` *(Object)*: The context object.
-2. `highestDefaultTimer` ():
-3. `[usTimer]` ():
+1. `highestDefaultTimer` ():
+2. `[usTimer]` (): A high-precision timer such as the one provided by microtime
 
 #### Returns
 *(Function)*: Returns a new `Benchmark` function.
@@ -639,7 +637,7 @@ Create a new `Benchmark` function using the given `context` object.
 <!-- div -->
 
 <h3 id="benchmarkprototypeabort"><code>Benchmark.prototype.abort()</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1451 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1452 [&#x24C9;][1]
 
 Aborts the benchmark without recording times.
 
@@ -653,7 +651,7 @@ Aborts the benchmark without recording times.
 <!-- div -->
 
 <h3 id="benchmarkprototypecloneoptions"><code>Benchmark.prototype.clone(options)</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1490 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1491 [&#x24C9;][1]
 
 Creates a new benchmark using the same test and options.
 
@@ -676,7 +674,7 @@ var bizarro = bench.clone({
 <!-- div -->
 
 <h3 id="benchmarkprototypecompareother"><code>Benchmark.prototype.compare(other)</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1514 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1515 [&#x24C9;][1]
 
 Determines if a benchmark is faster than another.
 
@@ -693,7 +691,7 @@ Determines if a benchmark is faster than another.
 <!-- div -->
 
 <h3 id="benchmarkprototypeemittype-args"><code>Benchmark.prototype.emit(type, [args])</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1316 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1317 [&#x24C9;][1]
 
 Executes all registered listeners of the specified event type.
 
@@ -711,7 +709,7 @@ Executes all registered listeners of the specified event type.
 <!-- div -->
 
 <h3 id="benchmarkprototypelistenerstype"><code>Benchmark.prototype.listeners(type)</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1348 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1349 [&#x24C9;][1]
 
 Returns an array of event listeners for a given type that can be manipulated to add or remove listeners.
 
@@ -728,7 +726,7 @@ Returns an array of event listeners for a given type that can be manipulated to 
 <!-- div -->
 
 <h3 id="benchmarkprototypeofftype-listener"><code>Benchmark.prototype.off([type], [listener])</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1381 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1382 [&#x24C9;][1]
 
 Unregisters a listener for the specified event type(s), or unregisters all listeners for the specified event type(s), or unregisters all listeners for all event types.
 
@@ -763,7 +761,7 @@ bench.off();
 <!-- div -->
 
 <h3 id="benchmarkprototypeontype-listener"><code>Benchmark.prototype.on(type, listener)</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1430 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1431 [&#x24C9;][1]
 
 Registers a listener for the specified event type(s).
 
@@ -789,7 +787,7 @@ bench.on('start cycle', listener);
 <!-- div -->
 
 <h3 id="benchmarkprototypereset"><code>Benchmark.prototype.reset()</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1567 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1568 [&#x24C9;][1]
 
 Reset properties and abort if running.
 
@@ -803,7 +801,7 @@ Reset properties and abort if running.
 <!-- div -->
 
 <h3 id="benchmarkprototyperunoptions"><code>Benchmark.prototype.run([options={}])</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2231 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2232 [&#x24C9;][1]
 
 Runs the benchmark.
 
@@ -828,7 +826,7 @@ bench.run({ 'async': true });
 <!-- div -->
 
 <h3 id="benchmarkprototypetostring"><code>Benchmark.prototype.toString()</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L1651 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L1652 [&#x24C9;][1]
 
 Displays relevant benchmark information when coerced to a string.
 
@@ -842,7 +840,7 @@ Displays relevant benchmark information when coerced to a string.
 <!-- div -->
 
 <h3 id="getresultregex-str"><code>getResult(regex, str)</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L144 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L138 [&#x24C9;][1]
 
 
 
@@ -861,7 +859,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="hasmaybe-prop"><code>has(maybe, prop)</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L132 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L126 [&#x24C9;][1]
 
 
 
@@ -886,7 +884,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkdeferredprototypebenchmark"><code>Benchmark.Deferred.prototype.benchmark</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2694 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2695 [&#x24C9;][1]
 
 (Object): The deferred benchmark instance.
 
@@ -897,7 +895,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkdeferredprototypecycles"><code>Benchmark.Deferred.prototype.cycles</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2702 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2703 [&#x24C9;][1]
 
 (number): The number of deferred cycles performed while benchmarking.
 
@@ -908,7 +906,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkdeferredprototypeelapsed"><code>Benchmark.Deferred.prototype.elapsed</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2710 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2711 [&#x24C9;][1]
 
 (number): The time taken to complete the deferred benchmark *(secs)*.
 
@@ -919,7 +917,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkdeferredprototypetimestamp"><code>Benchmark.Deferred.prototype.timeStamp</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2718 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2719 [&#x24C9;][1]
 
 (number): A timestamp of when the deferred benchmark started *(ms)*.
 
@@ -930,7 +928,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkeventprototypeaborted"><code>Benchmark.Event.prototype.aborted</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2735 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2736 [&#x24C9;][1]
 
 (boolean): A flag to indicate if the emitters listener iteration is aborted.
 
@@ -941,7 +939,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkeventprototypecancelled"><code>Benchmark.Event.prototype.cancelled</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2743 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2744 [&#x24C9;][1]
 
 (boolean): A flag to indicate if the default action is cancelled.
 
@@ -952,7 +950,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkeventprototypecurrenttarget"><code>Benchmark.Event.prototype.currentTarget</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2751 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2752 [&#x24C9;][1]
 
 (Object): The object whose listeners are currently being processed.
 
@@ -963,7 +961,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkeventprototyperesult"><code>Benchmark.Event.prototype.result</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2759 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2760 [&#x24C9;][1]
 
 (Mixed): The return value of the last executed listener.
 
@@ -974,7 +972,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkeventprototypetarget"><code>Benchmark.Event.prototype.target</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2767 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2768 [&#x24C9;][1]
 
 (Object): The object to which the event was originally emitted.
 
@@ -985,7 +983,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkeventprototypetimestamp"><code>Benchmark.Event.prototype.timeStamp</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2775 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2776 [&#x24C9;][1]
 
 (number): A timestamp of when the event was created *(ms)*.
 
@@ -996,7 +994,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkeventprototypetype"><code>Benchmark.Event.prototype.type</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2783 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2784 [&#x24C9;][1]
 
 (string): The event type.
 
@@ -1007,7 +1005,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarksuiteoptions"><code>Benchmark.Suite.options</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2795 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2796 [&#x24C9;][1]
 
 (Object): The default options copied by suite instances.
 
@@ -1018,7 +1016,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarksuiteoptionsname"><code>Benchmark.Suite.options.name</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2803 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2804 [&#x24C9;][1]
 
 (string): The name of the suite.
 
@@ -1029,7 +1027,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarksuiteprototypeaborted"><code>Benchmark.Suite.prototype.aborted</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2824 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2816 [&#x24C9;][1]
 
 (boolean): A flag to indicate if the suite is aborted.
 
@@ -1039,8 +1037,8 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 
 <!-- div -->
 
-<h3 id="benchmarksuiteprototypelength"><code>Benchmark.Suite.prototype.length</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2816 [&#x24C9;][1]
+<h3 id="benchmarksuiteprototypeget"><code>Benchmark.Suite.prototype.get</code></h3>
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L508 [&#x24C9;][1]
 
 (number): The number of benchmarks in the suite.
 
@@ -1051,7 +1049,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarksuiteprototyperunning"><code>Benchmark.Suite.prototype.running</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2832 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2824 [&#x24C9;][1]
 
 (boolean): A flag to indicate if the suite is running.
 
@@ -1062,7 +1060,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkoptions"><code>Benchmark.options</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2280 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2281 [&#x24C9;][1]
 
 (Object): The default options copied by benchmark instances.
 
@@ -1073,7 +1071,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkoptionsasync"><code>Benchmark.options.async</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2289 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2290 [&#x24C9;][1]
 
 (boolean): A flag to indicate that benchmark cycles will execute asynchronously by default.
 
@@ -1084,7 +1082,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkoptionsdefer"><code>Benchmark.options.defer</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2297 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2298 [&#x24C9;][1]
 
 (boolean): A flag to indicate that the benchmark clock is deferred.
 
@@ -1095,7 +1093,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkoptionsdelay"><code>Benchmark.options.delay</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2304 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2305 [&#x24C9;][1]
 
 (number): The delay between test cycles *(secs)*.
 
@@ -1106,7 +1104,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkoptionsid"><code>Benchmark.options.id</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2313 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2314 [&#x24C9;][1]
 
 (string): Displayed by `Benchmark#toString` when a `name` is not available *(auto-generated if absent)*.
 
@@ -1117,7 +1115,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkoptionsinitcount"><code>Benchmark.options.initCount</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2321 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2322 [&#x24C9;][1]
 
 (number): The default number of times to execute a test on a benchmark's first cycle.
 
@@ -1128,7 +1126,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkoptionsmaxtime"><code>Benchmark.options.maxTime</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2331 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2332 [&#x24C9;][1]
 
 (number): The maximum time a benchmark is allowed to run before finishing *(secs)*. Note: Cycle delays aren't counted toward the maximum time.
 
@@ -1139,7 +1137,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkoptionsminsamples"><code>Benchmark.options.minSamples</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2339 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2340 [&#x24C9;][1]
 
 (number): The minimum sample size required to perform statistical analysis.
 
@@ -1150,7 +1148,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkoptionsmintime"><code>Benchmark.options.minTime</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2347 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2348 [&#x24C9;][1]
 
 (number): The time needed to reduce the percent uncertainty of measurement to `1`% *(secs)*.
 
@@ -1161,7 +1159,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkoptionsname"><code>Benchmark.options.name</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2355 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2356 [&#x24C9;][1]
 
 (string): The name of the benchmark.
 
@@ -1172,7 +1170,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarksupport"><code>Benchmark.support</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L226 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L199 [&#x24C9;][1]
 
 (Object): An object used to flag environments/features.
 
@@ -1183,7 +1181,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkprototypeaborted"><code>Benchmark.prototype.aborted</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2483 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2484 [&#x24C9;][1]
 
 (boolean): A flag to indicate if the benchmark is aborted.
 
@@ -1194,7 +1192,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarksupportbrowser"><code>Benchmark.support.browser</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L236 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L209 [&#x24C9;][1]
 
 (boolean): Detect if running in a browser environment.
 
@@ -1205,7 +1203,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkprototypecompiled"><code>Benchmark.prototype.compiled</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2459 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2460 [&#x24C9;][1]
 
 (Function, string): The compiled test function.
 
@@ -1216,7 +1214,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkprototypecount"><code>Benchmark.prototype.count</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2435 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2436 [&#x24C9;][1]
 
 (number): The number of times a test was executed.
 
@@ -1227,7 +1225,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkprototypecycles"><code>Benchmark.prototype.cycles</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2443 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2444 [&#x24C9;][1]
 
 (number): The number of cycles performed while benchmarking.
 
@@ -1238,7 +1236,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarksupportdecompilation"><code>Benchmark.support.decompilation</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L253 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L226 [&#x24C9;][1]
 
 (boolean): Detect if function decompilation is support.
 
@@ -1248,8 +1246,19 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 
 <!-- div -->
 
+<h3 id="benchmarkprototypeerror"><code>Benchmark.prototype.error</code></h3>
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2468 [&#x24C9;][1]
+
+(Object): The error object if the test failed.
+
+---
+
+<!-- /div -->
+
+<!-- div -->
+
 <h3 id="benchmarkprototypefn"><code>Benchmark.prototype.fn</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2475 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2476 [&#x24C9;][1]
 
 (Function, string): The test to benchmark.
 
@@ -1259,8 +1268,19 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 
 <!-- div -->
 
+<h3 id="benchmarkprototypehz"><code>Benchmark.prototype.hz</code></h3>
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2452 [&#x24C9;][1]
+
+(number): The number of executions per second.
+
+---
+
+<!-- /div -->
+
+<!-- div -->
+
 <h3 id="benchmarkprototypesetup"><code>Benchmark.prototype.setup</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2554 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2555 [&#x24C9;][1]
 
 (Function, string): Compiled into the test and executed immediately **before** the test loop.
 
@@ -1327,7 +1347,7 @@ var a = 0;
 <!-- div -->
 
 <h3 id="benchmarkprototypestats"><code>Benchmark.prototype.stats</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2570 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2571 [&#x24C9;][1]
 
 (Object): An object of stats including mean, margin or error, and standard deviation.
 
@@ -1338,7 +1358,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkprototypeteardown"><code>Benchmark.prototype.teardown</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2562 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2563 [&#x24C9;][1]
 
 (Function, string): Compiled into the test and executed immediately **after** the test loop.
 
@@ -1349,7 +1369,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarksupporttimeout"><code>Benchmark.support.timeout</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L244 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L217 [&#x24C9;][1]
 
 (boolean): Detect if the Timers API exists.
 
@@ -1360,7 +1380,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkversion"><code>Benchmark.version</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2413 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2414 [&#x24C9;][1]
 
 (string): The semantic version number.
 
@@ -1370,30 +1390,8 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 
 <!-- div -->
 
-<h3 id="benchmarkprototypeerror"><code>Benchmark.prototype.error</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2467 [&#x24C9;][1]
-
-(Object): The error object if the test failed.
-
----
-
-<!-- /div -->
-
-<!-- div -->
-
-<h3 id="benchmarkprototypehz"><code>Benchmark.prototype.hz</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2451 [&#x24C9;][1]
-
-(number): The number of executions per second.
-
----
-
-<!-- /div -->
-
-<!-- div -->
-
 <h3 id="benchmarkprototyperunning"><code>Benchmark.prototype.running</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2491 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2492 [&#x24C9;][1]
 
 (boolean): A flag to indicate if the benchmark is running.
 
@@ -1404,7 +1402,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmarkprototypetimes"><code>Benchmark.prototype.times</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2635 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2636 [&#x24C9;][1]
 
 (Object): An object of timing data including cycle, elapsed, period, start, and stop.
 
@@ -1415,7 +1413,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmark-statsdeviation"><code>Benchmark#stats.deviation</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2602 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2603 [&#x24C9;][1]
 
 (number): The sample standard deviation.
 
@@ -1426,7 +1424,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmark-statsmean"><code>Benchmark#stats.mean</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2610 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2611 [&#x24C9;][1]
 
 (number): The sample arithmetic mean *(secs)*.
 
@@ -1437,7 +1435,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmark-statsmoe"><code>Benchmark#stats.moe</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2578 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2579 [&#x24C9;][1]
 
 (number): The margin of error.
 
@@ -1448,7 +1446,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmark-statsrme"><code>Benchmark#stats.rme</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2586 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2587 [&#x24C9;][1]
 
 (number): The relative margin of error *(expressed as a percentage of the mean)*.
 
@@ -1459,7 +1457,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmark-statssample"><code>Benchmark#stats.sample</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2618 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2619 [&#x24C9;][1]
 
 (Array): The array of sampled periods.
 
@@ -1470,7 +1468,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmark-statssem"><code>Benchmark#stats.sem</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2594 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2595 [&#x24C9;][1]
 
 (number): The standard error of the mean.
 
@@ -1481,7 +1479,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmark-statsvariance"><code>Benchmark#stats.variance</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2626 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2627 [&#x24C9;][1]
 
 (number): The sample variance.
 
@@ -1492,7 +1490,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmark-timescycle"><code>Benchmark#times.cycle</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2643 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2644 [&#x24C9;][1]
 
 (number): The time taken to complete the last cycle *(secs)*.
 
@@ -1503,7 +1501,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmark-timeselapsed"><code>Benchmark#times.elapsed</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2651 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2652 [&#x24C9;][1]
 
 (number): The time taken to complete the benchmark *(secs)*.
 
@@ -1514,7 +1512,7 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmark-timesperiod"><code>Benchmark#times.period</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2659 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2660 [&#x24C9;][1]
 
 (number): The time taken to execute the test once *(secs)*.
 
@@ -1525,20 +1523,9 @@ https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f0
 <!-- div -->
 
 <h3 id="benchmark-timestimestamp"><code>Benchmark#times.timeStamp</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L2667 [&#x24C9;][1]
+https://github.com/satisfactory-dev/benchmark.js/blob/2c1ca1b20c71c22143012b49e6edb2d3303c3a4f/benchmark.js#L2668 [&#x24C9;][1]
 
 (number): A timestamp of when the benchmark started *(ms)*.
-
----
-
-<!-- /div -->
-
-<!-- div -->
-
-<h3 id="result"><code>result</code></h3>
-https://github.com/satisfactory-dev/benchmark.js/blob/8cc032b70962810a85c3ef06f08012ba909f6fab/benchmark.js#L842 [&#x24C9;][1]
-
-
 
 ---
 
