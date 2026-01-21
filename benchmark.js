@@ -481,6 +481,143 @@
 
     class Benchmark {
       /**
+       * The default options copied by benchmark instances.
+       *
+       * @type {Object}
+       */
+      static options = {
+        /**
+         * A flag to indicate that benchmark cycles will execute asynchronously
+         * by default.
+         *
+         * @memberOf Benchmark.options
+         * @type boolean
+         */
+        'async': false,
+
+        /**
+         * A flag to indicate that the benchmark clock is deferred.
+         *
+         * @memberOf Benchmark.options
+         * @type boolean
+         */
+        'defer': false,
+
+        /**
+         * The delay between test cycles (secs).
+         * @memberOf Benchmark.options
+         * @type number
+         */
+        'delay': 0.005,
+
+        /**
+         * Displayed by `Benchmark#toString` when a `name` is not available
+         * (auto-generated if absent).
+         *
+         * @memberOf Benchmark.options
+         * @type string
+         */
+        'id': undefined,
+
+        /**
+         * The default number of times to execute a test on a benchmark's first cycle.
+         *
+         * @memberOf Benchmark.options
+         * @type number
+         */
+        'initCount': 1,
+
+        /**
+         * The maximum time a benchmark is allowed to run before finishing (secs).
+         *
+         * Note: Cycle delays aren't counted toward the maximum time.
+         *
+         * @memberOf Benchmark.options
+         * @type number
+         */
+        'maxTime': 5,
+
+        /**
+         * The minimum sample size required to perform statistical analysis.
+         *
+         * @memberOf Benchmark.options
+         * @type number
+         */
+        'minSamples': 5,
+
+        /**
+         * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
+         *
+         * @memberOf Benchmark.options
+         * @type number
+         */
+        'minTime': 0,
+
+        /**
+         * The name of the benchmark.
+         *
+         * @memberOf Benchmark.options
+         * @type string
+         */
+        'name': undefined,
+
+        /**
+         * An event listener called when the benchmark is aborted.
+         *
+         * @memberOf Benchmark.options
+         * @type Function
+         */
+        'onAbort': undefined,
+
+        /**
+         * An event listener called when the benchmark completes running.
+         *
+         * @memberOf Benchmark.options
+         * @type Function
+         */
+        'onComplete': undefined,
+
+        /**
+         * An event listener called after each run cycle.
+         *
+         * @memberOf Benchmark.options
+         * @type Function
+         */
+        'onCycle': undefined,
+
+        /**
+         * An event listener called when a test errors.
+         *
+         * @memberOf Benchmark.options
+         * @type Function
+         */
+        'onError': undefined,
+
+        /**
+         * An event listener called when the benchmark is reset.
+         *
+         * @memberOf Benchmark.options
+         * @type Function
+         */
+        'onReset': undefined,
+
+        /**
+         * An event listener called when the benchmark starts running.
+         *
+         * @memberOf Benchmark.options
+         * @type Function
+         */
+        'onStart': undefined
+      };
+
+      /**
+       * The semantic version number.
+       *
+       * @type string
+       */
+      static version = '2.1.4';
+
+      /**
        * The Benchmark constructor.
        *
        * @param {string} name A name to identify the benchmark.
@@ -2269,157 +2406,6 @@
     }
 
     /*------------------------------------------------------------------------*/
-
-    // Firefox 1 erroneously defines variable and argument names of functions on
-    // the function itself as non-configurable properties with `undefined` values.
-    // The bugginess continues as the `Benchmark` constructor has an argument
-    // named `options` and Firefox 1 will not assign a value to `Benchmark.options`,
-    // making it non-writable in the process, unless it is the first property
-    // assigned by for-in loop of `root.Object.assign()`.
-    root.Object.assign(Benchmark, {
-
-      /**
-       * The default options copied by benchmark instances.
-       *
-       * @static
-       * @memberOf Benchmark
-       * @type Object
-       */
-      'options': {
-
-        /**
-         * A flag to indicate that benchmark cycles will execute asynchronously
-         * by default.
-         *
-         * @memberOf Benchmark.options
-         * @type boolean
-         */
-        'async': false,
-
-        /**
-         * A flag to indicate that the benchmark clock is deferred.
-         *
-         * @memberOf Benchmark.options
-         * @type boolean
-         */
-        'defer': false,
-
-        /**
-         * The delay between test cycles (secs).
-         * @memberOf Benchmark.options
-         * @type number
-         */
-        'delay': 0.005,
-
-        /**
-         * Displayed by `Benchmark#toString` when a `name` is not available
-         * (auto-generated if absent).
-         *
-         * @memberOf Benchmark.options
-         * @type string
-         */
-        'id': undefined,
-
-        /**
-         * The default number of times to execute a test on a benchmark's first cycle.
-         *
-         * @memberOf Benchmark.options
-         * @type number
-         */
-        'initCount': 1,
-
-        /**
-         * The maximum time a benchmark is allowed to run before finishing (secs).
-         *
-         * Note: Cycle delays aren't counted toward the maximum time.
-         *
-         * @memberOf Benchmark.options
-         * @type number
-         */
-        'maxTime': 5,
-
-        /**
-         * The minimum sample size required to perform statistical analysis.
-         *
-         * @memberOf Benchmark.options
-         * @type number
-         */
-        'minSamples': 5,
-
-        /**
-         * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
-         *
-         * @memberOf Benchmark.options
-         * @type number
-         */
-        'minTime': 0,
-
-        /**
-         * The name of the benchmark.
-         *
-         * @memberOf Benchmark.options
-         * @type string
-         */
-        'name': undefined,
-
-        /**
-         * An event listener called when the benchmark is aborted.
-         *
-         * @memberOf Benchmark.options
-         * @type Function
-         */
-        'onAbort': undefined,
-
-        /**
-         * An event listener called when the benchmark completes running.
-         *
-         * @memberOf Benchmark.options
-         * @type Function
-         */
-        'onComplete': undefined,
-
-        /**
-         * An event listener called after each run cycle.
-         *
-         * @memberOf Benchmark.options
-         * @type Function
-         */
-        'onCycle': undefined,
-
-        /**
-         * An event listener called when a test errors.
-         *
-         * @memberOf Benchmark.options
-         * @type Function
-         */
-        'onError': undefined,
-
-        /**
-         * An event listener called when the benchmark is reset.
-         *
-         * @memberOf Benchmark.options
-         * @type Function
-         */
-        'onReset': undefined,
-
-        /**
-         * An event listener called when the benchmark starts running.
-         *
-         * @memberOf Benchmark.options
-         * @type Function
-         */
-        'onStart': undefined
-      },
-
-      /**
-       * The semantic version number.
-       *
-       * @static
-       * @memberOf Benchmark
-       * @type string
-       */
-      'version': '2.1.4'
-    });
 
     root.Object.assign(Benchmark, {
       'filter': filter,
