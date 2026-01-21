@@ -472,23 +472,23 @@
        */
       type;
 
-    /**
-     * The Event constructor.
-     *
-     * @constructor
-     * @memberOf Benchmark
-     * @param {Object|string} type The event type.
-     */
+      /**
+       * The Event constructor.
+       *
+       * @constructor
+       * @memberOf Benchmark
+       * @param {Object|string} type The event type.
+       */
       constructor(type) {
-      root.Object.assign(this, {
-          timeStamp: +root.Date.now(),
-          ...(
-            typeof type === 'string'
-              ? {type}
-              : type
-          ),
-      });
-    }
+        root.Object.assign(this, {
+            timeStamp: +root.Date.now(),
+            ...(
+              typeof type === 'string'
+                ? {type}
+                : type
+            ),
+        });
+      }
     }
 
     /**
