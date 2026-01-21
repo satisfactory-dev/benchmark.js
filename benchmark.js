@@ -479,10 +479,10 @@
 
     /*------------------------------------------------------------------------*/
 
+    class Benchmark {
     /**
      * The Benchmark constructor.
      *
-     * @constructor
      * @param {string} name A name to identify the benchmark.
      * @param {Function|string} fn The test to benchmark.
      * @param {Object} [options={}] Options object.
@@ -553,7 +553,7 @@
      *   'My name is '.concat(this.name); // "My name is foo"
      * });
      */
-    function Benchmark(name, fn, options) {
+      constructor(name, fn, options) {
       var bench = this;
 
       // Juggle arguments.
@@ -583,6 +583,7 @@
 
       bench.stats = cloneDeep(bench.stats);
       bench.times = cloneDeep(bench.times);
+    }
     }
 
     class Deferred {
