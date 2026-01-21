@@ -614,6 +614,8 @@
        * The semantic version number.
        *
        * @type string
+       *
+       * @todo replace with json-derived version built from npm version/git hash
        */
       static version = '2.1.4';
 
