@@ -9,9 +9,6 @@
 ;(function() {
   'use strict';
 
-  /** Used as a safe reference for `undefined` in pre ES5 environments. */
-  var undefined;
-
   /** Used to determine if values are of the language type Object. */
   var objectTypes = {
     'function': true,
