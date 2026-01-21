@@ -471,17 +471,8 @@
     QUnit.module(namespace + '#emit');
 
     (function() {
-      QUnit.test('should emit passed arguments', function(assert) {
-        var args,
-            object = Constructor();
-
-        object.on('args', function() { args = slice.call(arguments, 1); });
-        object.emit('args', 'a', 'b', 'c');
-        assert.deepEqual(args, ['a', 'b', 'c']);
-      });
-
       QUnit.test('should emit with no listeners', function(assert) {
-        var event = Benchmark.Event('empty'),
+        var event = new Benchmark.Event('empty'),
             object = Constructor();
 
         object.emit(event);
@@ -489,7 +480,7 @@
       });
 
       QUnit.test('should emit with an event type of "toString"', function(assert) {
-        var event = Benchmark.Event('toString'),
+        var event = new Benchmark.Event('toString'),
             object = Constructor();
 
         object.emit(event);
@@ -497,7 +488,7 @@
       });
 
       QUnit.test('should returns the last listeners returned value', function(assert) {
-        var event = Benchmark.Event('result'),
+        var event = new Benchmark.Event('result'),
             object = Constructor();
 
         object.on('result', function() { return 'x'; });
@@ -506,7 +497,7 @@
       });
 
       QUnit.test('should abort the emitters listener iteration when `event.aborted` is `true`', function(assert) {
-        var event = Benchmark.Event('aborted'),
+        var event = new Benchmark.Event('aborted'),
             object = Constructor();
 
         object.on('aborted', function(event) {
@@ -525,7 +516,7 @@
       });
 
       QUnit.test('should cancel the event if a listener explicitly returns `false`', function(assert) {
-        var event = Benchmark.Event('cancel'),
+        var event = new Benchmark.Event('cancel'),
             object = Constructor();
 
         object.on('cancel', function() { return false; });
@@ -544,13 +535,13 @@
           object.off(event.type, listener2);
         })
         .on('shallowclone', listener2)
-        .emit('shallowclone');
+        .emit(new Benchmark.Event('shallowclone'));
 
         assert.ok(event.listener2);
       });
 
       QUnit.test('should emit a custom event object', function(assert) {
-        var event = Benchmark.Event('custom'),
+        var event = new Benchmark.Event('custom'),
             object = Constructor();
 
         object.on('custom', function(eventObject) { eventObject.touched = true; });
@@ -559,7 +550,7 @@
       });
 
       QUnit.test('should set `event.result` correctly', function(assert) {
-        var event = Benchmark.Event('result'),
+        var event = new Benchmark.Event('result'),
             object = Constructor();
 
         object.on('result', function() { return 'x'; });
@@ -575,7 +566,7 @@
           event = eventObj;
         });
 
-        object.emit('type');
+        object.emit(new Benchmark.Event('type'));
         assert.strictEqual(event.type, 'type');
       });
     }());

@@ -430,20 +430,14 @@
      * @param {Object|string} type The event type.
      */
     function Event(type) {
-      var event = this;
-      if (type instanceof Event) {
-        return type;
-      }
-      return (event instanceof Event)
-        ? root.Object.assign(event, {
+      root.Object.assign(this, {
           timeStamp: +root.Date.now(),
           ...(
             typeof type === 'string'
               ? {type}
               : type
           ),
-        })
-        : new Event(type);
+      });
     }
 
     /**
@@ -981,12 +975,12 @@
 
         if (async) {
           last.off('complete', getNext);
-          last.emit('complete');
+          last.emit(new Event('complete'));
         }
         // Emit "cycle" event.
         eventProps.type = 'cycle';
         eventProps.target = last;
-        cycleEvent = Event(eventProps);
+        cycleEvent = new Event(eventProps);
         options.onCycle.call(benches._benchmarks, cycleEvent);
 
         // Choose next benchmark if not exiting early.
@@ -1006,7 +1000,7 @@
         } else {
           // Emit "complete" event.
           eventProps.type = 'complete';
-          options.onComplete.call(benches, Event(eventProps));
+          options.onComplete.call(benches, new Event(eventProps));
         }
         // When used as a listener `event.aborted = true` will cancel the rest of
         // the "complete" listeners because they were already called above and when
@@ -1061,16 +1055,16 @@
         bench = (result instanceof Suite ? result.benchmarks : result)[index];
         eventProps.type = 'start';
         eventProps.target = bench;
-        options.onStart.call(benches, Event(eventProps));
+        options.onStart.call(benches, new Event(eventProps));
 
         // End early if the suite was aborted in an "onStart" listener.
         if (name == 'run' && (benches instanceof Suite) && benches.aborted) {
           // Emit "cycle" event.
           eventProps.type = 'cycle';
-          options.onCycle.call(benches.benchmarks, Event(eventProps));
+          options.onCycle.call(benches.benchmarks, new Event(eventProps));
           // Emit "complete" event.
           eventProps.type = 'complete';
-          options.onComplete.call(benches, Event(eventProps));
+          options.onComplete.call(benches, new Event(eventProps));
         }
         // Start method execution.
         else {
@@ -1129,7 +1123,7 @@
           resetting = calledBy.resetSuite;
 
       if (suite.running) {
-        event = Event('abort');
+        event = new Event('abort');
         suite.emit(event);
         if (!event.cancelled || resetting) {
           // Avoid infinite recursion.
@@ -1186,7 +1180,7 @@
     function add(name, fn, options) {
       var suite = this,
           bench = new Benchmark(name, fn, options),
-          event = Event({ 'type': 'add', 'target': bench });
+          event = new Event({ 'type': 'add', 'target': bench });
 
       if (suite.emit(event), !event.cancelled) {
         this._benchmarks.push(bench);
@@ -1256,7 +1250,7 @@
       }
       // Reset if the state has changed.
       else if ((suite.aborted || suite.running) &&
-          (suite.emit(event = Event('reset')), !event.cancelled)) {
+          (suite.emit(event = new Event('reset')), !event.cancelled)) {
         suite.aborted = suite.running = false;
         if (!aborting) {
           invoke(suite, 'reset');
@@ -1297,7 +1291,7 @@
         'onCycle': function(event) {
           var bench = event.target;
           if (bench.error) {
-            suite.emit({ 'type': 'error', 'target': bench });
+            suite.emit(new Event({ 'type': 'error', 'target': bench }));
           }
           suite.emit(event);
           event.aborted = suite.aborted;
@@ -1316,14 +1310,13 @@
      * Executes all registered listeners of the specified event type.
      *
      * @memberOf Benchmark, Benchmark.Suite
-     * @param {Object|string} type The event type or object.
+     * @param {Event} event The event type or object.
      * @param {...*} [args] Arguments to invoke the listener with.
      * @returns {*} Returns the return value of the last listener executed.
      */
-    function emit(type) {
+    function emit(event) {
       var listeners,
           object = this,
-          event = Event(type),
           events = object.events,
           args = (arguments[0] = event, arguments);
 
@@ -1461,7 +1454,7 @@
           resetting = calledBy.reset;
 
       if (bench.running) {
-        event = Event('abort');
+        event = new Event('abort');
         bench.emit(event);
         if (!event.cancelled || resetting) {
           // Avoid infinite recursion.
@@ -1640,7 +1633,7 @@
 
       // If changed emit the `reset` event and if it isn't cancelled reset the benchmark.
       if (changes.length &&
-          (bench.emit(event = Event('reset')), !event.cancelled)) {
+          (bench.emit(event = new Event('reset')), !event.cancelled)) {
         changes.forEach((data) => {
           data.destination[data.key] = data.value;
         });
@@ -2015,7 +2008,7 @@
             }
             if (type == 'abort') {
               bench.abort();
-              bench.emit('cycle');
+              bench.emit(new Event('cycle'));
             } else {
               event.currentTarget = event.target = bench;
               bench.emit(event);
@@ -2113,7 +2106,7 @@
         'args': { 'async': async },
         'queued': true,
         'onCycle': evaluate,
-        'onComplete': function() { bench.emit('complete'); }
+        'onComplete': function() { bench.emit(new Event('complete')); }
       });
     }
 
@@ -2156,7 +2149,7 @@
           bench.cycles = cycles;
         }
         if (clone.error) {
-          event = Event('error');
+          event = new Event('error');
           event.message = clone.error;
           clone.emit(event);
           if (!event.cancelled) {
@@ -2191,7 +2184,7 @@
         }
       }
       // Should we exit early?
-      event = Event('cycle');
+      event = new Event('cycle');
       clone.emit(event);
       if (event.aborted) {
         clone.abort();
@@ -2215,7 +2208,7 @@
           runScript(uid + '=1;delete ' + uid);
         }
         // We're done.
-        clone.emit('complete');
+        clone.emit(new Event('complete'));
       }
     }
 
@@ -2237,7 +2230,7 @@
      */
     function run(options) {
       var bench = this,
-          event = Event('start');
+          event = new Event('start');
 
       // Set `running` to `false` so `reset()` won't call `abort()`.
       bench.running = false;
