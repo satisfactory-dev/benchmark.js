@@ -618,6 +618,9 @@
        * @todo replace with json-derived version built from npm version/git hash
        */
       static version = '2.1.4';
+
+      static runInContext = runInContext;
+
       /**
        * A generic `Array#filter` like method.
        *
@@ -2410,7 +2413,6 @@
     /*------------------------------------------------------------------------*/
 
     root.Object.assign(Benchmark, {
-      'runInContext': runInContext,
       'support': Support
     });
 
