@@ -46,13 +46,25 @@ npm i --save microtime
 
 ```js
 var Benchmark = require('benchmark');
+
 function microtime() {
+	const version = globalThis?.process?.version || '';
+	if (
+		version.startsWith('v21.') ||
+		version.startsWith('v22.') ||
+		version.startsWith('v23.')
+	) {
+		console.warn('microtime appears to misbehave on node 21-23');
+
+		return;
+	}
+
 	try {
 		const result = require('microtime');
 
 		console.log('using microtime');
 
-		return result;
+		return result.now;
 	} catch {
 	}
 
