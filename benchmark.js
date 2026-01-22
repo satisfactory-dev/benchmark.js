@@ -1413,292 +1413,292 @@
         bench.times = cloneDeep(bench.times);
       }
 
-    /**
-     * Aborts the benchmark without recording times.
-     *
-     * @returns {Object} The benchmark instance.
-     */
+      /**
+       * Aborts the benchmark without recording times.
+       *
+       * @returns {Object} The benchmark instance.
+       */
       abort() {
-      var event,
-          bench = this,
-          resetting = calledBy.reset;
+        var event,
+            bench = this,
+            resetting = calledBy.reset;
 
-      if (bench.running) {
-        event = new Event('abort');
-        bench.emit(event);
-        if (!event.cancelled || resetting) {
-          // Avoid infinite recursion.
-          calledBy.abort = true;
-          bench.reset();
-          delete calledBy.abort;
+        if (bench.running) {
+          event = new Event('abort');
+          bench.emit(event);
+          if (!event.cancelled || resetting) {
+            // Avoid infinite recursion.
+            calledBy.abort = true;
+            bench.reset();
+            delete calledBy.abort;
 
-          if (Support.timeout) {
-            root.clearTimeout(bench._timerId);
-            delete bench._timerId;
+            if (Support.timeout) {
+              root.clearTimeout(bench._timerId);
+              delete bench._timerId;
+            }
+            if (!resetting) {
+              bench.aborted = true;
+              bench.running = false;
+            }
           }
-          if (!resetting) {
-            bench.aborted = true;
-            bench.running = false;
-          }
         }
-      }
-      return bench;
-    }
-
-    /**
-     * Creates a new benchmark using the same test and options.
-     *
-     * @param {Object} options Options object to overwrite cloned options.
-     * @returns {Object} The new benchmark instance.
-     * @example
-     *
-     * var bizarro = bench.clone({
-     *   'name': 'doppelganger'
-     * });
-     */
-      clone(options) {
-      var bench = this,
-          result = new bench.constructor(root.Object.assign({}, bench, options));
-
-      // Correct the `options` object.
-      result.options = root.Object.assign({}, cloneDeep(bench.options), cloneDeep(options));
-
-      for (const property of Object.keys(Benchmark.defaultValues)) {
-        if (undefined === result[property]) {
-          result[property] = cloneDeep(bench[property]);
-        }
-      }
-
-      // Copy own custom properties.
-      root.Object.entries(bench).forEach(([key, value]) => {
-        if (!has(result, key)) {
-          result[key] = cloneDeep(value);
-        }
-      });
-
-      return result;
-    }
-
-    /**
-     * Determines if a benchmark is faster than another.
-     *
-     * @param {Object} other The benchmark to compare.
-     * @returns {number} Returns `-1` if slower, `1` if faster, and `0` if indeterminate.
-     */
-      compare(other) {
-      var bench = this;
-
-      // Exit early if comparing the same benchmark.
-      if (bench == other) {
-        return 0;
-      }
-      var critical,
-          zStat,
-          sample1 = bench.stats.sample,
-          sample2 = other.stats.sample,
-          size1 = sample1.length,
-          size2 = sample2.length,
-          maxSize = root.Math.max(size1, size2),
-          minSize = root.Math.min(size1, size2),
-          u1 = getU(sample1, sample2),
-          u2 = getU(sample2, sample1),
-          u = root.Math.min(u1, u2);
-
-      function getScore(xA, sampleB) {
-        return sampleB.reduce((total, xB) => {
-          return total + (xB > xA ? 0 : xB < xA ? 1 : 0.5);
-        }, 0);
-      }
-
-      function getU(sampleA, sampleB) {
-        return sampleA.reduce((total, xA) => {
-          return total + getScore(xA, sampleB);
-        }, 0);
-      }
-
-      function getZ(u) {
-        return (u - ((size1 * size2) / 2)) / root.Math.sqrt((size1 * size2 * (size1 + size2 + 1)) / 12);
-      }
-      // Reject the null hypothesis the two samples come from the
-      // same population (i.e. have the same median) if...
-      if (size1 + size2 > 30) {
-        // ...the z-stat is greater than 1.96 or less than -1.96
-        // http://www.statisticslectures.com/topics/mannwhitneyu/
-        zStat = getZ(u);
-        return root.Math.abs(zStat) > 1.96 ? (u == u1 ? 1 : -1) : 0;
-      }
-      // ...the U value is less than or equal the critical U value.
-      critical = maxSize < 5 || minSize < 3 ? 0 : uTable[maxSize][minSize - 3];
-      return u <= critical ? (u == u1 ? 1 : -1) : 0;
-    }
-
-    /**
-     * Reset properties and abort if running.
-     *
-     * @returns {Object} The benchmark instance.
-     */
-      reset() {
-      var bench = this;
-      if (bench.running && !calledBy.abort) {
-        // No worries, `reset()` is called within `abort()`.
-        calledBy.reset = true;
-        bench.abort();
-        delete calledBy.reset;
         return bench;
       }
-      var event,
-          index = 0,
-          changes = [],
-          queue = [];
 
-      const blank = new Benchmark();
+      /**
+       * Creates a new benchmark using the same test and options.
+       *
+       * @param {Object} options Options object to overwrite cloned options.
+       * @returns {Object} The new benchmark instance.
+       * @example
+       *
+       * var bizarro = bench.clone({
+       *   'name': 'doppelganger'
+       * });
+       */
+      clone(options) {
+        var bench = this,
+            result = new bench.constructor(root.Object.assign({}, bench, options));
 
-      // A non-recursive solution to check if properties have changed.
-      // For more information see http://www.jslab.dk/articles/non.recursive.preorder.traversal.part4.
-      var data = {
-        'destination': bench,
-        'source': root.Object.assign(
-          {},
-          cloneDeep(bench.constructor.prototype),
-          cloneDeep(Benchmark.defaultValues),
-          cloneDeep(bench.options)
-        )
-      };
+        // Correct the `options` object.
+        result.options = root.Object.assign({}, cloneDeep(bench.options), cloneDeep(options));
 
-      do {
-        root.Object.entries(data.source).forEach(([key, value]) => {
-          var changed,
-              destination = data.destination,
-              currValue = destination[key];
-
-          // Skip pseudo private properties and event listeners.
-          if (/^_|^events$|^on[A-Z]/.test(key)) {
-            return;
+        for (const property of Object.keys(Benchmark.defaultValues)) {
+          if (undefined === result[property]) {
+            result[property] = cloneDeep(bench[property]);
           }
-          if ((value && typeof value == 'object')) {
-            if (root.Array.isArray(value)) {
-              // Check if an array value has changed to a non-array value.
-              if (!root.Array.isArray(currValue)) {
-                changed = true;
-                currValue = [];
-              }
-              // Check if an array has changed its length.
-              if (currValue.length != value.length) {
-                changed = true;
-                currValue = currValue.slice(0, value.length);
-                currValue.length = value.length;
-              }
-            }
-            // Check if an object has changed to a non-object value.
-            else if (!(currValue && typeof currValue == 'object')) {
-              changed = true;
-              currValue = {};
-            }
-            // Register a changed object.
-            if (changed) {
-              changes.push({ 'destination': destination, 'key': key, 'value': currValue });
-            }
-            queue.push({ 'destination': currValue, 'source': value });
-          }
-          // Register a changed primitive.
-          else if (
-            !(currValue === value) &&
-            value !== undefined
-          ) {
-            changes.push({ 'destination': destination, 'key': key, 'value': value });
+        }
+
+        // Copy own custom properties.
+        root.Object.entries(bench).forEach(([key, value]) => {
+          if (!has(result, key)) {
+            result[key] = cloneDeep(value);
           }
         });
-      }
-      while ((data = queue[index++]));
 
-      // If changed emit the `reset` event and if it isn't cancelled reset the benchmark.
-      if (changes.length &&
-          (bench.emit(event = new Event('reset')), !event.cancelled)) {
-        changes.forEach((data) => {
-          data.destination[data.key] = data.value;
-        });
+        return result;
       }
-      return bench;
-    }
 
-    /**
-     * Displays relevant benchmark information when coerced to a string.
-     *
-     * @returns {string} A string representation of the benchmark instance.
-     */
+      /**
+       * Determines if a benchmark is faster than another.
+       *
+       * @param {Object} other The benchmark to compare.
+       * @returns {number} Returns `-1` if slower, `1` if faster, and `0` if indeterminate.
+       */
+      compare(other) {
+        var bench = this;
+
+        // Exit early if comparing the same benchmark.
+        if (bench == other) {
+          return 0;
+        }
+        var critical,
+            zStat,
+            sample1 = bench.stats.sample,
+            sample2 = other.stats.sample,
+            size1 = sample1.length,
+            size2 = sample2.length,
+            maxSize = root.Math.max(size1, size2),
+            minSize = root.Math.min(size1, size2),
+            u1 = getU(sample1, sample2),
+            u2 = getU(sample2, sample1),
+            u = root.Math.min(u1, u2);
+
+        function getScore(xA, sampleB) {
+          return sampleB.reduce((total, xB) => {
+            return total + (xB > xA ? 0 : xB < xA ? 1 : 0.5);
+          }, 0);
+        }
+
+        function getU(sampleA, sampleB) {
+          return sampleA.reduce((total, xA) => {
+            return total + getScore(xA, sampleB);
+          }, 0);
+        }
+
+        function getZ(u) {
+          return (u - ((size1 * size2) / 2)) / root.Math.sqrt((size1 * size2 * (size1 + size2 + 1)) / 12);
+        }
+        // Reject the null hypothesis the two samples come from the
+        // same population (i.e. have the same median) if...
+        if (size1 + size2 > 30) {
+          // ...the z-stat is greater than 1.96 or less than -1.96
+          // http://www.statisticslectures.com/topics/mannwhitneyu/
+          zStat = getZ(u);
+          return root.Math.abs(zStat) > 1.96 ? (u == u1 ? 1 : -1) : 0;
+        }
+        // ...the U value is less than or equal the critical U value.
+        critical = maxSize < 5 || minSize < 3 ? 0 : uTable[maxSize][minSize - 3];
+        return u <= critical ? (u == u1 ? 1 : -1) : 0;
+      }
+
+      /**
+       * Reset properties and abort if running.
+       *
+       * @returns {Object} The benchmark instance.
+       */
+      reset() {
+        var bench = this;
+        if (bench.running && !calledBy.abort) {
+          // No worries, `reset()` is called within `abort()`.
+          calledBy.reset = true;
+          bench.abort();
+          delete calledBy.reset;
+          return bench;
+        }
+        var event,
+            index = 0,
+            changes = [],
+            queue = [];
+
+        const blank = new Benchmark();
+
+        // A non-recursive solution to check if properties have changed.
+        // For more information see http://www.jslab.dk/articles/non.recursive.preorder.traversal.part4.
+        var data = {
+          'destination': bench,
+          'source': root.Object.assign(
+            {},
+            cloneDeep(bench.constructor.prototype),
+            cloneDeep(Benchmark.defaultValues),
+            cloneDeep(bench.options)
+          )
+        };
+
+        do {
+          root.Object.entries(data.source).forEach(([key, value]) => {
+            var changed,
+                destination = data.destination,
+                currValue = destination[key];
+
+            // Skip pseudo private properties and event listeners.
+            if (/^_|^events$|^on[A-Z]/.test(key)) {
+              return;
+            }
+            if ((value && typeof value == 'object')) {
+              if (root.Array.isArray(value)) {
+                // Check if an array value has changed to a non-array value.
+                if (!root.Array.isArray(currValue)) {
+                  changed = true;
+                  currValue = [];
+                }
+                // Check if an array has changed its length.
+                if (currValue.length != value.length) {
+                  changed = true;
+                  currValue = currValue.slice(0, value.length);
+                  currValue.length = value.length;
+                }
+              }
+              // Check if an object has changed to a non-object value.
+              else if (!(currValue && typeof currValue == 'object')) {
+                changed = true;
+                currValue = {};
+              }
+              // Register a changed object.
+              if (changed) {
+                changes.push({ 'destination': destination, 'key': key, 'value': currValue });
+              }
+              queue.push({ 'destination': currValue, 'source': value });
+            }
+            // Register a changed primitive.
+            else if (
+              !(currValue === value) &&
+              value !== undefined
+            ) {
+              changes.push({ 'destination': destination, 'key': key, 'value': value });
+            }
+          });
+        }
+        while ((data = queue[index++]));
+
+        // If changed emit the `reset` event and if it isn't cancelled reset the benchmark.
+        if (changes.length &&
+            (bench.emit(event = new Event('reset')), !event.cancelled)) {
+          changes.forEach((data) => {
+            data.destination[data.key] = data.value;
+          });
+        }
+        return bench;
+      }
+
+      /**
+       * Displays relevant benchmark information when coerced to a string.
+       *
+       * @returns {string} A string representation of the benchmark instance.
+       */
       toString() {
-      var bench = this,
-          error = bench.error,
-          hz = bench.hz,
-          id = bench.id,
-          stats = bench.stats,
-          size = stats.sample.length,
-          pm = '\xb1',
-          result = bench.name || (root.isNaN(id) ? id : '<Test #' + id + '>');
+        var bench = this,
+            error = bench.error,
+            hz = bench.hz,
+            id = bench.id,
+            stats = bench.stats,
+            size = stats.sample.length,
+            pm = '\xb1',
+            result = bench.name || (root.isNaN(id) ? id : '<Test #' + id + '>');
 
-      if (error) {
-        var errorStr;
-        if (!(error && (typeof error === 'object' || typeof error === 'function'))) {
-          errorStr = root.String(error);
-        } else if (!(error instanceof Error)) {
-          errorStr = Benchmark.join(error);
-        } else {
-          // Error#name and Error#message properties are non-enumerable.
-          errorStr = Benchmark.join(root.Object.assign({ 'name': error.name, 'message': error.message }, error));
-        }
-        result += ': ' + errorStr;
-      }
-      else {
-        result += ' x ' + Benchmark.formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) + ' ops/sec ' + pm +
-          stats.rme.toFixed(2) + '% (' + size + ' run' + (size == 1 ? '' : 's') + ' sampled)';
-      }
-      return result;
-    }
-
-    /**
-     * Runs the benchmark.
-     *
-     * @param {Object} [options={}] Options object.
-     * @returns {Object} The benchmark instance.
-     * @example
-     *
-     * // basic usage
-     * bench.run();
-     *
-     * // or with options
-     * bench.run({ 'async': true });
-     */
-      run(options) {
-      var bench = this,
-          event = new Event('start');
-
-      // Set `running` to `false` so `reset()` won't call `abort()`.
-      bench.running = false;
-      bench.reset();
-      bench.running = true;
-
-      bench.count = bench.initCount;
-      bench.times.timeStamp = (+root.Date.now());
-      bench.emit(event);
-
-      if (!event.cancelled) {
-        options = { 'async': ((options = options && options.async) == null ? bench.async : options) && Support.timeout };
-
-        // For clones created within `compute()`.
-        if (bench._original) {
-          if (bench.defer) {
-            new Deferred(bench);
+        if (error) {
+          var errorStr;
+          if (!(error && (typeof error === 'object' || typeof error === 'function'))) {
+            errorStr = root.String(error);
+          } else if (!(error instanceof Error)) {
+            errorStr = Benchmark.join(error);
           } else {
-            cycle(bench, options);
+            // Error#name and Error#message properties are non-enumerable.
+            errorStr = Benchmark.join(root.Object.assign({ 'name': error.name, 'message': error.message }, error));
+          }
+          result += ': ' + errorStr;
+        }
+        else {
+          result += ' x ' + Benchmark.formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) + ' ops/sec ' + pm +
+            stats.rme.toFixed(2) + '% (' + size + ' run' + (size == 1 ? '' : 's') + ' sampled)';
+        }
+        return result;
+      }
+
+      /**
+       * Runs the benchmark.
+       *
+       * @param {Object} [options={}] Options object.
+       * @returns {Object} The benchmark instance.
+       * @example
+       *
+       * // basic usage
+       * bench.run();
+       *
+       * // or with options
+       * bench.run({ 'async': true });
+       */
+      run(options) {
+        var bench = this,
+            event = new Event('start');
+
+        // Set `running` to `false` so `reset()` won't call `abort()`.
+        bench.running = false;
+        bench.reset();
+        bench.running = true;
+
+        bench.count = bench.initCount;
+        bench.times.timeStamp = (+root.Date.now());
+        bench.emit(event);
+
+        if (!event.cancelled) {
+          options = { 'async': ((options = options && options.async) == null ? bench.async : options) && Support.timeout };
+
+          // For clones created within `compute()`.
+          if (bench._original) {
+            if (bench.defer) {
+              new Deferred(bench);
+            } else {
+              cycle(bench, options);
+            }
+          }
+          // For original benchmarks.
+          else {
+            compute(bench, options);
           }
         }
-        // For original benchmarks.
-        else {
-          compute(bench, options);
-        }
+        return bench;
       }
-      return bench;
-    }
     }
 
     class Deferred {
