@@ -88,14 +88,14 @@
       assert.ok(timer !== undefined);
       assert.equal(timer, Benchmark.Timer.timer);
       if (undefined === maybe_microtime) {
-        if (process && process.hrtime) {
-          assert.equal(timer.ns, process.hrtime);
+        if (globalThis?.process?.hrtime) {
+          assert.equal(timer.ns, globalThis.process.hrtime);
         } else {
-          assert.equal(timer.ns, performance.now);
+          assert.equal(timer.ns, performance);
         }
       } else {
-        if (process && process.hrtime) {
-          assert.equal(timer.ns, process.hrtime);
+        if (globalThis?.process?.hrtime) {
+          assert.equal(timer.ns, globalThis.process.hrtime);
           Benchmark.Timer.changeContext({
             usTimer: maybe_microtime,
             allowHrtime: false,
@@ -103,7 +103,7 @@
           assert.notEqual(timer, Benchmark.Timer.timer);
           assert.equal(Benchmark.Timer.timer.ns, maybe_microtime);
         } else {
-        assert.notEqual(timer.ns, performance.now);
+          assert.notEqual(timer.ns, performance);
         }
       }
       Benchmark.Timer.changeContext();

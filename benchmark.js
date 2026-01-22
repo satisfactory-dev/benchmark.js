@@ -2359,8 +2359,7 @@
 
   /*------------------------------------------------------------------------*/
 
-    var
-        templateData = {};
+  const templateData = {};
 
   /**
    * Clocks the time taken to execute a test per cycle (secs).
@@ -2532,23 +2531,23 @@
     return clock.apply(null, [clone, timer]);
   }
 
-    /**
-     * Interpolates a given template string.
-     */
-    function interpolate(string) {
-      function tagged(_, string) {
-        let result = string;
+  /**
+   * Interpolates a given template string.
+   */
+  function interpolate(string) {
+    function tagged(_, string) {
+      let result = string;
 
-        for (const [key, value] of root.Object.entries(templateData)) {
-          result = result.replaceAll(`\${${key}}`, value);
-        }
-
-        return result;
+      for (const [key, value] of root.Object.entries(templateData)) {
+        result = result.replaceAll(`\${${key}}`, value);
       }
 
-      // Replaces all occurrences of `#` with a unique number and template tokens with content.
-      return tagged`${string.replace(/\#/g, /\d+/.exec(templateData.uid))}`;
+      return result;
     }
+
+    // Replaces all occurrences of `#` with a unique number and template tokens with content.
+    return tagged`${string.replace(/\#/g, /\d+/.exec(templateData.uid))}`;
+  }
 
   /*------------------------------------------------------------------------*/
 
