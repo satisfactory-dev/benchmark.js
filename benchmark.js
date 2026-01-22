@@ -490,138 +490,136 @@
      * @abstract
      */
     class EventTarget {
-    /**
-     * Executes all registered listeners of the specified event type.
-     *
-     * @param {Event} event The event type or object.
-     * @param {...*} [args] Arguments to invoke the listener with.
-     * @returns {*} Returns the return value of the last listener executed.
-     */
+      /**
+       * Executes all registered listeners of the specified event type.
+       *
+       * @param {Event} event The event type or object.
+       * @param {...*} [args] Arguments to invoke the listener with.
+       * @returns {*} Returns the return value of the last listener executed.
+       */
       emit(event) {
-      var listeners,
-          object = this,
-          events = object.events,
-          args = (arguments[0] = event, arguments);
+        var listeners,
+            object = this,
+            events = object.events,
+            args = (arguments[0] = event, arguments);
 
-      event.currentTarget || (event.currentTarget = object);
-      event.target || (event.target = object);
-      delete event.result;
+        event.currentTarget || (event.currentTarget = object);
+        event.target || (event.target = object);
+        delete event.result;
 
-      if (events && (listeners = has(events, event.type) && events[event.type])) {
-        for (const listener of [...listeners]) {
-          if ((event.result = listener.apply(object, args)) === false) {
-            event.cancelled = true;
-          }
-          if (event.aborted) {
-            break;
+        if (events && (listeners = has(events, event.type) && events[event.type])) {
+          for (const listener of [...listeners]) {
+            if ((event.result = listener.apply(object, args)) === false) {
+              event.cancelled = true;
+            }
+            if (event.aborted) {
+              break;
+            }
           }
         }
+        return event.result;
       }
-      return event.result;
-    }
 
-    /**
-     * Returns an array of event listeners for a given type that can be manipulated
-     * to add or remove listeners.
-     *
-     * @param {string} type The event type.
-     * @returns {Array} The listeners array.
-     */
+      /**
+       * Returns an array of event listeners for a given type that can be manipulated
+       * to add or remove listeners.
+       *
+       * @param {string} type The event type.
+       * @returns {Array} The listeners array.
+       */
       listeners(type) {
-      var object = this,
-          events = object.events || (object.events = {});
+        var object = this,
+            events = object.events || (object.events = {});
 
-      return has(events, type) ? events[type] : (events[type] = []);
-    }
+        return has(events, type) ? events[type] : (events[type] = []);
+      }
 
-    /**
-     * Unregisters a listener for the specified event type(s),
-     * or unregisters all listeners for the specified event type(s),
-     * or unregisters all listeners for all event types.
-     *
-     * @param {string} [type] The event type.
-     * @param {Function} [listener] The function to unregister.
-     * @returns {Object} The current instance.
-     * @example
-     *
-     * // unregister a listener for an event type
-     * bench.off('cycle', listener);
-     *
-     * // unregister a listener for multiple event types
-     * bench.off('start cycle', listener);
-     *
-     * // unregister all listeners for an event type
-     * bench.off('cycle');
-     *
-     * // unregister all listeners for multiple event types
-     * bench.off('start cycle complete');
-     *
-     * // unregister all listeners for all event types
-     * bench.off();
-     */
+      /**
+       * Unregisters a listener for the specified event type(s),
+       * or unregisters all listeners for the specified event type(s),
+       * or unregisters all listeners for all event types.
+       *
+       * @param {string} [type] The event type.
+       * @param {Function} [listener] The function to unregister.
+       * @returns {Object} The current instance.
+       * @example
+       *
+       * // unregister a listener for an event type
+       * bench.off('cycle', listener);
+       *
+       * // unregister a listener for multiple event types
+       * bench.off('start cycle', listener);
+       *
+       * // unregister all listeners for an event type
+       * bench.off('cycle');
+       *
+       * // unregister all listeners for multiple event types
+       * bench.off('start cycle complete');
+       *
+       * // unregister all listeners for all event types
+       * bench.off();
+       */
       off(type, listener) {
-      var object = this,
-          events = object.events;
+        var object = this,
+            events = object.events;
 
-      if (!events) {
+        if (!events) {
+          return object;
+        }
+
+        const loopOver = type ? type.split(' ') : events;
+
+        const entries = Array.isArray(loopOver)
+          ? loopOver.map((value, key) => [key, value])
+          : root.Object.entries(loopOver);
+
+        entries.forEach(function([type, listeners]) {
+          var index;
+          if (typeof listeners == 'string') {
+            type = listeners;
+            listeners = has(events, type) && events[type];
+          }
+          if (listeners) {
+            if (listener) {
+              index = listeners.indexOf(listener);
+              if (index > -1) {
+                listeners.splice(index, 1);
+              }
+            } else {
+              listeners.length = 0;
+            }
+          }
+        });
         return object;
       }
 
-      const loopOver = type ? type.split(' ') : events;
-
-      const entries = Array.isArray(loopOver)
-        ? loopOver.map((value, key) => [key, value])
-        : root.Object.entries(loopOver);
-
-      entries.forEach(function([type, listeners]) {
-        var index;
-        if (typeof listeners == 'string') {
-          type = listeners;
-          listeners = has(events, type) && events[type];
-        }
-        if (listeners) {
-          if (listener) {
-            index = listeners.indexOf(listener);
-            if (index > -1) {
-              listeners.splice(index, 1);
-            }
-          } else {
-            listeners.length = 0;
-          }
-        }
-      });
-      return object;
-    }
-
-    /**
-     * Registers a listener for the specified event type(s).
-     *
-     * @param {string} type The event type.
-     * @param {Function} listener The function to register.
-     * @returns {Object} The current instance.
-     * @example
-     *
-     * // register a listener for an event type
-     * bench.on('cycle', listener);
-     *
-     * // register a listener for multiple event types
-     * bench.on('start cycle', listener);
-     */
+      /**
+       * Registers a listener for the specified event type(s).
+       *
+       * @param {string} type The event type.
+       * @param {Function} listener The function to register.
+       * @returns {Object} The current instance.
+       * @example
+       *
+       * // register a listener for an event type
+       * bench.on('cycle', listener);
+       *
+       * // register a listener for multiple event types
+       * bench.on('start cycle', listener);
+       */
       on(type, listener) {
-      var object = this,
-          events = object.events || (object.events = {});
+        var object = this,
+            events = object.events || (object.events = {});
 
-      type.split(' ').forEach((type) => {
-        (has(events, type)
-          ? events[type]
-          : (events[type] = [])
-        ).push(listener);
-      });
-      return object;
+        type.split(' ').forEach((type) => {
+          (has(events, type)
+            ? events[type]
+            : (events[type] = [])
+          ).push(listener);
+        });
+        return object;
+      }
     }
-
-    }
-
 
     /*------------------------------------------------------------------------*/
 
