@@ -1835,19 +1835,19 @@
     }
 
     class Suite extends EventTarget {
-    /**
-     * The default options copied by suite instances.
-     *
+      /**
+       * The default options copied by suite instances.
+       *
        * @type {Object}
-     */
+       */
       static options = {
 
-      /**
-       * The name of the suite.
-       *
+        /**
+         * The name of the suite.
+         *
          * @type {string}
-       */
-      'name': undefined
+         */
+        'name': undefined
       }
 
       /**
