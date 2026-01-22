@@ -87,7 +87,11 @@
       const timer = Benchmark.Timer.timer;
       assert.ok(timer !== undefined);
       if (undefined === maybe_microtime) {
-        assert.equal(timer.ns, performance.now);
+        if (process && process.hrtime) {
+          assert.equal(timer.ns, process.hrtime);
+        } else {
+          assert.equal(timer.ns, performance.now);
+        }
       } else {
         assert.notEqual(timer.ns, performance.now);
       }
