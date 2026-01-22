@@ -620,24 +620,24 @@
         return object;
       }
 
-    /**
-     * Converts a Suite or Suite-like object/array to an array of values
-     *
-     * @param {(unknown[])|Suite|Object<number|'length', unknown>} array
-     *
-     * @returns {(unknown[])|(Benchmark[])}
-     */
+      /**
+       * Converts a Suite or Suite-like object/array to an array of values
+       *
+       * @param {(unknown[])|Suite|Object<number|'length', unknown>} array
+       *
+       * @returns {(unknown[])|(Benchmark[])}
+       */
       static asArray(array) {
-      if (root.Array.isArray(array)) {
-        return [...array];
-      } else if (array instanceof Suite) {
-        return array.benchmarks;
-      }
+        if (root.Array.isArray(array)) {
+          return [...array];
+        } else if (array instanceof Suite) {
+          return array.benchmarks;
+        }
 
-      return root.Object.keys(array || root.Object.create(null))
-        .filter((maybe) => /^\d+$/.test(maybe))
-        .map((key) => array[key]);
-    }
+        return root.Object.keys(array || root.Object.create(null))
+          .filter((maybe) => /^\d+$/.test(maybe))
+          .map((key) => array[key]);
+      }
     }
 
     /*------------------------------------------------------------------------*/
