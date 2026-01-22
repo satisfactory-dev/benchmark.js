@@ -990,6 +990,18 @@
         return Support;
       }
 
+      static get Deferred() {
+        return Deferred;
+      }
+
+      static get Event() {
+        return Event;
+      }
+
+      static get Suite() {
+        return Suite;
+      }
+
       /**
        * The default values for Benchmark instance properties
        *
@@ -2691,13 +2703,6 @@
     }
 
     /*------------------------------------------------------------------------*/
-
-    // Expose Deferred, Event, and Suite.
-    root.Object.assign(Benchmark, {
-      'Deferred': Deferred,
-      'Event': Event,
-      'Suite': Suite
-    });
 
     return Benchmark;
   }
