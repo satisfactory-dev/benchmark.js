@@ -418,41 +418,178 @@
     highestDefaultTimer = performance,
     usTimer = undefined,
   ) {
-    /**
-     * Timer object used by `clock()` and `Deferred#resolve`.
-     *
-     * @private
-     * @type Object
-     */
-    var timer = {
-
+    class Timer {
       /**
        * The timer namespace object or constructor.
        *
-       * @private
-       * @memberOf timer
+       * @readonly
+       *
        * @type {Function|Object}
        */
-      'ns': highestDefaultTimer,
+      ns;
 
       /**
        * Starts the deferred timer.
        *
-       * @private
-       * @memberOf timer
        * @param {Object} deferred The deferred instance.
        */
-      'start': null, // Lazy defined in `clock()`.
+      start = null;
 
       /**
        * Stops the deferred timer.
        *
-       * @private
-       * @memberOf timer
        * @param {Object} deferred The deferred instance.
        */
-      'stop': null // Lazy defined in `clock()`.
-    };
+      stop = null; // Lazy defined in `clock()`.
+
+      /**
+       * @readonly
+       *
+       * @type {number}
+       */
+      res;
+
+      /**
+       * @readonly
+       *
+       * @type {'ms'|'us'|'ns'}
+       */
+      unit;
+
+      /**
+       *
+       * @param {Timer['ns']} ns
+       * @param {Timer['res']} res
+       * @param {Timer['unit']} unit
+       */
+      constructor (
+        ns,
+        res,
+        unit,
+      ) {
+        super(ns);
+        this.res = res;
+        this.unit = unit;
+      }
+
+      /**
+       * @type {Timer|undefined}
+       */
+      static #timer;
+
+      /**
+       * Gets the current timer's minimum resolution (secs).
+       *
+       * @param {Timer['unit']} unit
+       * @param {Timer['ns']} ns
+       */
+      static #getRes(unit, ns) {
+        var measured,
+            begin,
+            count = 30,
+            divisor = 1e3,
+            sample = [];
+
+        // Get average smallest measurable time.
+        while (count--) {
+          if (unit == 'us') {
+            divisor = 1e6;
+            if (ns.stop) {
+              ns.start();
+              while (!(measured = ns.microseconds())) {}
+            } else {
+              begin = ns();
+              while (!(measured = ns() - begin)) {}
+            }
+          }
+          else if (unit == 'ns') {
+            divisor = 1e9;
+            begin = (begin = ns())[0] + (begin[1] / divisor);
+            while (!(measured = ((measured = ns())[0] + (measured[1] / divisor)) - begin)) {}
+            divisor = 1;
+          }
+          else if (ns.now) {
+            begin = (+ns.now());
+            while (!(measured = (+ns.now()) - begin)) {}
+          }
+          else {
+            begin = new ns().getTime();
+            while (!(measured = new ns().getTime() - begin)) {}
+          }
+          // Check for broken timers.
+          if (measured > 0) {
+            sample.push(measured);
+          } else {
+            sample.push(Infinity);
+            break;
+          }
+        }
+        // Convert to seconds.
+        return getMean(sample) / divisor;
+      }
+
+      /**
+       * Timer object used by `clock()` and `Deferred#resolve`.
+       *
+       * @returns {Timer}
+       */
+      static get timer() {
+        if (undefined === this.#timer) {
+          /** @type {[Timer, ...Timer[]]} */
+          const timers = [
+            new Timer(
+              highestDefaultTimer,
+              root.Math.max(0.0015, this.#getRes('ms', highestDefaultTimer)),
+              'ms',
+            ),
+          ];
+
+          // Detect Chrome's microsecond timer:
+          // enable benchmarking via the --enable-benchmarking command
+          // line switch in at least Chrome 7 to use chrome.Interval
+          try {
+            const instance = new (root.chrome || root.chromium).Interval;
+            if (instance) {
+              timers.push(new Timer(
+                instance,
+                this.#getRes('us', instance),
+                'us',
+              ));
+            }
+          } catch(e) {}
+
+          // Detect Node.js's nanosecond resolution timer available in Node.js >= 0.8.
+          if (processObject && typeof processObject.hrtime == 'function') {
+            timers.push(new Timer(
+              processObject.hrtime,
+              this.#getRes('ns', processObject.hrtime),
+              'ns',
+            ));
+          }
+          // Detect a supplied us-scale timer
+          if (usTimer && typeof usTimer == 'function') {
+            timers.push(new Timer(
+              usTimer,
+              this.#getRes('us', usTimer),
+              'us',
+            ));
+          }
+          // Pick timer with highest resolution.
+          const timer = timers.sort(({res: a}, {res: b}) => {
+            return a - b;
+          })[0];
+
+          // Error if there are no working timers.
+          if (timer.res == Infinity) {
+            throw new Error('Benchmark.js was unable to find a working timer.');
+          }
+
+          this.#timer = timer;
+        }
+
+        return this.#timer;
+      }
+    }
 
     /*------------------------------------------------------------------------*/
 
@@ -1788,10 +1925,10 @@
           cycle(deferred);
         }
         else if (++deferred.cycles < clone.count) {
-          clone.compiled.call(deferred, root, timer);
+          clone.compiled.call(deferred, root, Timer.timer);
         }
         else {
-          timer.stop(deferred);
+          Timer.timer.stop(deferred);
           deferred.teardown();
           delay(clone, function() { cycle(deferred); });
         }
@@ -2179,8 +2316,7 @@
      */
     function clock() {
       var
-          templateData = {},
-          timers = [{ 'ns': timer.ns, 'res': root.Math.max(0.0015, getRes('ms')), 'unit': 'ms' }];
+          templateData = {};
 
       // Lazy define for hi-res timers.
       clock = function(clone) {
@@ -2235,7 +2371,7 @@
             // Pretest to determine if compiled code exits early, usually by a
             // rogue `return` statement, by checking for a return object with the uid.
             bench.count = 1;
-            compiled = decompilable && (compiled.call(bench, root, timer) || {}).uid == templateData.uid && compiled;
+            compiled = decompilable && (compiled.call(bench, root, Timer.timer) || {}).uid == templateData.uid && compiled;
             bench.count = count;
           }
         } catch(e) {
@@ -2258,7 +2394,7 @@
           try {
             // Pretest one more time to check for errors.
             bench.count = 1;
-            compiled.call(bench, root, timer);
+            compiled.call(bench, root, Timer.timer);
             bench.count = count;
             delete clone.error;
           }
@@ -2272,7 +2408,7 @@
         // If no errors run the full test loop.
         if (!clone.error) {
           compiled = bench.compiled = clone.compiled = createCompiled(bench, decompilable, deferred, funcBody);
-          result = compiled.call(deferred || bench, root, timer).elapsed;
+          result = compiled.call(deferred || bench, root, Timer.timer).elapsed;
         }
         return result;
       };
@@ -2296,14 +2432,14 @@
         });
 
         // Use API of chosen timer.
-        if (timer.unit == 'ns') {
+        if (Timer.timer.unit == 'ns') {
           root.Object.assign(templateData, {
             'begin': interpolate('s#=n#()'),
             'end': interpolate('r#=n#(s#);r#=r#[0]+(r#[1]/1e9)')
           });
         }
-        else if (timer.unit == 'us') {
-          if (timer.ns.stop) {
+        else if (Timer.timer.unit == 'us') {
+          if (Timer.timer.ns.stop) {
             root.Object.assign(templateData, {
               'begin': interpolate('s#=n#.start()'),
               'end': interpolate('r#=n#.microseconds()/1e6')
@@ -2315,7 +2451,7 @@
             });
           }
         }
-        else if (timer.ns.now) {
+        else if (Timer.timer.ns.now) {
           root.Object.assign(templateData, {
             'begin': interpolate('s#=(+n#.now())'),
             'end': interpolate('r#=((+n#.now())-s#)/1e3')
@@ -2328,12 +2464,12 @@
           });
         }
         // Define `timer` methods.
-        timer.start = createFunction(
+        Timer.timer.start = createFunction(
           interpolate('o#'),
           interpolate('var n#=this.ns,${begin};o#.elapsed=0;o#.timeStamp=s#')
         );
 
-        timer.stop = createFunction(
+        Timer.timer.stop = createFunction(
           interpolate('o#'),
           interpolate('var n#=this.ns,s#=o#.timeStamp,${end};o#.elapsed=r#')
         );
@@ -2344,55 +2480,6 @@
           'var global = window, clearTimeout = global.clearTimeout, setTimeout = global.setTimeout;\n' +
           interpolate(body)
         );
-      }
-
-      /**
-       * Gets the current timer's minimum resolution (secs).
-       */
-      function getRes(unit) {
-        var measured,
-            begin,
-            count = 30,
-            divisor = 1e3,
-            ns = timer.ns,
-            sample = [];
-
-        // Get average smallest measurable time.
-        while (count--) {
-          if (unit == 'us') {
-            divisor = 1e6;
-            if (ns.stop) {
-              ns.start();
-              while (!(measured = ns.microseconds())) {}
-            } else {
-              begin = ns();
-              while (!(measured = ns() - begin)) {}
-            }
-          }
-          else if (unit == 'ns') {
-            divisor = 1e9;
-            begin = (begin = ns())[0] + (begin[1] / divisor);
-            while (!(measured = ((measured = ns())[0] + (measured[1] / divisor)) - begin)) {}
-            divisor = 1;
-          }
-          else if (ns.now) {
-            begin = (+ns.now());
-            while (!(measured = (+ns.now()) - begin)) {}
-          }
-          else {
-            begin = new ns().getTime();
-            while (!(measured = new ns().getTime() - begin)) {}
-          }
-          // Check for broken timers.
-          if (measured > 0) {
-            sample.push(measured);
-          } else {
-            sample.push(Infinity);
-            break;
-          }
-        }
-        // Convert to seconds.
-        return getMean(sample) / divisor;
       }
 
       /**
@@ -2415,35 +2502,9 @@
 
       /*----------------------------------------------------------------------*/
 
-      // Detect Chrome's microsecond timer:
-      // enable benchmarking via the --enable-benchmarking command
-      // line switch in at least Chrome 7 to use chrome.Interval
-      try {
-        if ((timer.ns = new (root.chrome || root.chromium).Interval)) {
-          timers.push({ 'ns': timer.ns, 'res': getRes('us'), 'unit': 'us' });
-        }
-      } catch(e) {}
-
-      // Detect Node.js's nanosecond resolution timer available in Node.js >= 0.8.
-      if (processObject && typeof (timer.ns = processObject.hrtime) == 'function') {
-        timers.push({ 'ns': timer.ns, 'res': getRes('ns'), 'unit': 'ns' });
-      }
-      // Detect a supplied us-scale timer
-      if (usTimer && typeof (timer.ns = usTimer) == 'function') {
-        timers.push({ 'ns': timer.ns,  'res': getRes('us'), 'unit': 'us' });
-      }
-      // Pick timer with highest resolution.
-      timer = timers.sort(({res: a}, {res: b}) => {
-        return a - b;
-      })[0];
-
-      // Error if there are no working timers.
-      if (timer.res == Infinity) {
-        throw new Error('Benchmark.js was unable to find a working timer.');
-      }
       // Resolve time span required to achieve a percent uncertainty of at most 1%.
       // For more information see http://spiff.rit.edu/classes/phys273/uncert/uncert.html.
-      Benchmark.options.minTime || (Benchmark.options.minTime = root.Math.max(timer.res / 2 / 0.01, 0.05));
+      Benchmark.options.minTime || (Benchmark.options.minTime = root.Math.max(Timer.timer.res / 2 / 0.01, 0.05));
       return clock.apply(null, arguments);
     }
 
@@ -2685,7 +2746,7 @@
         // Start a new cycle.
         clone.count = count;
         if (deferred) {
-          clone.compiled.call(deferred, root, timer);
+          clone.compiled.call(deferred, root, Timer.timer);
         } else if (async) {
           delay(clone, function() { cycle(clone, options); });
         } else {
