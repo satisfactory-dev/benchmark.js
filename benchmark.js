@@ -405,35 +405,6 @@
   }
 
   /**
-   * A helper function for setting options/event handlers.
-   *
-   * @private
-   * @param {Object} object The benchmark or suite instance.
-   * @param {Object} [options={}] Options object.
-   */
-  function setOptions(object, options) {
-    options = object.options = root.Object.assign({}, cloneDeep(object.constructor.options), cloneDeep(options));
-
-    root.Object.entries(options).forEach(([key, value]) => {
-      if (value != null) {
-        // Add event listeners.
-        if (/^on[A-Z]/.test(key)) {
-          key.split(' ').forEach((key) => {
-            object.on(key.slice(2).toLowerCase(), value);
-          });
-        } else if (
-          !has(object, key) || (
-            object instanceof Benchmark &&
-            key in Benchmark.defaultValues
-          )
-        ) {
-          object[key] = cloneDeep(value);
-        }
-      }
-    });
-  }
-
-  /**
    * Create a new `Benchmark` function using the given options.
    *
    * @static
@@ -619,6 +590,35 @@
         });
         return object;
       }
+
+  /**
+   * A helper function for setting options/event handlers.
+   *
+   * @private
+   * @param {Object} object The benchmark or suite instance.
+   * @param {Object} [options={}] Options object.
+   */
+      setOptions(object, options) {
+    options = object.options = root.Object.assign({}, cloneDeep(object.constructor.options), cloneDeep(options));
+
+    root.Object.entries(options).forEach(([key, value]) => {
+      if (value != null) {
+        // Add event listeners.
+        if (/^on[A-Z]/.test(key)) {
+          key.split(' ').forEach((key) => {
+            object.on(key.slice(2).toLowerCase(), value);
+          });
+        } else if (
+          !has(object, key) || (
+            object instanceof Benchmark &&
+            key in Benchmark.defaultValues
+          )
+        ) {
+          object[key] = cloneDeep(value);
+        }
+      }
+    });
+  }
 
       /**
        * Converts a Suite or Suite-like object/array to an array of values
@@ -1435,7 +1435,7 @@
           // 3 arguments (name, fn [, options]).
           bench.name = name;
         }
-        setOptions(bench, options);
+        this.setOptions(bench, options);
 
         bench.id || (bench.id = ++counter);
         bench.fn == null && (bench.fn = fn);
@@ -1944,7 +1944,7 @@
           // 2 arguments (name [, options]).
           suite.name = name;
         }
-        setOptions(suite, options);
+        this.setOptions(suite, options);
 
         this.reverse = () => {
           this._benchmarks.reverse();
