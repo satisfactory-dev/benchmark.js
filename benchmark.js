@@ -594,7 +594,7 @@
       /**
        * A helper function for setting options/event handlers.
        *
-       * @private
+       * @protected
        * @param {Object} object The benchmark or suite instance.
        * @param {Object} [options={}] Options object.
        */
