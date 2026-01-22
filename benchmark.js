@@ -1144,14 +1144,6 @@
       return Benchmark;
     }
 
-    static get support() {
-      return Support;
-    }
-
-    static get Deferred() {
-      return Deferred;
-    }
-
     static get Event() {
       return Event;
     }
