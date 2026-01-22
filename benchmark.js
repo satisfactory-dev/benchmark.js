@@ -1418,28 +1418,28 @@
       /**
        * The deferred benchmark instance.
        *
-       * @type Object
+       * @type {Object}
        */
       benchmark = null;
 
       /**
        * The number of deferred cycles performed while benchmarking.
        *
-       * @type number
+       * @type {number}
        */
       cycles = 0;
 
       /**
        * The time taken to complete the deferred benchmark (secs).
        *
-       * @type number
+       * @type {number}
        */
       elapsed = 0;
 
       /**
        * A timestamp of when the deferred benchmark started (ms).
        *
-       * @type number
+       * @type {number}
        */
       timeStamp = 0;
 
