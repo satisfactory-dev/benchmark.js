@@ -619,6 +619,25 @@
         });
         return object;
       }
+
+    /**
+     * Converts a Suite or Suite-like object/array to an array of values
+     *
+     * @param {(unknown[])|Suite|Object<number|'length', unknown>} array
+     *
+     * @returns {(unknown[])|(Benchmark[])}
+     */
+      static asArray(array) {
+      if (root.Array.isArray(array)) {
+        return [...array];
+      } else if (array instanceof Suite) {
+        return array.benchmarks;
+      }
+
+      return root.Object.keys(array || root.Object.create(null))
+        .filter((maybe) => /^\d+$/.test(maybe))
+        .map((key) => array[key]);
+    }
     }
 
     /*------------------------------------------------------------------------*/
@@ -1143,7 +1162,7 @@
             index = -1,
             eventProps = { 'currentTarget': benches },
             options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
-            result = asArray(benches);
+            result = this.asArray(benches);
 
         /**
          * Invokes the method of the current object and if synchronous, fetches the next.
@@ -2135,31 +2154,6 @@
         return suite;
       }
     }
-
-    /**
-     * Converts a Suite or Suite-like object/array to an array of values
-     *
-     * @memberOf Benchmark.Suite
-     *
-     * @static
-     *
-     * @param {(unknown[])|Suite|Object<number|'length', unknown>} array
-     *
-     * @returns {(unknown[])|(Benchmark[])}
-     */
-    function asArray(array) {
-      if (root.Array.isArray(array)) {
-        return [...array];
-      } else if (array instanceof Suite) {
-        return array.benchmarks;
-      }
-
-      return root.Object.keys(array || root.Object.create(null))
-        .filter((maybe) => /^\d+$/.test(maybe))
-        .map((key) => array[key]);
-    }
-
-    Suite.asArray = asArray;
 
     /*------------------------------------------------------------------------*/
 
