@@ -261,6 +261,7 @@
       delete anchor[prop];
       return result;
     };
+
     // Fix JaegerMonkey bug.
     // For more information see http://bugzil.la/639720.
     createFunction = Support.browser && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : root.Function;
@@ -974,6 +975,7 @@
        */
       variance: Benchmark.defaultValues.stats.variance,
     };
+
     /**
      * An object of timing data including cycle, elapsed, period, start, and stop.
      *
