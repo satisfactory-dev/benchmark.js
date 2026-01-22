@@ -421,7 +421,12 @@
           key.split(' ').forEach((key) => {
             object.on(key.slice(2).toLowerCase(), value);
           });
-        } else if (!has(object, key)) {
+        } else if (
+          !has(object, key) || (
+            object instanceof Benchmark &&
+            key in Benchmark.defaultValues
+          )
+        ) {
           object[key] = cloneDeep(value);
         }
       }
@@ -480,6 +485,221 @@
     /*------------------------------------------------------------------------*/
 
     class Benchmark {
+      /**
+       * The number of times a test was executed.
+       *
+       * @type {number}
+       */
+      count = Benchmark.defaultValues.count;
+
+      /**
+       * The number of cycles performed while benchmarking.
+       *
+       * @type {number}
+       */
+      cycles = Benchmark.defaultValues.cycles;
+
+      /**
+       * The number of executions per second.
+       *
+       * @type {number}
+       */
+      hz = Benchmark.defaultValues.hz;
+
+      /**
+       * The compiled test function.
+       *
+       * @type {Function|string}
+       */
+      compiled = Benchmark.defaultValues.compiled;
+
+      /**
+       * The error object if the test failed.
+       *
+       * @type {Object|undefined}
+       */
+      error = Benchmark.defaultValues.error;
+
+      /**
+       * The test to benchmark.
+       *
+       * @type {Function|string}
+       */
+      fn = Benchmark.defaultValues.fn;
+
+      /**
+       * A flag to indicate if the benchmark is aborted.
+       *
+       * @type {boolean}
+       */
+      aborted = Benchmark.defaultValues.aborted;
+
+      /**
+       * A flag to indicate if the benchmark is running.
+       *
+       * @type {boolean}
+       */
+      running = Benchmark.defaultValues.running;
+
+      /**
+       * Compiled into the test and executed immediately **before** the test loop.
+       *
+       * @type {Function|string}
+       * @example
+       *
+       * // basic usage
+       * var bench = Benchmark({
+       *   'setup': function() {
+       *     var c = this.count,
+       *         element = document.getElementById('container');
+       *     while (c--) {
+       *       element.appendChild(document.createElement('div'));
+       *     }
+       *   },
+       *   'fn': function() {
+       *     element.removeChild(element.lastChild);
+       *   }
+       * });
+       *
+       * // compiles to something like:
+       * var c = this.count,
+       *     element = document.getElementById('container');
+       * while (c--) {
+       *   element.appendChild(document.createElement('div'));
+       * }
+       * var start = new Date;
+       * while (count--) {
+       *   element.removeChild(element.lastChild);
+       * }
+       * var end = new Date - start;
+       *
+       * // or using strings
+       * var bench = Benchmark({
+       *   'setup': '\
+       *     var a = 0;\n\
+       *     (function() {\n\
+       *       (function() {\n\
+       *         (function() {',
+       *   'fn': 'a += 1;',
+       *   'teardown': '\
+       *          }())\n\
+       *        }())\n\
+       *      }())'
+       * });
+       *
+       * // compiles to something like:
+       * var a = 0;
+       * (function() {
+       *   (function() {
+       *     (function() {
+       *       var start = new Date;
+       *       while (count--) {
+       *         a += 1;
+       *       }
+       *       var end = new Date - start;
+       *     }())
+       *   }())
+       * }())
+       */
+      setup = Benchmark.defaultValues.setup;
+
+      /**
+       * Compiled into the test and executed immediately **after** the test loop.
+       *
+       * @type {Function|string}
+       */
+      teardown = Benchmark.defaultValues.teardown;
+
+      /**
+       * An object of stats including mean, margin or error, and standard deviation.
+       *
+       * @type Object
+       */
+      stats = {
+        /**
+         * The margin of error.
+         *
+         * @type {number}
+         */
+        moe: Benchmark.defaultValues.stats.moe,
+
+        /**
+         * The relative margin of error (expressed as a percentage of the mean).
+         *
+         * @type {number}
+         */
+        rme: Benchmark.defaultValues.stats.rme,
+
+        /**
+         * The standard error of the mean.
+         *
+         * @type {number}
+         */
+        sem: Benchmark.defaultValues.stats.sem,
+
+        /**
+         * The sample standard deviation.
+         *
+         * @type {number}
+         */
+        deviation: Benchmark.defaultValues.stats.deviation,
+
+        /**
+         * The sample arithmetic mean (secs).
+         *
+         * @type number
+         */
+        mean: Benchmark.defaultValues.stats.mean,
+
+        /**
+         * The array of sampled periods.
+         *
+         * @type Array
+         */
+        sample: [...Benchmark.defaultValues.stats.sample],
+
+        /**
+         * The sample variance.
+         *
+         * @type number
+         */
+        variance: Benchmark.defaultValues.stats.variance,
+      };
+      /**
+       * An object of timing data including cycle, elapsed, period, start, and stop.
+       *
+       * @type Object
+       */
+      times = {
+        /**
+         * The time taken to complete the last cycle (secs).
+         *
+         * @type number
+         */
+        cycle: Benchmark.defaultValues.times.cycle,
+
+        /**
+         * The time taken to complete the benchmark (secs).
+         *
+         * @type number
+         */
+        elapsed: Benchmark.defaultValues.times.elapsed,
+
+        /**
+         * The time taken to execute the test once (secs).
+         *
+         * @type number
+         */
+        period: Benchmark.defaultValues.times.period,
+
+        /**
+         * A timestamp of when the benchmark started (ms).
+         *
+         * @type number
+         */
+        timeStamp: Benchmark.defaultValues.times.timeStamp,
+      };
+
       /**
        * The default options copied by benchmark instances.
        *
@@ -626,6 +846,39 @@
       static get support() {
         return Support;
       }
+
+      /**
+       * The default values for Benchmark instance properties
+       *
+       * @returns {Object}
+       */
+      static defaultValues = Object.freeze({
+        count: 0,
+        cycles: 0,
+        hz: 0,
+        compiled: undefined,
+        error: undefined,
+        fn: undefined,
+        aborted: false,
+        running: false,
+        setup: noop,
+        teardown: noop,
+        stats: {
+          moe: 0,
+          rme: 0,
+          sem: 0,
+          deviation: 0,
+          mean: 0,
+          sample: [],
+          variance: 0,
+        },
+        times: {
+          cycle: 0,
+          elapsed: 0,
+          period: 0,
+          timeStamp: 0,
+        },
+      })
 
       /**
        * A generic `Array#filter` like method.
@@ -1642,6 +1895,12 @@
       // Correct the `options` object.
       result.options = root.Object.assign({}, cloneDeep(bench.options), cloneDeep(options));
 
+      for (const property of Object.keys(Benchmark.defaultValues)) {
+        if (undefined === result[property]) {
+          result[property] = cloneDeep(bench[property]);
+        }
+      }
+
       // Copy own custom properties.
       root.Object.entries(bench).forEach(([key, value]) => {
         if (!has(result, key)) {
@@ -1726,11 +1985,18 @@
           changes = [],
           queue = [];
 
+      const blank = new Benchmark();
+
       // A non-recursive solution to check if properties have changed.
       // For more information see http://www.jslab.dk/articles/non.recursive.preorder.traversal.part4.
       var data = {
         'destination': bench,
-        'source': root.Object.assign({}, cloneDeep(bench.constructor.prototype), cloneDeep(bench.options))
+        'source': root.Object.assign(
+          {},
+          cloneDeep(bench.constructor.prototype),
+          cloneDeep(Benchmark.defaultValues),
+          cloneDeep(bench.options)
+        )
       };
 
       do {
@@ -2409,250 +2675,6 @@
     }
 
     /*------------------------------------------------------------------------*/
-
-    root.Object.assign(Benchmark.prototype, {
-
-      /**
-       * The number of times a test was executed.
-       *
-       * @memberOf Benchmark
-       * @type number
-       */
-      'count': 0,
-
-      /**
-       * The number of cycles performed while benchmarking.
-       *
-       * @memberOf Benchmark
-       * @type number
-       */
-      'cycles': 0,
-
-      /**
-       * The number of executions per second.
-       *
-       * @memberOf Benchmark
-       * @type number
-       */
-      'hz': 0,
-
-      /**
-       * The compiled test function.
-       *
-       * @memberOf Benchmark
-       * @type {Function|string}
-       */
-      'compiled': undefined,
-
-      /**
-       * The error object if the test failed.
-       *
-       * @memberOf Benchmark
-       * @type Object
-       */
-      'error': undefined,
-
-      /**
-       * The test to benchmark.
-       *
-       * @memberOf Benchmark
-       * @type {Function|string}
-       */
-      'fn': undefined,
-
-      /**
-       * A flag to indicate if the benchmark is aborted.
-       *
-       * @memberOf Benchmark
-       * @type boolean
-       */
-      'aborted': false,
-
-      /**
-       * A flag to indicate if the benchmark is running.
-       *
-       * @memberOf Benchmark
-       * @type boolean
-       */
-      'running': false,
-
-      /**
-       * Compiled into the test and executed immediately **before** the test loop.
-       *
-       * @memberOf Benchmark
-       * @type {Function|string}
-       * @example
-       *
-       * // basic usage
-       * var bench = Benchmark({
-       *   'setup': function() {
-       *     var c = this.count,
-       *         element = document.getElementById('container');
-       *     while (c--) {
-       *       element.appendChild(document.createElement('div'));
-       *     }
-       *   },
-       *   'fn': function() {
-       *     element.removeChild(element.lastChild);
-       *   }
-       * });
-       *
-       * // compiles to something like:
-       * var c = this.count,
-       *     element = document.getElementById('container');
-       * while (c--) {
-       *   element.appendChild(document.createElement('div'));
-       * }
-       * var start = new Date;
-       * while (count--) {
-       *   element.removeChild(element.lastChild);
-       * }
-       * var end = new Date - start;
-       *
-       * // or using strings
-       * var bench = Benchmark({
-       *   'setup': '\
-       *     var a = 0;\n\
-       *     (function() {\n\
-       *       (function() {\n\
-       *         (function() {',
-       *   'fn': 'a += 1;',
-       *   'teardown': '\
-       *          }())\n\
-       *        }())\n\
-       *      }())'
-       * });
-       *
-       * // compiles to something like:
-       * var a = 0;
-       * (function() {
-       *   (function() {
-       *     (function() {
-       *       var start = new Date;
-       *       while (count--) {
-       *         a += 1;
-       *       }
-       *       var end = new Date - start;
-       *     }())
-       *   }())
-       * }())
-       */
-      'setup': noop,
-
-      /**
-       * Compiled into the test and executed immediately **after** the test loop.
-       *
-       * @memberOf Benchmark
-       * @type {Function|string}
-       */
-      'teardown': noop,
-
-      /**
-       * An object of stats including mean, margin or error, and standard deviation.
-       *
-       * @memberOf Benchmark
-       * @type Object
-       */
-      'stats': {
-
-        /**
-         * The margin of error.
-         *
-         * @memberOf Benchmark#stats
-         * @type number
-         */
-        'moe': 0,
-
-        /**
-         * The relative margin of error (expressed as a percentage of the mean).
-         *
-         * @memberOf Benchmark#stats
-         * @type number
-         */
-        'rme': 0,
-
-        /**
-         * The standard error of the mean.
-         *
-         * @memberOf Benchmark#stats
-         * @type number
-         */
-        'sem': 0,
-
-        /**
-         * The sample standard deviation.
-         *
-         * @memberOf Benchmark#stats
-         * @type number
-         */
-        'deviation': 0,
-
-        /**
-         * The sample arithmetic mean (secs).
-         *
-         * @memberOf Benchmark#stats
-         * @type number
-         */
-        'mean': 0,
-
-        /**
-         * The array of sampled periods.
-         *
-         * @memberOf Benchmark#stats
-         * @type Array
-         */
-        'sample': [],
-
-        /**
-         * The sample variance.
-         *
-         * @memberOf Benchmark#stats
-         * @type number
-         */
-        'variance': 0
-      },
-
-      /**
-       * An object of timing data including cycle, elapsed, period, start, and stop.
-       *
-       * @memberOf Benchmark
-       * @type Object
-       */
-      'times': {
-
-        /**
-         * The time taken to complete the last cycle (secs).
-         *
-         * @memberOf Benchmark#times
-         * @type number
-         */
-        'cycle': 0,
-
-        /**
-         * The time taken to complete the benchmark (secs).
-         *
-         * @memberOf Benchmark#times
-         * @type number
-         */
-        'elapsed': 0,
-
-        /**
-         * The time taken to execute the test once (secs).
-         *
-         * @memberOf Benchmark#times
-         * @type number
-         */
-        'period': 0,
-
-        /**
-         * A timestamp of when the benchmark started (ms).
-         *
-         * @memberOf Benchmark#times
-         * @type number
-         */
-        'timeStamp': 0
-      }
-    });
 
     root.Object.assign(Benchmark.prototype, {
       'abort': abort,
