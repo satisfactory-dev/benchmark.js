@@ -35,10 +35,9 @@
   const maybe_microtime = microtime();
 
   if (maybe_microtime) {
-    Benchmark = Benchmark.runInContext(
-      undefined,
-      maybe_microtime,
-    );
+    Benchmark = Benchmark.runInContext({
+      usTimer: maybe_microtime,
+    });
   }
 
   /** Used to create dummy benchmarks for comparisons. */

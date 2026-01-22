@@ -405,19 +405,6 @@
     delete anchor[prop];
   }
 
-  /**
-   * Create a new `Benchmark` function using the given options.
-   *
-   * @static
-   * @memberOf Benchmark
-   * @param {Object<now, () => number>} highestDefaultTimer
-   * @param {Object<now, () => number>} [usTimer] A high-precision timer such as the one provided by microtime
-   * @returns {Function} Returns a new `Benchmark` function.
-   */
-  function runInContext(
-    highestDefaultTimer = performance,
-    usTimer = undefined,
-  ) {
     class Timer {
       /**
        * The timer namespace object or constructor.
@@ -467,7 +454,7 @@
         res,
         unit,
       ) {
-        super(ns);
+        this.ns = ns;
         this.res = res;
         this.unit = unit;
       }
@@ -476,6 +463,32 @@
        * @type {Timer|undefined}
        */
       static #timer;
+
+      /**
+       * @type {Object<now, () => number>}
+       */
+      static #highestDefaultTimer = performance;
+
+      /**
+       * A high-precision timer such as the one provided by microtime
+       *
+       * @type {Object<now, () => number>|undefined}
+       */
+      static #usTimer;
+
+      /**
+       * @param {Object} options
+       * @param {Object<now, () => number>} [options.highestDefaultTimer]
+       * @param {Object<now, () => number>} [options.usTimer] A high-precision timer such as the one provided by microtime
+       */
+      static changeTimerContext({
+        highestDefaultTimer = performance,
+        usTimer = undefined,
+      } = {}) {
+        this.#timer = undefined;
+        this.#highestDefaultTimer = highestDefaultTimer;
+        this.#usTimer = usTimer;
+      }
 
       /**
        * Gets the current timer's minimum resolution (secs).
@@ -538,8 +551,8 @@
           /** @type {[Timer, ...Timer[]]} */
           const timers = [
             new Timer(
-              highestDefaultTimer,
-              root.Math.max(0.0015, this.#getRes('ms', highestDefaultTimer)),
+              this.#highestDefaultTimer,
+              root.Math.max(0.0015, this.#getRes('ms', this.#highestDefaultTimer)),
               'ms',
             ),
           ];
@@ -567,10 +580,10 @@
             ));
           }
           // Detect a supplied us-scale timer
-          if (usTimer && typeof usTimer == 'function') {
+          if (this.#usTimer && typeof this.#usTimer == 'function') {
             timers.push(new Timer(
-              usTimer,
-              this.#getRes('us', usTimer),
+              this.#usTimer,
+              this.#getRes('us', this.#usTimer),
               'us',
             ));
           }
@@ -1120,8 +1133,15 @@
        */
       static version = '2.1.4';
 
-      static get runInContext() {
-        return runInContext;
+      /**
+       * @param {Object<now, () => number>} highestDefaultTimer
+       * @param {Object<now, () => number>} [usTimer] A high-precision timer such as the one provided by microtime
+       * @returns {Benchmark} Returns the existing Benchmark class
+       */
+      static runInContext(options) {
+        Timer.changeTimerContext(options);
+
+        return Benchmark;
       }
 
       static get support() {
@@ -2764,11 +2784,6 @@
       }
     }
 
-    /*------------------------------------------------------------------------*/
-
-    return Benchmark;
-  }
-
   /*--------------------------------------------------------------------------*/
 
   // Export Benchmark.
@@ -2776,12 +2791,10 @@
   if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
     // Define as an anonymous module so, through path mapping, it can be aliased.
     define(function() {
-      return runInContext();
+      return Benchmark;
     });
   }
   else {
-    var Benchmark = runInContext();
-
     // Check for `exports` after `define` in case a build optimizer adds an `exports` object.
     if (freeExports && freeModule) {
       // Export for Node.js.
