@@ -1952,188 +1952,188 @@
         this._benchmarks.length = value;
       }
 
-    /**
-     * Aborts all benchmarks in the suite.
-     *
-     * @returns {Object} The suite instance.
-     */
+      /**
+       * Aborts all benchmarks in the suite.
+       *
+       * @returns {Object} The suite instance.
+       */
       abort() {
-      var event,
-          suite = this,
-          resetting = calledBy.resetSuite;
+        var event,
+            suite = this,
+            resetting = calledBy.resetSuite;
 
-      if (suite.running) {
-        event = new Event('abort');
-        suite.emit(event);
-        if (!event.cancelled || resetting) {
-          // Avoid infinite recursion.
-          calledBy.abortSuite = true;
-          suite.reset();
-          delete calledBy.abortSuite;
+        if (suite.running) {
+          event = new Event('abort');
+          suite.emit(event);
+          if (!event.cancelled || resetting) {
+            // Avoid infinite recursion.
+            calledBy.abortSuite = true;
+            suite.reset();
+            delete calledBy.abortSuite;
 
-          if (!resetting) {
-            suite.aborted = true;
-            Benchmark.invoke(suite, 'abort');
+            if (!resetting) {
+              suite.aborted = true;
+              Benchmark.invoke(suite, 'abort');
+            }
           }
         }
+        return suite;
       }
-      return suite;
-    }
 
-    /**
-     * Adds a test to the benchmark suite.
-     *
-     * @param {string} name A name to identify the benchmark.
-     * @param {Function|string} fn The test to benchmark.
-     * @param {Object} [options={}] Options object.
-     * @returns {Object} The suite instance.
-     * @example
-     *
-     * // basic usage
-     * suite.add(fn);
-     *
-     * // or using a name first
-     * suite.add('foo', fn);
-     *
-     * // or with options
-     * suite.add('foo', fn, {
-     *   'onCycle': onCycle,
-     *   'onComplete': onComplete
-     * });
-     *
-     * // or name and options
-     * suite.add('foo', {
-     *   'fn': fn,
-     *   'onCycle': onCycle,
-     *   'onComplete': onComplete
-     * });
-     *
-     * // or options only
-     * suite.add({
-     *   'name': 'foo',
-     *   'fn': fn,
-     *   'onCycle': onCycle,
-     *   'onComplete': onComplete
-     * });
-     */
+      /**
+       * Adds a test to the benchmark suite.
+       *
+       * @param {string} name A name to identify the benchmark.
+       * @param {Function|string} fn The test to benchmark.
+       * @param {Object} [options={}] Options object.
+       * @returns {Object} The suite instance.
+       * @example
+       *
+       * // basic usage
+       * suite.add(fn);
+       *
+       * // or using a name first
+       * suite.add('foo', fn);
+       *
+       * // or with options
+       * suite.add('foo', fn, {
+       *   'onCycle': onCycle,
+       *   'onComplete': onComplete
+       * });
+       *
+       * // or name and options
+       * suite.add('foo', {
+       *   'fn': fn,
+       *   'onCycle': onCycle,
+       *   'onComplete': onComplete
+       * });
+       *
+       * // or options only
+       * suite.add({
+       *   'name': 'foo',
+       *   'fn': fn,
+       *   'onCycle': onCycle,
+       *   'onComplete': onComplete
+       * });
+       */
       add(name, fn, options) {
-      var suite = this,
-          bench = new Benchmark(name, fn, options),
-          event = new Event({ 'type': 'add', 'target': bench });
+        var suite = this,
+            bench = new Benchmark(name, fn, options),
+            event = new Event({ 'type': 'add', 'target': bench });
 
-      if (suite.emit(event), !event.cancelled) {
-        this._benchmarks.push(bench);
+        if (suite.emit(event), !event.cancelled) {
+          this._benchmarks.push(bench);
+        }
+        return suite;
       }
-      return suite;
-    }
 
-    /**
-     * Creates a new suite with cloned benchmarks.
-     *
-     * @param {Object} options Options object to overwrite cloned options.
-     * @returns {Object} The new suite instance.
-     */
+      /**
+       * Creates a new suite with cloned benchmarks.
+       *
+       * @param {Object} options Options object to overwrite cloned options.
+       * @returns {Object} The new suite instance.
+       */
       clone(options) {
-      var suite = this,
-          result = new suite.constructor(root.Object.assign({}, suite.options, options));
+        var suite = this,
+            result = new suite.constructor(root.Object.assign({}, suite.options, options));
 
-      // Copy own properties.
-      root.Object.entries(suite).forEach(([key, value]) => {
-        if (!has(result, key)) {
-          result[key] = (typeof value?.clone === 'function')
-            ? value.clone()
-            : cloneDeep(value);
-        }
-      });
-      return result;
-    }
-
-    /**
-     * An `Array#filter` like method.
-     *
-     * @param {Function|string} callback The function/alias called per iteration.
-     * @returns {Object} A new suite of benchmarks that passed callback filter.
-     */
-      filter(callback) {
-      var suite = this,
-          result = new suite.constructor(suite.options);
-
-      const cb = Benchmark.filter(this, callback);
-
-      result._benchmarks.push(...cb);
-
-      return result;
-    }
-
-    /**
-     * Resets all benchmarks in the suite.
-     *
-     * @returns {Object} The suite instance.
-     */
-      reset() {
-      var event,
-          suite = this,
-          aborting = calledBy.abortSuite;
-
-      if (suite.running && !aborting) {
-        // No worries, `resetSuite()` is called within `abortSuite()`.
-        calledBy.resetSuite = true;
-        suite.abort();
-        delete calledBy.resetSuite;
-      }
-      // Reset if the state has changed.
-      else if ((suite.aborted || suite.running) &&
-          (suite.emit(event = new Event('reset')), !event.cancelled)) {
-        suite.aborted = suite.running = false;
-        if (!aborting) {
-          Benchmark.invoke(suite, 'reset');
-        }
-      }
-      return suite;
-    }
-
-    /**
-     * Runs the suite.
-     *
-     * @param {Object} [options={}] Options object.
-     * @returns {Object} The suite instance.
-     * @example
-     *
-     * // basic usage
-     * suite.run();
-     *
-     * // or with options
-     * suite.run({ 'async': true, 'queued': true });
-     */
-      run(options) {
-      var suite = this;
-
-      suite.reset();
-      suite.running = true;
-      options || (options = {});
-
-      Benchmark.invoke(suite, {
-        'name': 'run',
-        'args': options,
-        'queued': options.queued,
-        'onStart': function(event) {
-          suite.emit(event);
-        },
-        'onCycle': function(event) {
-          var bench = event.target;
-          if (bench.error) {
-            suite.emit(new Event({ 'type': 'error', 'target': bench }));
+        // Copy own properties.
+        root.Object.entries(suite).forEach(([key, value]) => {
+          if (!has(result, key)) {
+            result[key] = (typeof value?.clone === 'function')
+              ? value.clone()
+              : cloneDeep(value);
           }
-          suite.emit(event);
-          event.aborted = suite.aborted;
-        },
-        'onComplete': function(event) {
-          suite.running = false;
-          suite.emit(event);
+        });
+        return result;
+      }
+
+      /**
+       * An `Array#filter` like method.
+       *
+       * @param {Function|string} callback The function/alias called per iteration.
+       * @returns {Object} A new suite of benchmarks that passed callback filter.
+       */
+      filter(callback) {
+        var suite = this,
+            result = new suite.constructor(suite.options);
+
+        const cb = Benchmark.filter(this, callback);
+
+        result._benchmarks.push(...cb);
+
+        return result;
+      }
+
+      /**
+       * Resets all benchmarks in the suite.
+       *
+       * @returns {Object} The suite instance.
+       */
+      reset() {
+        var event,
+            suite = this,
+            aborting = calledBy.abortSuite;
+
+        if (suite.running && !aborting) {
+          // No worries, `resetSuite()` is called within `abortSuite()`.
+          calledBy.resetSuite = true;
+          suite.abort();
+          delete calledBy.resetSuite;
         }
-      });
-      return suite;
-    }
+        // Reset if the state has changed.
+        else if ((suite.aborted || suite.running) &&
+            (suite.emit(event = new Event('reset')), !event.cancelled)) {
+          suite.aborted = suite.running = false;
+          if (!aborting) {
+            Benchmark.invoke(suite, 'reset');
+          }
+        }
+        return suite;
+      }
+
+      /**
+       * Runs the suite.
+       *
+       * @param {Object} [options={}] Options object.
+       * @returns {Object} The suite instance.
+       * @example
+       *
+       * // basic usage
+       * suite.run();
+       *
+       * // or with options
+       * suite.run({ 'async': true, 'queued': true });
+       */
+      run(options) {
+        var suite = this;
+
+        suite.reset();
+        suite.running = true;
+        options || (options = {});
+
+        Benchmark.invoke(suite, {
+          'name': 'run',
+          'args': options,
+          'queued': options.queued,
+          'onStart': function(event) {
+            suite.emit(event);
+          },
+          'onCycle': function(event) {
+            var bench = event.target;
+            if (bench.error) {
+              suite.emit(new Event({ 'type': 'error', 'target': bench }));
+            }
+            suite.emit(event);
+            event.aborted = suite.aborted;
+          },
+          'onComplete': function(event) {
+            suite.running = false;
+            suite.emit(event);
+          }
+        });
+        return suite;
+      }
     }
 
     /**
