@@ -1951,46 +1951,13 @@
 
         this._benchmarks.length = value;
       }
-    }
-
-    /**
-     * Converts a Suite or Suite-like object/array to an array of values
-     *
-     * @memberOf Benchmark.Suite
-     *
-     * @static
-     *
-     * @param {(unknown[])|Suite|Object<number|'length', unknown>} array
-     *
-     * @returns {(unknown[])|(Benchmark[])}
-     */
-    function asArray(array) {
-      if (root.Array.isArray(array)) {
-        return [...array];
-      } else if (array instanceof Suite) {
-        return array.benchmarks;
-      }
-
-      return root.Object.keys(array || root.Object.create(null))
-        .filter((maybe) => /^\d+$/.test(maybe))
-        .map((key) => array[key]);
-    }
-
-    Suite.asArray = asArray;
-
-    /*------------------------------------------------------------------------*/
-
-
-    /*------------------------------------------------------------------------*/
 
     /**
      * Aborts all benchmarks in the suite.
      *
-     * @name abort
-     * @memberOf Benchmark.Suite
      * @returns {Object} The suite instance.
      */
-    function abortSuite() {
+      abort() {
       var event,
           suite = this,
           resetting = calledBy.resetSuite;
@@ -2016,7 +1983,6 @@
     /**
      * Adds a test to the benchmark suite.
      *
-     * @memberOf Benchmark.Suite
      * @param {string} name A name to identify the benchmark.
      * @param {Function|string} fn The test to benchmark.
      * @param {Object} [options={}] Options object.
@@ -2050,7 +2016,7 @@
      *   'onComplete': onComplete
      * });
      */
-    function add(name, fn, options) {
+      add(name, fn, options) {
       var suite = this,
           bench = new Benchmark(name, fn, options),
           event = new Event({ 'type': 'add', 'target': bench });
@@ -2064,12 +2030,10 @@
     /**
      * Creates a new suite with cloned benchmarks.
      *
-     * @name clone
-     * @memberOf Benchmark.Suite
      * @param {Object} options Options object to overwrite cloned options.
      * @returns {Object} The new suite instance.
      */
-    function cloneSuite(options) {
+      clone(options) {
       var suite = this,
           result = new suite.constructor(root.Object.assign({}, suite.options, options));
 
@@ -2087,12 +2051,10 @@
     /**
      * An `Array#filter` like method.
      *
-     * @name filter
-     * @memberOf Benchmark.Suite
      * @param {Function|string} callback The function/alias called per iteration.
      * @returns {Object} A new suite of benchmarks that passed callback filter.
      */
-    function filterSuite(callback) {
+      filter(callback) {
       var suite = this,
           result = new suite.constructor(suite.options);
 
@@ -2106,11 +2068,9 @@
     /**
      * Resets all benchmarks in the suite.
      *
-     * @name reset
-     * @memberOf Benchmark.Suite
      * @returns {Object} The suite instance.
      */
-    function resetSuite() {
+      reset() {
       var event,
           suite = this,
           aborting = calledBy.abortSuite;
@@ -2135,8 +2095,6 @@
     /**
      * Runs the suite.
      *
-     * @name run
-     * @memberOf Benchmark.Suite
      * @param {Object} [options={}] Options object.
      * @returns {Object} The suite instance.
      * @example
@@ -2147,7 +2105,7 @@
      * // or with options
      * suite.run({ 'async': true, 'queued': true });
      */
-    function runSuite(options) {
+      run(options) {
       var suite = this;
 
       suite.reset();
@@ -2176,6 +2134,32 @@
       });
       return suite;
     }
+    }
+
+    /**
+     * Converts a Suite or Suite-like object/array to an array of values
+     *
+     * @memberOf Benchmark.Suite
+     *
+     * @static
+     *
+     * @param {(unknown[])|Suite|Object<number|'length', unknown>} array
+     *
+     * @returns {(unknown[])|(Benchmark[])}
+     */
+    function asArray(array) {
+      if (root.Array.isArray(array)) {
+        return [...array];
+      } else if (array instanceof Suite) {
+        return array.benchmarks;
+      }
+
+      return root.Object.keys(array || root.Object.create(null))
+        .filter((maybe) => /^\d+$/.test(maybe))
+        .map((key) => array[key]);
+    }
+
+    Suite.asArray = asArray;
 
     /*------------------------------------------------------------------------*/
 
@@ -2711,17 +2695,6 @@
         clone.emit(new Event('complete'));
       }
     }
-
-    /*------------------------------------------------------------------------*/
-
-    root.Object.assign(Suite.prototype, {
-      'abort': abortSuite,
-      'add': add,
-      'clone': cloneSuite,
-      'filter': filterSuite,
-      'reset': resetSuite,
-      'run': runSuite,
-    });
 
     /*------------------------------------------------------------------------*/
 
