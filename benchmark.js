@@ -2177,7 +2177,7 @@
      * @returns {number} The time taken.
      */
     function clock() {
-      var options = Benchmark.options,
+      var
           templateData = {},
           timers = [{ 'ns': timer.ns, 'res': root.Math.max(0.0015, getRes('ms')), 'unit': 'ms' }];
 
@@ -2198,7 +2198,7 @@
             result = 0;
 
         // Init `minTime` if needed.
-        clone.minTime = bench.minTime || (bench.minTime = bench.options.minTime = options.minTime);
+        clone.minTime = bench.minTime || (bench.minTime = bench.options.minTime = Benchmark.options.minTime);
 
         // Compile in setup/teardown functions and the test loop.
         // Create a new compiled test, instead of using the cached `bench.compiled`,
@@ -2442,7 +2442,7 @@
       }
       // Resolve time span required to achieve a percent uncertainty of at most 1%.
       // For more information see http://spiff.rit.edu/classes/phys273/uncert/uncert.html.
-      options.minTime || (options.minTime = root.Math.max(timer.res / 2 / 0.01, 0.05));
+      Benchmark.options.minTime || (Benchmark.options.minTime = root.Math.max(timer.res / 2 / 0.01, 0.05));
       return clock.apply(null, arguments);
     }
 
