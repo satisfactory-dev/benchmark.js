@@ -1138,10 +1138,8 @@
      * @param {Object<now, () => number>} [usTimer] A high-precision timer such as the one provided by microtime
      * @returns {Benchmark} Returns the existing Benchmark class
      */
-    static runInContext(options) {
+    static reconfigureTimer(options) {
       Timer.changeTimerContext(options);
-
-      return Benchmark;
     }
 
     static get Event() {
