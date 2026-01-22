@@ -482,7 +482,7 @@
      * @param {Object<now, () => number>} [options.highestDefaultTimer]
      * @param {Object<now, () => number>} [options.usTimer] A high-precision timer such as the one provided by microtime
      */
-    static changeTimerContext({
+    static changeContext({
       highestDefaultTimer = performance,
       usTimer = undefined,
     } = {}) {
@@ -1135,21 +1135,16 @@
      */
     static version = '2.1.4';
 
-    /**
-     * @param {Object<now, () => number>} highestDefaultTimer
-     * @param {Object<now, () => number>} [usTimer] A high-precision timer such as the one provided by microtime
-     * @returns {Benchmark} Returns the existing Benchmark class
-     */
-    static reconfigureTimer(options) {
-      Timer.changeTimerContext(options);
-    }
-
     static get Event() {
       return Event;
     }
 
     static get Suite() {
       return Suite;
+    }
+
+    static get Timer() {
+      return Timer;
     }
 
     /**
@@ -1853,6 +1848,8 @@
       var bench = this,
           event = new Event('start');
 
+      const timer = options?.timer || Timer.timer;
+
       // Set `running` to `false` so `reset()` won't call `abort()`.
       bench.running = false;
       bench.reset();
@@ -1865,10 +1862,12 @@
       if (!event.cancelled) {
         options = { 'async': ((options = options && options.async) == null ? bench.async : options) && Support.timeout };
 
+        options.timer = timer;
+
         // For clones created within `compute()`.
         if (bench._original) {
           if (bench.defer) {
-            new Deferred(bench);
+            new Deferred(bench, timer);
           } else {
             cycle(bench, options);
           }
@@ -1883,6 +1882,13 @@
   }
 
   class Deferred {
+    /**
+     * The Timer instance.
+     *
+     * @type {Timer}
+     */
+    #timer;
+
     /**
      * The deferred benchmark instance.
      *
@@ -1916,10 +1922,12 @@
      *
      * @memberOf Benchmark
      * @param {Benchmark} clone The cloned benchmark instance.
+     * @param {Timer} timer The timer instance.
      */
-    constructor(clone) {
+    constructor(clone, timer) {
       this.benchmark = clone;
-      clock(this);
+      this.#timer = timer;
+      clock(this, timer);
     }
 
     /**
@@ -1934,15 +1942,15 @@
         // cycle() -> clone cycle/complete event -> compute()'s invoked bench.run() cycle/complete.
         deferred.teardown();
         clone.running = false;
-        cycle(deferred);
+        cycle(deferred, {timer: this.#timer});
       }
       else if (++deferred.cycles < clone.count) {
-        clone.compiled.call(deferred, root, Timer.timer);
+        clone.compiled.call(deferred, root, this.#timer);
       }
       else {
-        Timer.timer.stop(deferred);
+        this.#timer.stop(deferred);
         deferred.teardown();
-        delay(clone, function() { cycle(deferred); });
+        delay(clone, () => { cycle(deferred, {timer: this.#timer}); });
       }
     }
   }
@@ -2292,6 +2300,7 @@
       suite.reset();
       suite.running = true;
       options || (options = {});
+      options.timer = options?.timer || Timer.timer;
 
       Benchmark.invoke(suite, {
         'name': 'run',
@@ -2323,15 +2332,15 @@
    * Clocks the time taken to execute a test per cycle (secs).
    *
    * @private
-   * @param {Object} bench The benchmark instance.
+   * @param {Object} clone The benchmark instance.
    * @returns {number} The time taken.
    */
-  function clock() {
+  function clock(clone, timer) {
     var
         templateData = {};
 
     // Lazy define for hi-res timers.
-    clock = function(clone) {
+    clock = function(clone, timer) {
       var deferred;
 
       if (clone instanceof Deferred) {
@@ -2383,7 +2392,7 @@
           // Pretest to determine if compiled code exits early, usually by a
           // rogue `return` statement, by checking for a return object with the uid.
           bench.count = 1;
-          compiled = decompilable && (compiled.call(bench, root, Timer.timer) || {}).uid == templateData.uid && compiled;
+          compiled = decompilable && (compiled.call(bench, root, timer) || {}).uid == templateData.uid && compiled;
           bench.count = count;
         }
       } catch(e) {
@@ -2406,7 +2415,7 @@
         try {
           // Pretest one more time to check for errors.
           bench.count = 1;
-          compiled.call(bench, root, Timer.timer);
+          compiled.call(bench, root, timer);
           bench.count = count;
           delete clone.error;
         }
@@ -2420,7 +2429,7 @@
       // If no errors run the full test loop.
       if (!clone.error) {
         compiled = bench.compiled = clone.compiled = createCompiled(bench, decompilable, deferred, funcBody);
-        result = compiled.call(deferred || bench, root, Timer.timer).elapsed;
+        result = compiled.call(deferred || bench, root, timer).elapsed;
       }
       return result;
     };
@@ -2444,14 +2453,14 @@
       });
 
       // Use API of chosen timer.
-      if (Timer.timer.unit == 'ns') {
+      if (timer.unit == 'ns') {
         root.Object.assign(templateData, {
           'begin': interpolate('s#=n#()'),
           'end': interpolate('r#=n#(s#);r#=r#[0]+(r#[1]/1e9)')
         });
       }
-      else if (Timer.timer.unit == 'us') {
-        if (Timer.timer.ns.stop) {
+      else if (timer.unit == 'us') {
+        if (timer.ns.stop) {
           root.Object.assign(templateData, {
             'begin': interpolate('s#=n#.start()'),
             'end': interpolate('r#=n#.microseconds()/1e6')
@@ -2463,7 +2472,7 @@
           });
         }
       }
-      else if (Timer.timer.ns.now) {
+      else if (timer.ns.now) {
         root.Object.assign(templateData, {
           'begin': interpolate('s#=(+n#.now())'),
           'end': interpolate('r#=((+n#.now())-s#)/1e3')
@@ -2476,12 +2485,12 @@
         });
       }
       // Define `timer` methods.
-      Timer.timer.start = createFunction(
+      timer.start = createFunction(
         interpolate('o#'),
         interpolate('var n#=this.ns,${begin};o#.elapsed=0;o#.timeStamp=s#')
       );
 
-      Timer.timer.stop = createFunction(
+      timer.stop = createFunction(
         interpolate('o#'),
         interpolate('var n#=this.ns,s#=o#.timeStamp,${end};o#.elapsed=r#')
       );
@@ -2516,8 +2525,8 @@
 
     // Resolve time span required to achieve a percent uncertainty of at most 1%.
     // For more information see http://spiff.rit.edu/classes/phys273/uncert/uncert.html.
-    Benchmark.options.minTime || (Benchmark.options.minTime = root.Math.max(Timer.timer.res / 2 / 0.01, 0.05));
-    return clock.apply(null, arguments);
+    Benchmark.options.minTime || (Benchmark.options.minTime = root.Math.max(timer.res / 2 / 0.01, 0.05));
+    return clock.apply(null, [clone, timer]);
   }
 
   /*------------------------------------------------------------------------*/
@@ -2530,7 +2539,7 @@
    * @param {Object} options The options object.
    */
   function compute(bench, options) {
-    options || (options = {});
+    const {timer} = options;
 
     var async = options.async,
         elapsed = 0,
@@ -2667,7 +2676,7 @@
     enqueue();
     Benchmark.invoke(queue, {
       'name': 'run',
-      'args': { 'async': async },
+      'args': { async, timer },
       'queued': true,
       'onCycle': evaluate,
       'onComplete': function() { bench.emit(new Event('complete')); }
@@ -2684,7 +2693,7 @@
    * @param {Object} options The options object.
    */
   function cycle(clone, options) {
-    options || (options = {});
+    const {timer} = options;
 
     var deferred;
     if (clone instanceof Deferred) {
@@ -2706,7 +2715,7 @@
     if (clone.running) {
       // `minTime` is set to `Benchmark.options.minTime` in `clock()`.
       cycles = ++clone.cycles;
-      clocked = deferred ? deferred.elapsed : clock(clone);
+      clocked = deferred ? deferred.elapsed : clock(clone, timer);
       minTime = clone.minTime;
 
       if (cycles > bench.cycles) {
@@ -2758,11 +2767,11 @@
       // Start a new cycle.
       clone.count = count;
       if (deferred) {
-        clone.compiled.call(deferred, root, Timer.timer);
+        clone.compiled.call(deferred, root, timer);
       } else if (async) {
         delay(clone, function() { cycle(clone, options); });
       } else {
-        cycle(clone);
+        cycle(clone, {timer});
       }
     }
     else {

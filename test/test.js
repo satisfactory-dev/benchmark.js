@@ -23,7 +23,7 @@
 
       console.log('using microtime');
 
-      return result;
+      return result.now;
     } catch {
     }
 
@@ -35,7 +35,7 @@
   const maybe_microtime = microtime();
 
   if (maybe_microtime) {
-    Benchmark.reconfigureTimer({
+    Benchmark.Timer.changeContext({
       usTimer: maybe_microtime,
     });
   }
@@ -77,6 +77,22 @@
       assert.ok(true, 'test skipped');
     }
   }
+
+  /*--------------------------------------------------------------------------*/
+
+  QUnit.module('Benchmark.Timer');
+
+  (() => {
+    QUnit.test('Should default to the expected timer', (assert) => {
+      const timer = Benchmark.Timer.timer;
+      assert.ok(timer !== undefined);
+      if (undefined === maybe_microtime) {
+        assert.equal(timer.ns, performance.now);
+      } else {
+        assert.notEqual(timer.ns, performance.now);
+      }
+    })
+  })();
 
   /*--------------------------------------------------------------------------*/
 
@@ -1145,7 +1161,8 @@
       skipped,
       todo,
       total,
-    }
+    },
+    childSuites,
   }) => {
     console.table({
       failed,
@@ -1157,6 +1174,16 @@
       status,
     });
     console.log('Finished running tests')
+    if (status !== 'passed') {
+      const failed = childSuites
+        .filter(({status}) => 'failed' === status)
+        .flatMap(({tests}) => tests
+          .filter(({status}) => 'failed' === status)
+          .map(({name, suiteName}) => `${suiteName}: ${name}`)
+        );
+      console.error(failed);
+      throw new Error('Some tests failed!');
+    }
   })
   if (!document) {
     QUnit.config.noglobals = true;

@@ -64,7 +64,7 @@ function microtime() {
 const maybe_microtime = microtime();
 
 if (maybe_microtime) {
-	Benchmark.reconfigureTimer({
+	Benchmark.Timer.changeContext({
 		usTimer: maybe_microtime,
 	});
 }
