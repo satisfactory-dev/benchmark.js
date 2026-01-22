@@ -1379,10 +1379,10 @@
       }
     }
 
+    class Suite {
     /**
      * The Suite constructor.
      *
-     * @constructor
      * @memberOf Benchmark
      * @param {string} name A name to identify the suite.
      * @param {Object} [options={}] Options object.
@@ -1416,7 +1416,7 @@
      *   'onComplete': onComplete
      * });
      */
-    function Suite(name, options) {
+      constructor(name, options) {
       var suite = this;
 
       this._benchmarks = [];
@@ -1440,31 +1440,32 @@
         return this._benchmarks.shift();
       }
     }
-
-    root.Object.defineProperty(Suite.prototype, 'benchmarks', {
-      get: function() {
+      get benchmarks() {
         return [...this._benchmarks];
-      },
-    });
+      }
 
-    root.Object.defineProperty(Suite.prototype, 'length', {
       /**
        * The number of benchmarks in the suite.
        *
-       * @memberOf Benchmark.Suite
-       * @type number
+       * @type {number}
        */
-      get: function () {
+      get length() {
         return this._benchmarks.length;
-      },
-      set: function (value) {
+      }
+
+      /**
+       * Sets the length of the benchmarks array for the Suite instance.
+       *
+       * Useful for truncating the array.
+       */
+      set length(value) {
         if (undefined === this._benchmarks) {
           this._benchmarks = [];
         }
 
         this._benchmarks.length = value;
-      },
-    });
+      }
+    }
 
     /**
      * Converts a Suite or Suite-like object/array to an array of values
