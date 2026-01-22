@@ -1380,66 +1380,67 @@
     }
 
     class Suite {
-    /**
-     * The Suite constructor.
-     *
-     * @memberOf Benchmark
-     * @param {string} name A name to identify the suite.
-     * @param {Object} [options={}] Options object.
-     * @example
-     *
-     * // basic usage (the `new` operator is optional)
-     * var suite = new Benchmark.Suite;
-     *
-     * // or using a name first
-     * var suite = new Benchmark.Suite('foo');
-     *
-     * // or with options
-     * var suite = new Benchmark.Suite('foo', {
-     *
-     *   // called when the suite starts running
-     *   'onStart': onStart,
-     *
-     *   // called between running benchmarks
-     *   'onCycle': onCycle,
-     *
-     *   // called when aborted
-     *   'onAbort': onAbort,
-     *
-     *   // called when a test errors
-     *   'onError': onError,
-     *
-     *   // called when reset
-     *   'onReset': onReset,
-     *
-     *   // called when the suite completes running
-     *   'onComplete': onComplete
-     * });
-     */
+      /**
+       * The Suite constructor.
+       *
+       * @memberOf Benchmark
+       * @param {string} name A name to identify the suite.
+       * @param {Object} [options={}] Options object.
+       * @example
+       *
+       * // basic usage (the `new` operator is optional)
+       * var suite = new Benchmark.Suite;
+       *
+       * // or using a name first
+       * var suite = new Benchmark.Suite('foo');
+       *
+       * // or with options
+       * var suite = new Benchmark.Suite('foo', {
+       *
+       *   // called when the suite starts running
+       *   'onStart': onStart,
+       *
+       *   // called between running benchmarks
+       *   'onCycle': onCycle,
+       *
+       *   // called when aborted
+       *   'onAbort': onAbort,
+       *
+       *   // called when a test errors
+       *   'onError': onError,
+       *
+       *   // called when reset
+       *   'onReset': onReset,
+       *
+       *   // called when the suite completes running
+       *   'onComplete': onComplete
+       * });
+       */
       constructor(name, options) {
-      var suite = this;
+        var suite = this;
 
-      this._benchmarks = [];
-      // Juggle arguments.
-      if (typeof name === 'object') {
-        // 1 argument (options).
-        options = name;
-      } else {
-        // 2 arguments (name [, options]).
-        suite.name = name;
+        this._benchmarks = [];
+        // Juggle arguments.
+        if (typeof name === 'object') {
+          // 1 argument (options).
+          options = name;
+        } else {
+          // 2 arguments (name [, options]).
+          suite.name = name;
+        }
+        setOptions(suite, options);
+
+        this.reverse = () => {
+          this._benchmarks.reverse();
+
+          return this;
+        }
+
+        this.shift = () => {
+          return this._benchmarks.shift();
+        }
       }
-      setOptions(suite, options);
 
-      this.reverse = () => {
-        this._benchmarks.reverse();
-
-        return this;
-      }
-
-      this.shift = () => {
-        return this._benchmarks.shift();
-      }
-    }
       get benchmarks() {
         return [...this._benchmarks];
       }
