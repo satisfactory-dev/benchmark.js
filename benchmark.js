@@ -416,19 +416,41 @@
      */
     ns;
 
+    #start = null;
+
     /**
      * Starts the deferred timer.
      *
      * @param {Object} deferred The deferred instance.
      */
-    start = null;
+    get start() {
+      if (null === this.#start) {
+        this.#start = createFunction(
+          interpolate('o#'),
+          interpolate('var n#=this.ns,${begin};o#.elapsed=0;o#.timeStamp=s#')
+        );
+      }
+
+      return this.#start;
+    }
+
+    #stop = null;
 
     /**
      * Stops the deferred timer.
      *
      * @param {Object} deferred The deferred instance.
      */
-    stop = null; // Lazy defined in `clock()`.
+    get stop() {
+      if (null === this.#stop) {
+        this.#stop = createFunction(
+          interpolate('o#'),
+          interpolate('var n#=this.ns,s#=o#.timeStamp,${end};o#.elapsed=r#')
+        );
+      }
+
+      return this.#stop;
+    }
 
     /**
      * @readonly
@@ -477,18 +499,23 @@
      */
     static #usTimer;
 
+    static #allowHrtime = true;
+
     /**
      * @param {Object} options
      * @param {Object<now, () => number>} [options.highestDefaultTimer]
      * @param {Object<now, () => number>} [options.usTimer] A high-precision timer such as the one provided by microtime
+     * @param {boolean} [options.allowHrtime] If process.hrtime is available, controls whether it is used.
      */
     static changeContext({
       highestDefaultTimer = performance,
       usTimer = undefined,
+      allowHrtime = true,
     } = {}) {
       this.#timer = undefined;
       this.#highestDefaultTimer = highestDefaultTimer;
       this.#usTimer = usTimer;
+      this.#allowHrtime = allowHrtime;
     }
 
     /**
@@ -573,7 +600,11 @@
         } catch(e) {}
 
         // Detect Node.js's nanosecond resolution timer available in Node.js >= 0.8.
-        if (processObject && typeof processObject.hrtime == 'function') {
+        if (
+          this.#allowHrtime &&
+          processObject &&
+          typeof processObject.hrtime == 'function'
+        ) {
           timers.push(new Timer(
             processObject.hrtime,
             this.#getRes('ns', processObject.hrtime),
@@ -2328,6 +2359,9 @@
 
   /*------------------------------------------------------------------------*/
 
+    var
+        templateData = {};
+
   /**
    * Clocks the time taken to execute a test per cycle (secs).
    *
@@ -2336,9 +2370,6 @@
    * @returns {number} The time taken.
    */
   function clock(clone, timer) {
-    var
-        templateData = {};
-
     // Lazy define for hi-res timers.
     clock = function(clone, timer) {
       var deferred;
@@ -2484,16 +2515,6 @@
           'end': interpolate('r#=(new n#().getTime()-s#)/1e3')
         });
       }
-      // Define `timer` methods.
-      timer.start = createFunction(
-        interpolate('o#'),
-        interpolate('var n#=this.ns,${begin};o#.elapsed=0;o#.timeStamp=s#')
-      );
-
-      timer.stop = createFunction(
-        interpolate('o#'),
-        interpolate('var n#=this.ns,s#=o#.timeStamp,${end};o#.elapsed=r#')
-      );
 
       // Create compiled test.
       return createFunction(
@@ -2502,6 +2523,14 @@
         interpolate(body)
       );
     }
+
+    /*----------------------------------------------------------------------*/
+
+    // Resolve time span required to achieve a percent uncertainty of at most 1%.
+    // For more information see http://spiff.rit.edu/classes/phys273/uncert/uncert.html.
+    Benchmark.options.minTime || (Benchmark.options.minTime = root.Math.max(timer.res / 2 / 0.01, 0.05));
+    return clock.apply(null, [clone, timer]);
+  }
 
     /**
      * Interpolates a given template string.
@@ -2520,14 +2549,6 @@
       // Replaces all occurrences of `#` with a unique number and template tokens with content.
       return tagged`${string.replace(/\#/g, /\d+/.exec(templateData.uid))}`;
     }
-
-    /*----------------------------------------------------------------------*/
-
-    // Resolve time span required to achieve a percent uncertainty of at most 1%.
-    // For more information see http://spiff.rit.edu/classes/phys273/uncert/uncert.html.
-    Benchmark.options.minTime || (Benchmark.options.minTime = root.Math.max(timer.res / 2 / 0.01, 0.05));
-    return clock.apply(null, [clone, timer]);
-  }
 
   /*------------------------------------------------------------------------*/
 

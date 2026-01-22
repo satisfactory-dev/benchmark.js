@@ -86,6 +86,7 @@
     QUnit.test('Should default to the expected timer', (assert) => {
       const timer = Benchmark.Timer.timer;
       assert.ok(timer !== undefined);
+      assert.equal(timer, Benchmark.Timer.timer);
       if (undefined === maybe_microtime) {
         if (process && process.hrtime) {
           assert.equal(timer.ns, process.hrtime);
@@ -93,8 +94,19 @@
           assert.equal(timer.ns, performance.now);
         }
       } else {
+        if (process && process.hrtime) {
+          assert.equal(timer.ns, process.hrtime);
+          Benchmark.Timer.changeContext({
+            usTimer: maybe_microtime,
+            allowHrtime: false,
+          })
+          assert.notEqual(timer, Benchmark.Timer.timer);
+          assert.equal(Benchmark.Timer.timer.ns, maybe_microtime);
+        } else {
         assert.notEqual(timer.ns, performance.now);
+        }
       }
+      Benchmark.Timer.changeContext();
     })
   })();
 
