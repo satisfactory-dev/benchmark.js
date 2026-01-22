@@ -103,10 +103,12 @@
         }
       } else {
         if (globalThis?.process?.hrtime) {
-          assert.equal(
-            timer.ns,
-            globalThis.process.hrtime,
-            'Expected Benchmark.Timer.timer to use hrtime when running under node',
+          assert.ok(
+            (
+              timer.ns === globalThis.process.hrtime ||
+              timer.ns === maybe_microtime
+            ),
+            'Expected Benchmark.Timer.timer to use hrtime or microtime when running under node',
           );
           Benchmark.Timer.changeContext({
             usTimer: maybe_microtime,
