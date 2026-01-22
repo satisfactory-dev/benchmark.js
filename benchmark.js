@@ -1380,6 +1380,35 @@
     }
 
     class Suite {
+    /**
+     * The default options copied by suite instances.
+     *
+       * @type {Object}
+     */
+      static options = {
+
+      /**
+       * The name of the suite.
+       *
+         * @type {string}
+       */
+      'name': undefined
+      }
+
+      /**
+       * A flag to indicate if the suite is aborted.
+       *
+       * @type {boolean}
+       */
+      aborted = false;
+
+      /**
+       * A flag to indicate if the suite is running.
+       *
+       * @type {boolean}
+       */
+      running = false;
+
       /**
        * The Suite constructor.
        *
@@ -2713,45 +2742,8 @@
       'timeStamp': 0
     });
 
-    /*------------------------------------------------------------------------*/
-
-    /**
-     * The default options copied by suite instances.
-     *
-     * @static
-     * @memberOf Benchmark.Suite
-     * @type Object
-     */
-    Suite.options = {
-
-      /**
-       * The name of the suite.
-       *
-       * @memberOf Benchmark.Suite.options
-       * @type string
-       */
-      'name': undefined
-    };
 
     /*------------------------------------------------------------------------*/
-
-    root.Object.assign(Suite.prototype, {
-      /**
-       * A flag to indicate if the suite is aborted.
-       *
-       * @memberOf Benchmark.Suite
-       * @type boolean
-       */
-      'aborted': false,
-
-      /**
-       * A flag to indicate if the suite is running.
-       *
-       * @memberOf Benchmark.Suite
-       * @type boolean
-       */
-      'running': false
-    });
 
     root.Object.assign(Suite.prototype, {
       'abort': abortSuite,
