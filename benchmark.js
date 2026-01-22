@@ -1416,6 +1416,34 @@
 
     class Deferred {
       /**
+       * The deferred benchmark instance.
+       *
+       * @type Object
+       */
+      benchmark = null;
+
+      /**
+       * The number of deferred cycles performed while benchmarking.
+       *
+       * @type number
+       */
+      cycles = 0;
+
+      /**
+       * The time taken to complete the deferred benchmark (secs).
+       *
+       * @type number
+       */
+      elapsed = 0;
+
+      /**
+       * A timestamp of when the deferred benchmark started (ms).
+       *
+       * @type number
+       */
+      timeStamp = 0;
+
+      /**
        * The Deferred constructor.
        *
        * @memberOf Benchmark
@@ -2708,44 +2736,6 @@
       'run': run,
       'toString': toStringBench
     });
-
-    /*------------------------------------------------------------------------*/
-
-    root.Object.assign(Deferred.prototype, {
-
-      /**
-       * The deferred benchmark instance.
-       *
-       * @memberOf Benchmark.Deferred
-       * @type Object
-       */
-      'benchmark': null,
-
-      /**
-       * The number of deferred cycles performed while benchmarking.
-       *
-       * @memberOf Benchmark.Deferred
-       * @type number
-       */
-      'cycles': 0,
-
-      /**
-       * The time taken to complete the deferred benchmark (secs).
-       *
-       * @memberOf Benchmark.Deferred
-       * @type number
-       */
-      'elapsed': 0,
-
-      /**
-       * A timestamp of when the deferred benchmark started (ms).
-       *
-       * @memberOf Benchmark.Deferred
-       * @type number
-       */
-      'timeStamp': 0
-    });
-
 
     /*------------------------------------------------------------------------*/
 
