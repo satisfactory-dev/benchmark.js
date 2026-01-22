@@ -89,21 +89,45 @@
       assert.equal(timer, Benchmark.Timer.timer);
       if (undefined === maybe_microtime) {
         if (globalThis?.process?.hrtime) {
-          assert.equal(timer.ns, globalThis.process.hrtime);
+          assert.equal(
+            timer.ns,
+            globalThis.process.hrtime,
+            'Expected Benchmark.Timer.timer to use hrtime when running under node',
+          );
         } else {
-          assert.equal(timer.ns, performance);
+          assert.equal(
+            timer.ns,
+            performance,
+            'Expected Benchmark.Timer.timer to use performance API when not running under node',
+          );
         }
       } else {
         if (globalThis?.process?.hrtime) {
-          assert.equal(timer.ns, globalThis.process.hrtime);
+          assert.equal(
+            timer.ns,
+            globalThis.process.hrtime,
+            'Expected Benchmark.Timer.timer to use hrtime when running under node',
+          );
           Benchmark.Timer.changeContext({
             usTimer: maybe_microtime,
             allowHrtime: false,
           })
-          assert.notEqual(timer, Benchmark.Timer.timer);
-          assert.equal(Benchmark.Timer.timer.ns, maybe_microtime);
+          assert.notEqual(
+            timer,
+            Benchmark.Timer.timer,
+            'Expected Benchmark.Timer.timer to return a different instance after changing context',
+          );
+          assert.equal(
+            Benchmark.Timer.timer.ns,
+            maybe_microtime,
+            'Expected Benchmark.Timer.timer to use microtime when access to process.hrtime is not allowed'
+          );
         } else {
-          assert.notEqual(timer.ns, performance);
+          assert.notEqual(
+            timer.ns,
+            performance,
+            'Expected Benchmark.Timer.timer to not use performance API'
+          );
         }
       }
       Benchmark.Timer.changeContext();
