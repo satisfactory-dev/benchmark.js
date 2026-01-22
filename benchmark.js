@@ -1845,7 +1845,7 @@
         /**
          * The name of the suite.
          *
-         * @type {string}
+         * @type {string|string}
          */
         'name': undefined
       }
