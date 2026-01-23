@@ -11,18 +11,30 @@
     <script>
       QUnit.config.hidepassed = true;
       QUnit.urlParams.norequire = /[?&]norequire=true(?:&|$)/.test(location.search);
+      QUnit.urlParams.asModule = /[?&]asmodule=true(?:&|$)/.test(location.search);
 
       async function loading () {
-        for (const url of (
+        /** @type {string[]} */
+        const scripts_to_load = [];
+        if (QUnit.urlParams.asModule) {
+          globalThis.Benchmark = (await import('../benchmark.js')).default;
+          console.log('loaded as module');
+
+          scripts_to_load.push('test.js');
+        } else {
+          scripts_to_load.push(...(
           QUnit.urlParams.norequire
             ? [
-              '../benchmark.js',
+              '../benchmark.umd.js',
               'test.js',
             ]
             : [
               '../node_modules/requirejs/require.js',
             ]
-        )) {
+          ));
+        }
+
+        for (const url of scripts_to_load) {
           const script = document.createElement('script');
           script.src = url;
 
@@ -55,7 +67,7 @@
             {
               'name': 'benchmark',
               'location': '..',
-              'main': 'benchmark'
+              'main': 'benchmark.umd'
             },
             {
               'name': 'test',

@@ -6,26 +6,9 @@
  * Modified by John-David Dalton
  * Available under MIT license
  */
-;(function() {
-  'use strict';
-
-  /** Used to determine if values are of the language type Object. */
-  var objectTypes = {
-    'function': true,
-    'object': true
-  };
-
-  /** Detect free variable `exports`. */
-  var freeExports = objectTypes[typeof exports] && exports && !exports.nodeType && exports;
-
-  /** Detect free variable `module`. */
-  var freeModule = objectTypes[typeof module] && module && !module.nodeType && module;
 
   /** Used to assign each benchmark an incremented id. */
   var counter = 0;
-
-  /** Detect the popular CommonJS extension `module.exports`. */
-  var moduleExports = freeModule && freeModule.exports === freeExports && freeExports;
 
   /** Used to detect primitive types. */
   var rePrimitive = /^(?:boolean|number|string|undefined)$/;
@@ -2805,26 +2788,4 @@
   /*--------------------------------------------------------------------------*/
 
   // Export Benchmark.
-  // Some AMD build optimizers, like r.js, check for condition patterns like the following:
-  if (typeof define == 'function' && typeof define.amd == 'object' && define.amd) {
-    // Define as an anonymous module so, through path mapping, it can be aliased.
-    define(function() {
-      return Benchmark;
-    });
-  }
-  else {
-    // Check for `exports` after `define` in case a build optimizer adds an `exports` object.
-    if (freeExports && freeModule) {
-      // Export for Node.js.
-      if (moduleExports) {
-        (freeModule.exports = Benchmark).Benchmark = Benchmark;
-      }
-      // Export for CommonJS support.
-      freeExports.Benchmark = Benchmark;
-    }
-    else {
-      // Export to the global object.
-      globalThis.Benchmark = Benchmark;
-    }
-  }
-}.call(globalThis));
+export default Benchmark;

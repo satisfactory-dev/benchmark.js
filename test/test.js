@@ -1,4 +1,4 @@
-;(function() {
+;(async function() {
 
   /** Used as a safe reference for `undefined` in pre ES5 environments. */
   var undefined;
@@ -14,10 +14,10 @@
 
   /** Load libraries. */
   var
-      Benchmark = root.Benchmark || require('../benchmark.js'),
-      QUnit = root.QUnit || require('qunit');
+      Benchmark = root.Benchmark || (await import('../benchmark.js')).default,
+      QUnit = root.QUnit || (await import('qunit')).default;
 
-  function microtime() {
+  async function microtime() {
     const version = globalThis?.process?.version || '';
     if (
       version.startsWith('v21.') ||
@@ -30,7 +30,7 @@
     }
 
     try {
-      const result = require('microtime');
+      const result = (await import('microtime')).default;
 
       console.log('using microtime');
 
@@ -43,7 +43,7 @@
     return undefined;
   }
 
-  const maybe_microtime = microtime();
+  const maybe_microtime = await microtime();
 
   if (maybe_microtime) {
     Benchmark.Timer.changeContext({

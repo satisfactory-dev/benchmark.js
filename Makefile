@@ -14,20 +14,24 @@ nvm--run: nvm--install
 nvm--exec: nvm--install
 	@make nvm CMD="exec $(VERSION) $(CMD)"
 
+build:
+	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/rolldown -c ./rolldown.config.js"
+
 init:
 	@make nvm--exec VERSION=20 CMD="npm install"
 	@for version in $(VERSIONS); do make nvm--install VERSION="$$version"; done
 	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/playwright install --with-deps --only-shell chromium firefox webkit"
+	@make build
 
-test--all-versions:
+test--all-versions: build
 	@for version in $(VERSIONS); do make nvm--run VERSION="$$version" CMD="./test/test.js"; done
 
-test:
+test: build
 	@node ./test/test.js
 
 coverage: coverage--clean coverage--node coverage--playwright coverage--merge
 
-coverage--clean:
+coverage--clean: build
 	@git clean -fxd ./coverage/node/ ./coverage/playwright/
 
 coverage--node:
@@ -36,7 +40,7 @@ coverage--node:
 	@make nvm--exec VERSION=20 CMD="npm ci"
 	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/c8 -c ./.c8rc.node.json node ./test/test.js"
 
-coverage--playwright:
+coverage--playwright: build
 	@make nvm--exec VERSION=20 CMD="node ./playwright.js --browser=chromium"
 	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/c8 -c ./.c8rc.playwright.json report"
 

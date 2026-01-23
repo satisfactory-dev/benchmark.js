@@ -2,7 +2,12 @@
   "name": "@satisfactory-dev/benchmark",
   "description": "A benchmarking library that supports high-resolution timers & returns statistically significant results.",
   "license": "MIT",
-  "main": "benchmark.js",
+  "type": "module",
+  "exports": {
+    "import": "./benchmark.js",
+    "require": "./benchmark.umd.js",
+    "default": "./benchmark.umd.js"
+  },
   "keywords": [
     "benchmark",
     "performance",
@@ -24,13 +29,16 @@
     "c8": "^10.1.3",
     "playwright": "^1.57.0",
     "qunit": "^2.25.0",
-    "requirejs": "^2.3.5"
+    "requirejs": "^2.3.5",
+    "rolldown": "^1.0.0-rc.1"
   },
   "engines": {
     "node": ">=20.20.0"
   },
   "files": [
-    "benchmark.js"
+    "benchmark.js",
+    "benchmark.umd.js.map",
+    "benchmark.umd.js"
   ],
   "optionalDependencies": {
     "microtime": "^3.1.1"

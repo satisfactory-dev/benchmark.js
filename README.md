@@ -12,7 +12,7 @@ Forked from [benchmark.js](https://github.com/bestiejs/benchmark.js)
 In a browser:
 
 ```html
-<script src="benchmark.js"></script>
+<script src="benchmark.umd.js"></script>
 ```
 
 In an AMD loader:

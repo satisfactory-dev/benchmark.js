@@ -1,8 +1,8 @@
-const {
+import {
   chromium,
   firefox,
   webkit,
-} = require('playwright');
+} from 'playwright';
 
 let browsers = {
   chromium: [
@@ -27,18 +27,18 @@ if (specified_browser && specified_browser in browsers) {
   };
 }
 
-const {
+import {
   writeFile,
   readFile,
-} = require('node:fs/promises');
+} from 'node:fs/promises';
 
-const {
+import {
   pathToFileURL,
-} = require('node:url');
+} from 'node:url';
 
   const baseUrl = process.argv.find((maybe) => maybe.startsWith('http://')) || 'http://tests:80'
 
-const filter_by = `${baseUrl.replace(/:80$/, '')}/benchmark.js`;
+const filter_by = `${baseUrl.replace(/:80$/, '')}/benchmark.`;
 
   if (
     baseUrl !== 'http://tests:80'
@@ -66,6 +66,7 @@ async function maybeWithCoverage(
   for (const [label, url] of [
     ['with require', baseUrl],
     ['without require', `${baseUrl}?norequire=true`],
+    ['as module', `${baseUrl}?asmodule=true`],
   ]) {
     console.log(`Running ${label}`);
 
@@ -114,7 +115,7 @@ async function maybeWithCoverage(
                 maybe,
               ) => maybe.url.startsWith(filter_by))
               .map((e) => {
-                e.url = pathToFileURL(__dirname + '/benchmark.js')
+                e.url = pathToFileURL(import.meta.dirname + '/' + (e.url.includes('.umd.js') ? 'benchmark.umd.js' : 'benchmark.js'))
 
                 return e;
               }),
@@ -130,8 +131,8 @@ async function maybeWithCoverage(
     await browser.close();
   }
 
-  const readme = (await readFile(`${__dirname}/README.md`)).toString();
-  const Makefile = (await readFile(`${__dirname}/Makefile`)).toString();
+  const readme = (await readFile(`${import.meta.dirname}/README.md`)).toString();
+  const Makefile = (await readFile(`${import.meta.dirname}/Makefile`)).toString();
 
   const versions_from_Makefile = (
     /VERSIONS =((?: \d+)+)/.exec(Makefile) || ['', '']
@@ -173,7 +174,7 @@ async function maybeWithCoverage(
   })`;
 
   await writeFile(
-    `${__dirname}/README.md`,
+    `${import.meta.dirname}/README.md`,
     readme.replace(
       /<!-- #region Tested In -->\n(Tested in.+)\n<!-- #endregion Tested In -->/,
       `
