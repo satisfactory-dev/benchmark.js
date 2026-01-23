@@ -39,16 +39,16 @@ import {
   pathToFileURL,
 } from 'node:url';
 
-  const baseUrl = process.argv.find((maybe) => maybe.startsWith('http://')) || 'http://tests:80'
+const baseUrl = process.argv.find((maybe) => maybe.startsWith('http://')) || 'http://tests:80'
 
 const filter_by = `${baseUrl.replace(/:80$/, '')}/benchmark.`;
 
-  if (
-    baseUrl !== 'http://tests:80'
-    && baseUrl !== 'http://localhost:8003'
-  ) {
-    throw new Error(`Unsupported URL specified: ${baseUrl}`)
-  }
+if (
+  baseUrl !== 'http://tests:80'
+  && baseUrl !== 'http://localhost:8003'
+) {
+  throw new Error(`Unsupported URL specified: ${baseUrl}`)
+}
 
 /**
  * @param {import('playwright').Browser} browser
@@ -99,42 +99,42 @@ async function maybeWithCoverage(
 /** @type {[string, [string, import('playwright').BrowserType]][]} */
 const browsersAsEntries = Object.entries(browsers);
 
-  const versions = [];
+const versions = [];
 for (const [label, [name, type]] of browsersAsEntries) {
-    const browser = await type.launch();
-    const version = `${name} (${browser.version()})`;
-    versions.push(version);
-    console.log(`Running tests in ${version}`);
-    const start = performance.now();
-    const coverage = await maybeWithCoverage(browser, type === (browsers?.chromium || ['', ''])[1]);
-    console.log(`Tests in ${version} took ${performance.now() - start}`);
+  const browser = await type.launch();
+  const version = `${name} (${browser.version()})`;
+  versions.push(version);
+  console.log(`Running tests in ${version}`);
+  const start = performance.now();
+  const coverage = await maybeWithCoverage(browser, type === (browsers?.chromium || ['', ''])[1]);
+  console.log(`Tests in ${version} took ${performance.now() - start}`);
 
-    if (coverage) {
-      console.log(`${version} has generated coverage`);
-      await writeFile(
-        `./coverage/playwright/tmp/playwright-${label}.json`,
-        JSON.stringify(
-          {
-            result: coverage
-              .filter((
-                maybe,
-              ) => maybe.url.startsWith(filter_by))
-              .map((e) => {
-                e.url = pathToFileURL(import.meta.dirname + '/' + (e.url.includes('.umd.js') ? 'benchmark.umd.js' : 'benchmark.js'))
+  if (coverage) {
+    console.log(`${version} has generated coverage`);
+    await writeFile(
+      `./coverage/playwright/tmp/playwright-${label}.json`,
+      JSON.stringify(
+        {
+          result: coverage
+            .filter((
+              maybe,
+            ) => maybe.url.startsWith(filter_by))
+            .map((e) => {
+              e.url = pathToFileURL(import.meta.dirname + '/' + (e.url.includes('.umd.js') ? 'benchmark.umd.js' : 'benchmark.js'))
 
-                return e;
-              }),
-          },
-          null,
-          '\t'
-        )
+              return e;
+            }),
+        },
+        null,
+        '\t'
       )
-    } else {
-      console.log(`${version} has not generated coverage`);
-    }
-    console.log('closing');
-    await browser.close();
+    )
+  } else {
+    console.log(`${version} has not generated coverage`);
   }
+  console.log('closing');
+  await browser.close();
+}
 
 if (updateReadme) {
   const readme = (await readFile(`${import.meta.dirname}/README.md`)).toString();
@@ -192,4 +192,4 @@ if (updateReadme) {
   );
 }
 
-  process.exit(0)
+process.exit(0)
