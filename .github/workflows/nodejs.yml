@@ -101,13 +101,12 @@ jobs:
               with:
                   node-version: 20
                   cache: 'npm'
-            - run: npm ci --omit=optional
-            - run: ./node_modules/.bin/rolldown -c ./rolldown.config.js
-            - name: Node Coverage (without microtime)
-              run: ./node_modules/.bin/c8 -c ./.c8rc.node.json node ./test/test.js
             - run: npm ci
             - run: ./node_modules/.bin/rolldown -c ./rolldown.config.js
             - name: Node Coverage (with microtime)
+              run: ./node_modules/.bin/c8 -c ./.c8rc.node.json node ./test/test.js
+            - run: npm ci --omit=optional
+            - name: Node Coverage (without microtime)
               run: ./node_modules/.bin/c8 -c ./.c8rc.node.json node ./test/test.js
             - uses: hoverkraft-tech/compose-action@05da55b2bb8a5a759d1c4732095044bd9018c050
               with:
