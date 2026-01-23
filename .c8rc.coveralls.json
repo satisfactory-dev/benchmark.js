@@ -1,6 +1,5 @@
 {
 	"reporter": ["lcovonly"],
 	"report-dir": "./coverage",
-	"all": true,
 	"include": ["benchmark.js", "benchmark.umd.js"]
 }

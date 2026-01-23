@@ -1,6 +1,5 @@
 {
 	"reporter": ["text", "html"],
 	"report-dir": "./coverage",
-	"all": true,
 	"include": ["benchmark.js", "benchmark.umd.js"]
 }
