@@ -2105,16 +2105,6 @@
         suite.name = name;
       }
       this.setOptions(suite, options);
-
-      this.reverse = () => {
-        this._benchmarks.reverse();
-
-        return this;
-      }
-
-      this.shift = () => {
-        return this._benchmarks.shift();
-      }
     }
 
     get benchmarks() {
@@ -2141,6 +2131,26 @@
       }
 
       this._benchmarks.length = value;
+    }
+
+    /**
+     * Reverse the benchmarks order
+     *
+     * @returns {this}
+     */
+    reverse() {
+      this._benchmarks.reverse();
+
+      return this;
+    }
+
+    /**
+     * Removes the first benchmark from the benchmarks array and returns it
+     *
+     * @returns {Benchmark|undefined}
+     */
+    shift() {
+      return this._benchmarks.shift();
     }
 
     /**
