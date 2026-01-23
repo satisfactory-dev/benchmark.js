@@ -93,7 +93,6 @@ async function maybeWithCoverage(
   return coverage;
 }
 
-(async () => {
   const versions = [];
   for (const [label, [name, type]] of Object.entries(browsers)) {
     const browser = await type.launch();
@@ -186,4 +185,3 @@ async function maybeWithCoverage(
   );
 
   process.exit(0)
-})();
