@@ -407,6 +407,41 @@
 
   /*--------------------------------------------------------------------------*/
 
+  QUnit.module('Benchmark.toString');
+
+  (() => {
+    QUnit.test('should format a thrown error', (assert) => {
+        var bench = new Benchmark({
+          fn: 'const x=42;x.foo()',
+        }).run();
+
+        assert.ok(!!bench.error);
+        assert.ok(bench.error instanceof Error);
+        assert.ok(bench.error.message.includes('x.foo is not a function'));
+        assert.ok(bench.toString().includes('x.foo is not a function'));
+    });
+    QUnit.test('should format a manually-set function error', (assert) => {
+        var bench = new Benchmark({
+          fn: 'this.error = () => {console.log("foo")}; this.error.toString = () => "manual stringification";',
+        }).run();
+
+        assert.ok(!!bench.error);
+        assert.equal(typeof bench.error, 'function');
+        assert.ok(bench.toString().endsWith('() => "manual stringification"'));
+    });
+    QUnit.test('should format a manually-set number error', (assert) => {
+        var bench = new Benchmark({
+          fn: 'this.error = 42;',
+        }).run();
+
+        assert.ok(!!bench.error);
+        assert.equal(typeof bench.error, 'number');
+        assert.equal(bench.toString(), `<Test #${bench.id}>: 42`);
+    });
+  })();
+
+  /*--------------------------------------------------------------------------*/
+
   QUnit.module('Benchmark#clone');
 
   (function() {
