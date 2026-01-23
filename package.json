@@ -33,7 +33,7 @@
     "rolldown": "^1.0.0-rc.1"
   },
   "engines": {
-    "node": ">=20.20.0"
+    "node": "^20.20.0 || >= 22.22.0"
   },
   "files": [
     "benchmark.js",
