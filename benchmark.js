@@ -2363,8 +2363,6 @@
    * @returns {number} The time taken.
    */
   function clock(clone, timer) {
-    // Lazy define for hi-res timers.
-    clock = function(clone, timer) {
       var deferred;
 
       if (clone instanceof Deferred) {
@@ -2456,9 +2454,6 @@
         result = compiled.call(deferred || bench, globalThis, timer).elapsed;
       }
       return result;
-    };
-
-    return clock.apply(null, [clone, timer]);
   }
 
     /*----------------------------------------------------------------------*/
