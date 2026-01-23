@@ -37,6 +37,7 @@ jobs:
                   node-version: ${{ matrix.node_version }}
                   cache: 'npm'
             - run: npm ci
+            - run: make build
             - run: node ./test/test.js
     basic-checks:
         runs-on: ubuntu-latest
@@ -57,6 +58,7 @@ jobs:
                   node-version: ${{ matrix.node_version }}
                   cache: 'npm'
             - run: npm ci
+            - run: make build
             - run: node ./test/test.js
     playwright:
         name: Playwright
@@ -75,6 +77,7 @@ jobs:
                   node-version: 20
                   cache: 'npm'
             - run: npm ci
+            - run: make build
             - uses: hoverkraft-tech/compose-action@05da55b2bb8a5a759d1c4732095044bd9018c050
               with:
                 services: tests
@@ -100,9 +103,11 @@ jobs:
                   node-version: 20
                   cache: 'npm'
             - run: npm ci --omit=optional
+            - run: make build
             - name: Node Coverage (without microtime)
               run: ./node_modules/.bin/c8 -c ./.c8rc.node.json node ./test/test.js
             - run: npm ci
+            - run: make build
             - name: Node Coverage (with microtime)
               run: ./node_modules/.bin/c8 -c ./.c8rc.node.json node ./test/test.js
             - uses: hoverkraft-tech/compose-action@05da55b2bb8a5a759d1c4732095044bd9018c050
