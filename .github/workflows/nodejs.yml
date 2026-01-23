@@ -37,6 +37,7 @@ jobs:
                   node-version: ${{ matrix.node_version }}
                   cache: 'npm'
             - run: npm ci
+            - run: node ./dump-version.js
             - run: ./node_modules/.bin/rolldown -c ./rolldown.config.js
             - run: node ./test/test.js
     basic-checks:
@@ -57,6 +58,7 @@ jobs:
                   node-version: ${{ matrix.node_version }}
                   cache: 'npm'
             - run: npm ci
+            - run: node ./dump-version.js
             - run: ./node_modules/.bin/rolldown -c ./rolldown.config.js
             - run: node ./test/test.js
     playwright:
@@ -76,6 +78,7 @@ jobs:
                   node-version: 20
                   cache: 'npm'
             - run: npm ci
+            - run: node ./dump-version.js
             - run: ./node_modules/.bin/rolldown -c ./rolldown.config.js
             - uses: hoverkraft-tech/compose-action@05da55b2bb8a5a759d1c4732095044bd9018c050
               with:
@@ -102,6 +105,7 @@ jobs:
                   node-version: 20
                   cache: 'npm'
             - run: npm ci
+            - run: node ./dump-version.js
             - run: ./node_modules/.bin/rolldown -c ./rolldown.config.js
             - name: Node Coverage (with microtime)
               run: ./node_modules/.bin/c8 -c ./.c8rc.node.json node ./test/test.js
