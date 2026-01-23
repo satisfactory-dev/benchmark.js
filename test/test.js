@@ -17,6 +17,8 @@
       Benchmark = root.Benchmark || (await import('../benchmark.js')).default,
       QUnit = root.QUnit || (await import('qunit')).default;
 
+  QUnit.config.testTimeout = 30 * 1000;
+
   async function microtime() {
     const version = globalThis?.process?.version || '';
     if (
