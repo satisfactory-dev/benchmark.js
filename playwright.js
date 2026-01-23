@@ -93,8 +93,11 @@ async function maybeWithCoverage(
   return coverage;
 }
 
+/** @type {[string, [string, import('playwright').BrowserType]][]} */
+const browsersAsEntries = Object.entries(browsers);
+
   const versions = [];
-  for (const [label, [name, type]] of Object.entries(browsers)) {
+for (const [label, [name, type]] of browsersAsEntries) {
     const browser = await type.launch();
     const version = `${name} (${browser.version()})`;
     versions.push(version);
