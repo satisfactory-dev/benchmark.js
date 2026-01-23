@@ -222,11 +222,11 @@
         // comments at end'
       );
 
-      Benchmark.prototype.setup = '\
+      Benchmark.defaultValues.setup = '\
         window.foo = 42;\n\
         var x = arr;';
 
-      Benchmark.prototype.teardown = '\
+      Benchmark.defaultValues.teardown = '\
         window.foo = 24;';
     </script>
   </body>

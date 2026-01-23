@@ -121,9 +121,11 @@
 
       if (stopped) {
         logError({ 'clear': true });
-        ui.push.apply(ui, ui.benchmarks.filter((bench) => {
+        benchmarks.filter((bench) => {
           return !bench.error && bench.reset();
-        }));
+        }).forEach((bench) => {
+          ui.add(bench);
+        })
         ui.run(runOptions);
       }
     }
@@ -148,8 +150,8 @@
         target = target.parentNode;
       }
       index = id && --id.split('-')[1] || 0;
-      ui.push(ui.benchmarks[index].reset());
-      ui.running ? ui.render(index) : ui.run(runOptions);
+      ui.push(benchmarks[index].reset());
+      ui.running ? render(index) : ui.run(runOptions);
     },
 
     /**
@@ -366,18 +368,23 @@
 
   /*--------------------------------------------------------------------------*/
 
+  function renderAll() {
+    benchmarks.forEach((bench) => {
+      render(bench);
+    })
+  }
+
   /**
    * Renders the results table cell of the corresponding benchmark(s).
    *
    * @static
    * @memberOf ui
-   * @param {number} [index] The index of the benchmark to render.
+   * @param {Benchmark} bench The benchmark to render
    * @returns {Object} The suite instance.
    */
-  function render(index) {
-    (index == null ? (index = 0, ui.benchmarks) : [ui.benchmarks[index]]).forEach((bench) => {
+  function render(bench) {
       var parsed,
-          cell = $(prefix + (++index)),
+          cell = $(prefix + bench.id),
           error = bench.error,
           hz = bench.hz;
 
@@ -421,19 +428,20 @@
           }
         }
       }
-    });
+
     return ui;
   }
 
   /*--------------------------------------------------------------------------*/
 
-  ui.on('add', function(event) {
-    var bench = event.target,
-        index = ui.benchmarks.length,
-        id = index + 1,
-        title = $('title-' + id);
+  ui.on('add', function({target: bench}) {
+    const index = benchmarks.findIndex((maybe) => maybe.id === bench.id);
 
-    ui.benchmarks.push(bench);
+    if (-1 === index) {
+      benchmarks.push(bench);
+    }
+    var
+        title = $('title-' + bench.id);
 
     if (has.runner) {
       title.tabIndex = 0;
@@ -444,25 +452,33 @@
 
       bench.on('start', handlers.benchmark.start);
       bench.on('start cycle', handlers.benchmark.cycle);
-      ui.render(index);
+      render(bench);
     }
   })
-  .on('start cycle', function() {
-    ui.render();
+  .on('error', (e) => {
+    const index = benchmarks.findIndex((maybe) => maybe.id === e.target.id);
+    benchmarks[index] = e.target;
+    render(e.target);
+  })
+  .on('start cycle', function(e) {
+    const index = benchmarks.findIndex((maybe) => maybe.id === e.target.id);
+    benchmarks[index] = e.target;
+
+    render(e.target);
     setHTML('run', texts.run.running);
   })
-  .on('complete', function() {
-    var benches = filter(ui.benchmarks, 'successful'),
+  .on('complete', function(e) {
+    var benches = filter(benchmarks, 'successful'),
         fastest = filter(benches, 'fastest'),
         slowest = filter(benches, 'slowest');
 
-    ui.render();
+    renderAll();
     setHTML('run', texts.run.again);
     setStatus(texts.status.again);
 
     // highlight result cells
-    benches.forEach((bench) => {
-      var cell = $(prefix + (ui.benchmarks.indexOf(bench) + 1)),
+    benchmarks.forEach((bench) => {
+      var cell = $(prefix + bench.id),
           fastestHz = getHz(fastest[0]),
           hz = getHz(bench),
           percent = (1 - (hz / fastestHz)) * 100,
@@ -497,10 +513,9 @@
   /**
    * An array of benchmarks created from test cases.
    *
-   * @memberOf ui
    * @type Array
    */
-  ui.benchmarks = [];
+  const benchmarks = [];
 
   /**
    * The parsed query parameters of the pages url hash.
@@ -509,9 +524,6 @@
    * @type Object
    */
   ui.params = {};
-
-  // (re)render the results of one or more benchmarks
-  ui.render = render;
 
   /*--------------------------------------------------------------------------*/
 
@@ -569,11 +581,10 @@
   }
   else {
     // short circuit unusable methods
-    ui.render = function() {};
     ui.off('start cycle complete');
     setTimeout(function() {
       ui.off();
-      Object.values(ui.benchmarks).forEach((benchmark) => {
+      Object.values(benchmarks).forEach((benchmark) => {
         benchmark.off();
       })
     }, 1);

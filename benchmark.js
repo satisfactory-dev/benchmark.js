@@ -1171,7 +1171,7 @@
      *
      * @returns {Object}
      */
-    static defaultValues = Object.freeze({
+    static defaultValues = Object.seal({
       count: 0,
       cycles: 0,
       hz: 0,
@@ -1197,7 +1197,7 @@
         period: 0,
         timeStamp: 0,
       },
-    })
+    });
 
     /**
      * A generic `Array#filter` like method.
@@ -1230,7 +1230,7 @@
       }
       else if (callback === 'fastest' || callback === 'slowest') {
         // Get successful, sort by period + margin of error, and filter fastest/slowest.
-        var result = this.filter(array, 'successful').sort(function(a, b) {
+        var result = Benchmark.filter(array, 'successful').sort(function(a, b) {
           a = a.stats; b = b.stats;
           return (a.mean + a.moe > b.mean + b.moe ? 1 : -1) * (callback === 'fastest' ? 1 : -1);
         });
@@ -1381,7 +1381,7 @@
 
         // Choose next benchmark if not exiting early.
         if (!cycleEvent.aborted && raiseIndex() !== false) {
-          bench = queued ? benches[0] : result[index];
+          bench = queued ? (benches instanceof Suite ? benches.benchmarks : benches)[0] : result[index];
           if (isAsync(bench)) {
             delay(bench, execute);
           }
@@ -2158,6 +2158,15 @@
       }
 
       this._benchmarks.length = value;
+    }
+
+    /**
+     * @param {Benchmark} bench
+     *
+     * @returns {number}
+     */
+    indexOf(bench) {
+      return this._benchmarks.indexOf(bench);
     }
 
     /**
