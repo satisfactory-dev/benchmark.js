@@ -2401,7 +2401,13 @@ function clock(clone, timer) {
     : 'var r#,s#,m#=this,f#=m#.fn,i#=m#.count,n#=t#.ns;${setup}\n${begin};' +
       'while(i#--){${fn}\n}${end};${teardown}\nreturn{elapsed:r#,uid:"${uid}"}';
 
-  var compiled = bench.compiled = clone.compiled = createCompiled(bench, decompilable, deferred, funcBody),
+  var compiled = bench.compiled = clone.compiled = createCompiled(
+      bench,
+      decompilable,
+      deferred,
+      funcBody,
+      timer
+    ),
       isEmpty = !(templateData.fn || stringable);
 
   try {
@@ -2432,7 +2438,13 @@ function clock(clone, timer) {
       ',n#=t#.ns;${setup}\n${begin};m#.f#=f#;while(i#--){m#.f#()}${end};' +
       'delete m#.f#;${teardown}\nreturn{elapsed:r#}';
 
-    compiled = createCompiled(bench, decompilable, deferred, funcBody);
+    compiled = createCompiled(
+      bench,
+      decompilable,
+      deferred,
+      funcBody,
+      timer,
+    );
 
     try {
       // Pretest one more time to check for errors.
@@ -2450,7 +2462,13 @@ function clock(clone, timer) {
   }
   // If no errors run the full test loop.
   if (!clone.error) {
-    compiled = bench.compiled = clone.compiled = createCompiled(bench, decompilable, deferred, funcBody);
+    compiled = bench.compiled = clone.compiled = createCompiled(
+      bench,
+      decompilable,
+      deferred,
+      funcBody,
+      timer,
+    );
     result = compiled.call(deferred || bench, globalThis, timer).elapsed;
   }
 
@@ -2461,8 +2479,10 @@ function clock(clone, timer) {
 
 /**
  * Creates a compiled function from the given function `body`.
+ *
+ * @param {Timer} timer
  */
-function createCompiled(bench, decompilable, deferred, body) {
+function createCompiled(bench, decompilable, deferred, body, timer) {
   var fn = bench.fn,
       fnArg = deferred ? getFirstArgument(fn) || 'deferred' : '';
 
