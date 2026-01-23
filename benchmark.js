@@ -7,6 +7,8 @@
  * Available under MIT license
  */
 
+import version from './version.json' with {type: 'json'};
+
 /** Used to assign each benchmark an incremented id. */
 var counter = 0;
 
@@ -1135,11 +1137,9 @@ class Benchmark extends EventTarget {
   /**
    * The semantic version number.
    *
-   * @type string
-   *
-   * @todo replace with json-derived version built from npm version/git hash
+   * @type {string}
    */
-  static version = '2.1.4';
+  static version = version.version;
 
   static get Event() {
     return Event;

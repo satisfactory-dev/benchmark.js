@@ -15,6 +15,7 @@ nvm--exec: nvm--install
 	@make nvm CMD="exec $(VERSION) $(CMD)"
 
 build:
+	@make nvm--exec VERSION=20 CMD="node ./dump-version.js"
 	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/rolldown -c ./rolldown.config.js"
 
 init:

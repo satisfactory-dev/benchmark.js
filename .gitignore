@@ -7,3 +7,4 @@ node_modules
 /.cache/
 /benchmark.umd.js
 /benchmark.umd.js.map
+/version.json
