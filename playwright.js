@@ -21,7 +21,10 @@ let browsers = {
 
 const specified_browser = (process.argv.find((maybe) => maybe.startsWith('--browser=')) || '').split('=')[1] || undefined;
 
+let updateReadme = true;
+
 if (specified_browser && specified_browser in browsers) {
+  updateReadme = false;
   browsers = {
     [specified_browser]: browsers[specified_browser],
   };
@@ -133,6 +136,7 @@ for (const [label, [name, type]] of browsersAsEntries) {
     await browser.close();
   }
 
+if (updateReadme) {
   const readme = (await readFile(`${import.meta.dirname}/README.md`)).toString();
   const Makefile = (await readFile(`${import.meta.dirname}/Makefile`)).toString();
 
@@ -186,5 +190,6 @@ for (const [label, [name, type]] of browsersAsEntries) {
         `.replace(/^\s+/gm, '').trim()
     )
   );
+}
 
   process.exit(0)
