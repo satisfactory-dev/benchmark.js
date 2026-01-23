@@ -558,20 +558,6 @@ class Timer {
         ),
       ];
 
-      // Detect Chrome's microsecond timer:
-      // enable benchmarking via the --enable-benchmarking command
-      // line switch in at least Chrome 7 to use chrome.Interval
-      try {
-        const instance = new (globalThis.chrome || globalThis.chromium).Interval;
-        if (instance) {
-          timers.push(new Timer(
-            instance,
-            this.#getRes('us', instance),
-            'us',
-          ));
-        }
-      } catch(e) {}
-
       // Detect Node.js's nanosecond resolution timer available in Node.js >= 0.8.
       if (
         this.#allowHrtime &&
