@@ -1818,7 +1818,7 @@ class Benchmark extends EventTarget {
     if ('idle' === this.delay) {
       this.#timerId = requestIdleCallback(() => fn());
     } else {
-    this.#timerId = setTimeout(() => fn(), this.delay * 1e3);
+      this.#timerId = setTimeout(() => fn(), this.delay * 1e3);
     }
   }
 
@@ -1829,7 +1829,7 @@ class Benchmark extends EventTarget {
     if ('idle' === this.delay) {
       cancelIdleCallback(this.#timerId);
     } else {
-    clearTimeout(this.#timerId);
+      clearTimeout(this.#timerId);
     }
     this.#timerId = undefined;
   }
