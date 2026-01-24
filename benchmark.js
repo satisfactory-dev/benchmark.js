@@ -898,6 +898,20 @@ class Benchmark extends EventTarget {
   };
 
   /**
+   * A flag to indicate if the benchmark is aborted.
+   *
+   * @type {boolean}
+   */
+  aborted = Benchmark.defaultValues.aborted;
+
+  /**
+   * The compiled test function.
+   *
+   * @type {Function|string|undefined}
+   */
+  compiled = Benchmark.defaultValues.compiled;
+
+  /**
    * The number of times a test was executed.
    *
    * @type {number}
@@ -910,20 +924,6 @@ class Benchmark extends EventTarget {
    * @type {number}
    */
   cycles = Benchmark.defaultValues.cycles;
-
-  /**
-   * The number of executions per second.
-   *
-   * @type {number}
-   */
-  hz = Benchmark.defaultValues.hz;
-
-  /**
-   * The compiled test function.
-   *
-   * @type {Function|string|undefined}
-   */
-  compiled = Benchmark.defaultValues.compiled;
 
   /**
    * The error object if the test failed.
@@ -940,11 +940,11 @@ class Benchmark extends EventTarget {
   fn = Benchmark.defaultValues.fn;
 
   /**
-   * A flag to indicate if the benchmark is aborted.
+   * The number of executions per second.
    *
-   * @type {boolean}
+   * @type {number}
    */
-  aborted = Benchmark.defaultValues.aborted;
+  hz = Benchmark.defaultValues.hz;
 
   /**
    * A flag to indicate if the benchmark is running.
@@ -1016,13 +1016,6 @@ class Benchmark extends EventTarget {
   setup = Benchmark.defaultValues.setup;
 
   /**
-   * Compiled into the test and executed immediately **after** the test loop.
-   *
-   * @type {Function|string}
-   */
-  teardown = Benchmark.defaultValues.teardown;
-
-  /**
    * An object of stats including mean, margin or error, and standard deviation.
    */
   stats = {
@@ -1075,6 +1068,13 @@ class Benchmark extends EventTarget {
      */
     variance: Benchmark.defaultValues.stats.variance,
   };
+
+  /**
+   * Compiled into the test and executed immediately **after** the test loop.
+   *
+   * @type {Function|string}
+   */
+  teardown = Benchmark.defaultValues.teardown;
 
   /**
    * An object of timing data including cycle, elapsed, period, start, and stop.
