@@ -867,9 +867,9 @@ class Benchmark extends EventTarget {
 
     /**
      * The delay between test cycles (secs).
-     * @type {number}
+     * @type {number|'idle'}
      */
-    'delay': 0.005,
+    'delay': 'idle',
 
     /**
      * Displayed by `Benchmark#toString` when a `name` is not available
@@ -1005,7 +1005,7 @@ class Benchmark extends EventTarget {
   /**
    * The delay between test cycles (secs).
    *
-   * @type {number}
+   * @type {number|'idle'}
    */
   delay = Benchmark.options.delay;
 
@@ -1815,14 +1815,22 @@ class Benchmark extends EventTarget {
    * @param {Function} fn The function to execute.
    */
   delayFn(fn) {
+    if ('idle' === this.delay) {
+      this.#timerId = requestIdleCallback(() => fn());
+    } else {
     this.#timerId = setTimeout(() => fn(), this.delay * 1e3);
+    }
   }
 
   /**
    * Clears the delayed function from being executed
    */
   #clearDelayFn() {
+    if ('idle' === this.delay) {
+      cancelIdleCallback(this.#timerId);
+    } else {
     clearTimeout(this.#timerId);
+    }
     this.#timerId = undefined;
   }
 
