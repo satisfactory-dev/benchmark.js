@@ -1406,6 +1406,17 @@ class Benchmark extends EventTarget {
         eventProps = { 'currentTarget': benches },
         options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
         result = this.asArray(benches);
+    // Juggle arguments.
+    if ((typeof name === 'string')) {
+      // 2 arguments (array, name).
+      args = Array.prototype.slice.call(arguments, 2);
+    } else {
+      // 2 arguments (array, options).
+      options = Object.assign(options, name);
+      name = options.name;
+      args = Array.isArray(args = 'args' in options ? options.args : []) ? args : [args];
+      queued = options.queued;
+    }
 
     /**
      * Invokes the method of the current object and if synchronous, fetches the next.
@@ -1509,17 +1520,7 @@ class Benchmark extends EventTarget {
         ? index
         : (index = false);
     }
-    // Juggle arguments.
-    if ((typeof name === 'string')) {
-      // 2 arguments (array, name).
-      args = Array.prototype.slice.call(arguments, 2);
-    } else {
-      // 2 arguments (array, options).
-      options = Object.assign(options, name);
-      name = options.name;
-      args = Array.isArray(args = 'args' in options ? options.args : []) ? args : [args];
-      queued = options.queued;
-    }
+
     // Start iterating over the array.
     if (raiseIndex() !== false) {
       // Emit "start" event.
