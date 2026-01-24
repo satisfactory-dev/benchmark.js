@@ -272,17 +272,6 @@ const createFunction = (() => {
 })();
 
 /**
- * Delay the execution of a function based on the benchmark's `delay` property.
- *
- * @private
- * @param {Benchmark} bench The benchmark instance.
- * @param {Function} fn The function to execute.
- */
-function delay(bench, fn) {
-  bench._timerId = setTimeout(() => fn(), bench.delay * 1e3);
-}
-
-/**
  * Gets the name of the first argument from a function's source.
  *
  * @private
@@ -1249,6 +1238,9 @@ class Benchmark extends EventTarget {
     timeStamp: Benchmark.defaultValues.times.timeStamp,
   };
 
+  /** @type {number|undefined} */
+  #timerId;
+
   /**
    * The semantic version number.
    *
@@ -1473,7 +1465,7 @@ class Benchmark extends EventTarget {
       if (!cycleEvent.aborted && raiseIndex() !== false) {
         bench = queued ? (benches instanceof Suite ? benches.benchmarks : benches)[0] : result[index];
         if (isAsync(bench)) {
-          delay(bench, execute);
+          bench.delayFn(execute);
         }
         else if (async) {
           // Resume execution if previously asynchronous but now synchronous.
@@ -1552,7 +1544,7 @@ class Benchmark extends EventTarget {
       // Start method execution.
       else {
         if (isAsync(bench)) {
-          delay(bench, execute);
+          bench.delayFn(execute);
         } else {
           while (execute()) {}
         }
@@ -1706,8 +1698,7 @@ class Benchmark extends EventTarget {
         bench.reset();
         delete calledBy.abort;
 
-          clearTimeout(bench._timerId);
-          delete bench._timerId;
+        this.#clearDelayFn();
 
         if (!resetting) {
           bench.aborted = true;
@@ -1814,6 +1805,25 @@ class Benchmark extends EventTarget {
     // ...the U value is less than or equal the critical U value.
     critical = maxSize < 5 || minSize < 3 ? 0 : uTable[maxSize][minSize - 3];
     return u <= critical ? (u == u1 ? 1 : -1) : 0;
+  }
+
+  /**
+   * Delay the execution of a function based on the benchmark's `delay` property.
+   *
+   * @private
+   *
+   * @param {Function} fn The function to execute.
+   */
+  delayFn(fn) {
+    this.#timerId = setTimeout(() => fn(), this.delay * 1e3);
+  }
+
+  /**
+   * Clears the delayed function from being executed
+   */
+  #clearDelayFn() {
+    clearTimeout(this.#timerId);
+    this.#timerId = undefined;
   }
 
   /**
@@ -2064,7 +2074,7 @@ class Deferred {
     else {
       this.#timer.stop(deferred);
       deferred.teardown();
-      delay(clone, () => { cycle(deferred, {timer: this.#timer}); });
+      clone.delayFn(() => { cycle(deferred, {timer: this.#timer}); });
     }
   }
 }
@@ -2932,7 +2942,7 @@ function cycle(obj, options) {
     if (deferred) {
       clone.compiled.call(deferred, globalThis, timer);
     } else if (async) {
-      delay(clone, function() { cycle(clone, options); });
+      clone.delayFn(function() { cycle(clone, options); });
     } else {
       cycle(clone, {timer});
     }
