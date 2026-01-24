@@ -164,12 +164,12 @@ class BrowserHelper {
    * @param {string} code The code to run.
    */
   runScript(code) {
-    var anchor = Benchmark,
+    var anchor = Benchmark.anchor,
           script = this.#doc.createElement('script'),
           sibling = this.#doc.getElementsByTagName('script')[0],
         parent = sibling.parentNode,
         prop = uid + 'runScript',
-        prefix = '(' + 'Benchmark.' + prop + '||function(){})();';
+        prefix = '(' + 'Benchmark.anchor.' + prop + '||function(){})();';
 
     // Firefox 2.0.0.2 cannot use script injection as intended because it executes
     // asynchronously, but that's OK because script injection is only used to avoid
@@ -254,10 +254,10 @@ const createFunction = (() => {
   if (helper) {
     return function (args, body) {
       var result,
-          anchor = Benchmark,
+          anchor = Benchmark.anchor,
           prop = uid + 'createFunction';
 
-      helper.runScript('Benchmark.' + prop + '=function(' + args + '){' + body + '}');
+      helper.runScript('Benchmark.anchor.' + prop + '=function(' + args + '){' + body + '}');
       result = anchor[prop];
       delete anchor[prop];
       return result;
@@ -789,6 +789,11 @@ class EventTarget {
 /*------------------------------------------------------------------------*/
 
 class Benchmark extends EventTarget {
+  /**
+   * @type {Object<string, unknown>}
+   */
+  static anchor = Object.create(null);
+
   /**
    * The default values for Benchmark instance properties
    *
