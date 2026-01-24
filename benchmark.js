@@ -1346,7 +1346,7 @@ class Benchmark extends EventTarget {
       eventProps.type = 'cycle';
       eventProps.target = last;
       cycleEvent = new Event(eventProps);
-      options.onCycle.call(benches._benchmarks, cycleEvent);
+      options.onCycle.call(benches.benchmarks, cycleEvent);
 
       // Choose next benchmark if not exiting early.
       if (!cycleEvent.aborted && raiseIndex() !== false) {
@@ -2043,6 +2043,9 @@ class Suite extends EventTarget {
     'name': undefined
   }
 
+  /** @type {Benchmark[]} */
+  #benchmarks;
+
   /**
    * A flag to indicate if the suite is aborted.
    *
@@ -2097,7 +2100,7 @@ class Suite extends EventTarget {
     super();
     var suite = this;
 
-    this._benchmarks = [];
+    this.#benchmarks = [];
     // Juggle arguments.
     if (typeof name === 'object') {
       // 1 argument (options).
@@ -2110,7 +2113,7 @@ class Suite extends EventTarget {
   }
 
   get benchmarks() {
-    return [...this._benchmarks];
+    return [...this.#benchmarks];
   }
 
   /**
@@ -2119,7 +2122,7 @@ class Suite extends EventTarget {
    * @type {number}
    */
   get length() {
-    return this._benchmarks.length;
+    return this.#benchmarks.length;
   }
 
   /**
@@ -2128,11 +2131,11 @@ class Suite extends EventTarget {
    * Useful for truncating the array.
    */
   set length(value) {
-    if (undefined === this._benchmarks) {
-      this._benchmarks = [];
+    if (undefined === this.#benchmarks) {
+      this.#benchmarks = [];
     }
 
-    this._benchmarks.length = value;
+    this.#benchmarks.length = value;
   }
 
   /**
@@ -2141,7 +2144,7 @@ class Suite extends EventTarget {
    * @returns {this}
    */
   reverse() {
-    this._benchmarks.reverse();
+    this.#benchmarks.reverse();
 
     return this;
   }
@@ -2152,7 +2155,7 @@ class Suite extends EventTarget {
    * @returns {Benchmark|undefined}
    */
   shift() {
-    return this._benchmarks.shift();
+    return this.#benchmarks.shift();
   }
 
   /**
@@ -2161,7 +2164,7 @@ class Suite extends EventTarget {
    * @returns {number}
    */
   indexOf(bench) {
-    return this._benchmarks.indexOf(bench);
+    return this.#benchmarks.indexOf(bench);
   }
 
   /**
@@ -2234,7 +2237,7 @@ class Suite extends EventTarget {
         event = new Event({ 'type': 'add', 'target': bench });
 
     if (suite.emit(event), !event.cancelled) {
-      this._benchmarks.push(bench);
+      this.#benchmarks.push(bench);
     }
     return suite;
   }
@@ -2272,7 +2275,7 @@ class Suite extends EventTarget {
 
     const cb = Benchmark.filter(this, callback);
 
-    result._benchmarks.push(...cb);
+    result.#benchmarks.push(...cb);
 
     return result;
   }
