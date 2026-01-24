@@ -8,31 +8,14 @@
   <body>
     <div id="qunit"></div>
     <script src="../node_modules/qunit/qunit/qunit.js"></script>
-    <script>
+    <script type="module">
+      import Benchmark from '../benchmark.js';
       QUnit.config.hidepassed = true;
-      QUnit.urlParams.norequire = /[?&]norequire=true(?:&|$)/.test(location.search);
-      QUnit.urlParams.asModule = /[?&]asmodule=true(?:&|$)/.test(location.search);
+      globalThis.Benchmark = Benchmark;
 
       async function loading () {
         /** @type {string[]} */
-        const scripts_to_load = [];
-        if (QUnit.urlParams.asModule) {
-          globalThis.Benchmark = (await import('../benchmark.js')).default;
-          console.log('loaded as module');
-
-          scripts_to_load.push('test.js');
-        } else {
-          scripts_to_load.push(...(
-          QUnit.urlParams.norequire
-            ? [
-              '../benchmark.umd.js',
-              'test.js',
-            ]
-            : [
-              '../node_modules/requirejs/require.js',
-            ]
-          ));
-        }
+        const scripts_to_load = ['test.js'];
 
         for (const url of scripts_to_load) {
           const script = document.createElement('script');
@@ -47,58 +30,15 @@
 
         console.log('done async loading');
       }
-    </script>
-    <script>
+
       var benchmarkModule;
 
-      (async function() {
         QUnit.config.autostart = false;
         await loading();
-        if (!window.require) {
-          QUnit.start();
-          return;
-        }
-
-        requirejs.config({
-          'baseUrl': './',
-          'urlArgs': 't=' + (+new Date),
-          'waitSeconds': 0,
-          'packages': [
-            {
-              'name': 'benchmark',
-              'location': '..',
-              'main': 'benchmark.umd'
-            },
-            {
-              'name': 'test',
-              'location': '.',
-              'main': 'test'
-            }
-          ]
-        });
-
-        // Load Benchmark as a module.
-        require(['benchmark'], function(Benchmark) {
-          benchmarkModule = window.Benchmark = Benchmark;
-          require(['test'], function() {
             QUnit.start();
             QUnit.on('runEnd', () => {
                 console.log('Finished running tests')
             })
-          });
-        });
-      }());
-
-      // Set a more readable browser name.
-      window.onload = function() {
-        var timeoutId = setInterval(function() {
-          var ua = document.getElementById('qunit-userAgent');
-          if (ua && (benchmarkModule || !window.require)) {
-            ua.textContent = navigator.userAgent;
-            clearInterval(timeoutId);
-          }
-        }, 16);
-      };
     </script>
   </body>
 </html>

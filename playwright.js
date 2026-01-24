@@ -67,9 +67,7 @@ async function maybeWithCoverage(
   }
 
   for (const [label, url] of [
-    ['with require', baseUrl],
-    ['without require', `${baseUrl}?norequire=true`],
-    ['as module', `${baseUrl}?asmodule=true`],
+    ['as module', baseUrl],
   ]) {
     console.log(`Running ${label}`);
 
