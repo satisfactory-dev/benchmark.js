@@ -183,9 +183,8 @@ var cloneDeep = (value) => {
  * @param {string} body The function body.
  * @returns {Function} The new function.
  */
-function createFunction() {
-  // Lazy define.
-  createFunction = function(args, body) {
+const createFunction = Support.browser
+  ? function (args, body) {
     var result,
         anchor = Benchmark,
         prop = uid + 'createFunction';
@@ -194,13 +193,8 @@ function createFunction() {
     result = anchor[prop];
     delete anchor[prop];
     return result;
-  };
-
-  // Fix JaegerMonkey bug.
-  // For more information see https://bugzilla.mozilla.org/show_bug.cgi?id=639720.
-  createFunction = Support.browser && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : Function;
-  return createFunction.apply(null, arguments);
-}
+  }
+  : Function;
 
 /**
  * Delay the execution of a function based on the benchmark's `delay` property.
