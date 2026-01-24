@@ -1363,7 +1363,7 @@ class Benchmark extends EventTarget {
    * Invokes a method on all items in an array.
    *
    * @param {(Benchmark[])|Suite} benches Array of benchmarks to iterate over.
-   * @param {Object|string} name The name of the method to invoke OR options object.
+   * @param {{name: string}|string} maybeName The name of the method to invoke OR options object.
    * @param {...*} [args] Arguments to invoke the method with.
    * @returns {Array} A new array of values returned from each method invoked.
    * @example
@@ -1396,9 +1396,10 @@ class Benchmark extends EventTarget {
    *   'onComplete': onComplete
    * });
    */
-  static invoke(benches, name) {
+  static invoke(benches, maybeName) {
     /** @type {unknown[]} */
     var args,
+        /** @type {Benchmark} */
         bench,
         /** @type {boolean} */
         queued,
@@ -1406,14 +1407,19 @@ class Benchmark extends EventTarget {
         eventProps = { 'currentTarget': benches },
         options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
         result = this.asArray(benches);
+
+    /** @type {string} */
+    let name;
+
     // Juggle arguments.
-    if ((typeof name === 'string')) {
+    if ((typeof maybeName === 'string')) {
       // 2 arguments (array, name).
       args = Array.prototype.slice.call(arguments, 2);
+      name = maybeName;
     } else {
       // 2 arguments (array, options).
-      options = Object.assign(options, name);
-      name = options.name;
+      options = Object.assign(options, maybeName);
+      name = 'name' in options ? options.name : '';
       args = Array.isArray(args = 'args' in options ? options.args : []) ? args : [args];
       queued = options.queued;
     }
