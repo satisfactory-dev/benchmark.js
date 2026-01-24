@@ -702,7 +702,7 @@ class EventTarget {
       var index;
       if (typeof listeners == 'string') {
         type = listeners;
-        listeners = has(events, type) ? events[type] : [];
+        listeners = events.hasOwnProperty(type) ? events[type] : [];
       }
       if (listeners) {
         if (listener) {
@@ -1362,7 +1362,7 @@ class Benchmark extends EventTarget {
   /**
    * Invokes a method on all items in an array.
    *
-   * @param {Array} benches Array of benchmarks to iterate over.
+   * @param {(Benchmark[])|Suite} benches Array of benchmarks to iterate over.
    * @param {Object|string} name The name of the method to invoke OR options object.
    * @param {...*} [args] Arguments to invoke the method with.
    * @returns {Array} A new array of values returned from each method invoked.
@@ -1397,8 +1397,10 @@ class Benchmark extends EventTarget {
    * });
    */
   static invoke(benches, name) {
+    /** @type {unknown[]} */
     var args,
         bench,
+        /** @type {boolean} */
         queued,
         index = -1,
         eventProps = { 'currentTarget': benches },
@@ -1428,6 +1430,8 @@ class Benchmark extends EventTarget {
 
     /**
      * Fetches the next bench or executes `onComplete` callback.
+     *
+     * @param {Event} [event]
      */
     function getNext(event) {
       var cycleEvent,
@@ -1721,9 +1725,12 @@ class Benchmark extends EventTarget {
     // Correct the `options` object.
     result.options = Object.assign({}, cloneDeep(bench.options), cloneDeep(options));
 
-    for (const property of Object.keys(Benchmark.defaultValues)) {
+    const properties = Object.keys(Benchmark.defaultValues);
+
+    for (const property of properties) {
       if (undefined === result[property]) {
-        result[property] = cloneDeep(bench[property]);
+        const value = cloneDeep(bench[property]);
+        result[property] = value;
       }
     }
 
