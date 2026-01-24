@@ -230,7 +230,7 @@ function getFirstArgument(fn) {
     !has(fn, 'toString') &&
     (
       /^[\s(]*function[^(]*\(([^\s,)]+)/.exec(fn) ||
-      0
+      []
     )[1]
   ) || '';
 }
