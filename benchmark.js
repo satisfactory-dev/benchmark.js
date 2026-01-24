@@ -2293,12 +2293,12 @@ class Suite extends EventTarget {
    * @returns {Object} The suite instance.
    */
   abort() {
-    var event,
+    var
         suite = this,
         resetting = calledBy.resetSuite;
 
     if (suite.running) {
-      event = new Event('abort');
+      const event = new Event('abort');
       suite.emit(event);
       if (!event.cancelled || resetting) {
         // Avoid infinite recursion.
