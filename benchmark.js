@@ -162,7 +162,7 @@ class Support {
  * @param {*} value The value to clone.
  * @returns {*} The cloned value.
  */
-var cloneDeep = (value) => {
+function cloneDeep(value) {
   if (Array.isArray(value)) {
     return [...value];
   } else if (value && typeof value === 'object') {
