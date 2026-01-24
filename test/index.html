@@ -11,30 +11,13 @@
     <script type="module">
       import Benchmark from '../benchmark.js';
       QUnit.config.hidepassed = true;
+      globalThis.QUnit = QUnit;
       globalThis.Benchmark = Benchmark;
-
-      async function loading () {
-        /** @type {string[]} */
-        const scripts_to_load = ['test.js'];
-
-        for (const url of scripts_to_load) {
-          const script = document.createElement('script');
-          script.src = url;
-
-          await new Promise((yup, nope) => {
-            script.onload = () => yup();
-            script.onerror = (...args) => nope(args);
-            document.body.append(script);
-          });
-        }
-
-        console.log('done async loading');
-      }
 
       var benchmarkModule;
 
         QUnit.config.autostart = false;
-        await loading();
+        await import('./test.js');
             QUnit.start();
             QUnit.on('runEnd', () => {
                 console.log('Finished running tests')

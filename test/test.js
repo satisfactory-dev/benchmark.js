@@ -1,20 +1,14 @@
-;(async function() {
-
-  /** Used as a safe reference for `undefined` in pre ES5 environments. */
-  var undefined;
+import Benchmark from '../benchmark.js';
 
   /** Used as a reference to the global object. */
-  var root = (typeof global == 'object' && global) || this;
+var root = globalThis;
 
   /** Method and object shortcuts. */
   var
-      amd = root.define && define.amd,
-      document = root.document,
       slice = Array.prototype.slice;
 
   /** Load libraries. */
   var
-      Benchmark = root.Benchmark || (await import('../benchmark.js')).default,
       QUnit = root.QUnit || (await import('qunit')).default;
 
   QUnit.config.testTimeout = 30 * 1000;
@@ -148,21 +142,6 @@
       Benchmark.Timer.changeContext();
     })
   })();
-
-  /*--------------------------------------------------------------------------*/
-
-  QUnit.module('Benchmark');
-
-  (function() {
-    QUnit.test('should support loading Benchmark.js as a module', function(assert) {
-      if (amd) {
-        assert.strictEqual((benchmarkModule || {}).version, Benchmark.version);
-      }
-      else {
-        skipTest(assert);
-      }
-    });
-  }());
 
   /*--------------------------------------------------------------------------*/
 
@@ -1275,8 +1254,7 @@
       throw new Error('Some tests failed!');
     }
   })
-  if (!document) {
+  if (!('document' in root)) {
     QUnit.config.noglobals = true;
     QUnit.start();
   }
-}.call(this));
