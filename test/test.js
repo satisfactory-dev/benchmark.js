@@ -84,9 +84,7 @@ function skipTest(assert, count) {
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark.Timer');
-
-(() => {
+QUnit.module('Benchmark.Timer', () => {
   QUnit.test('Should default to the expected timer', (assert) => {
     const timer = Benchmark.Timer.timer;
     assert.ok(timer !== undefined);
@@ -138,13 +136,11 @@ QUnit.module('Benchmark.Timer');
     }
     Benchmark.Timer.changeContext();
   })
-})();
+});
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark constructor');
-
-(function() {
+QUnit.module('Benchmark constructor', function() {
   QUnit.test('should support passing an options object', function(assert) {
     var bench = new Benchmark({ 'name': 'foo', 'fn': function() {} });
     assert.ok(bench.fn && bench.name == 'foo');
@@ -174,13 +170,11 @@ QUnit.module('Benchmark constructor');
     var bench = new Benchmark(function() {}).run();
     assert.ok(/setup\(\)/.test(bench.compiled) ? !bench.error : bench.error);
   });
-}());
+});
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark compilation');
-
-(function() {
+QUnit.module('Benchmark compilation', function() {
   QUnit.test('should compile using the default "toString" method', function(assert) {
     var bench = new Benchmark({
       'setup': function() { var a = 1; },
@@ -233,13 +227,11 @@ QUnit.module('Benchmark compilation');
       assert.ok(/var a\s*=\s*1/.test(compiled) && /throw a/.test(compiled) && /a\s*=\s*2/.test(compiled));
     }
   });
-}());
+});
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark test binding');
-
-(function() {
+QUnit.module('Benchmark test binding', function() {
   var count = 0;
 
   var tests = {
@@ -280,13 +272,11 @@ QUnit.module('Benchmark test binding');
       }
     });
   });
-}());
+});
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark.filter');
-
-(function() {
+QUnit.module('Benchmark.filter', function() {
   var objects = {
     'array': ['a', 'b', 'c', ''],
     'array-like-object': { '0': 'a', '1': 'b', '2': 'c',  '3': '', 'length': 4 }
@@ -359,13 +349,11 @@ QUnit.module('Benchmark.filter');
     actual = Benchmark.filter([bench, other], 'slowest');
     assert.deepEqual(actual, [other], 'correctly detects the slowest');
   });
-}());
+});
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark.formatNumber');
-
-(function() {
+QUnit.module('Benchmark.formatNumber', function() {
   QUnit.test('should format a million correctly', function(assert) {
     assert.strictEqual(Benchmark.formatNumber(1e6), '1,000,000');
   });
@@ -381,13 +369,11 @@ QUnit.module('Benchmark.formatNumber');
   QUnit.test('should format negative numbers correctly', function(assert) {
     assert.strictEqual(Benchmark.formatNumber(-1234.56), '-1,234.56');
   });
-}());
+});
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark.toString');
-
-(() => {
+QUnit.module('Benchmark.toString', () => {
   QUnit.test('should format a thrown error', (assert) => {
       var bench = new Benchmark({
         fn: 'const x=42;x.foo()',
@@ -416,13 +402,11 @@ QUnit.module('Benchmark.toString');
       assert.equal(typeof bench.error, 'number');
       assert.equal(bench.toString(), `<Test #${bench.id}>: 42`);
   });
-})();
+});
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark#clone');
-
-(function() {
+QUnit.module('Benchmark#clone', function() {
   var bench = new Benchmark(function() { this.count += 0; }).run();
 
   QUnit.test('should return the correct result passing no arguments', function(assert) {
@@ -441,9 +425,7 @@ QUnit.module('Benchmark#clone');
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark#compare');
-
-(function() {
+QUnit.module('Benchmark#compare', function() {
   QUnit.test('should return `0` when compared to itself', function(assert) {
     var bench = new Benchmark(benchData);
     assert.strictEqual(bench.compare(bench), 0);
@@ -491,13 +473,11 @@ QUnit.module('Benchmark#compare');
     assert.strictEqual(bench.compare(other), 1);
     assert.strictEqual(other.compare(bench), -1);
   });
-}());
+});
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark#reset');
-
-(function() {
+QUnit.module('Benchmark#reset', function() {
   QUnit.test('should not reset default event handlers', function(assert) {
     var handler = function() {};
     Benchmark.options.onStart = handler;
@@ -510,13 +490,11 @@ QUnit.module('Benchmark#reset');
     assert.deepEqual(clone.events, { 'start': [handler] });
     delete Benchmark.options.onStart;
   });
-}());
+});
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark#run');
-
-(function() {
+QUnit.module('Benchmark#run', function() {
   var data = { 'onComplete': 0, 'onCycle': 0, 'onStart': 0 };
 
   var bench = new Benchmark({
@@ -536,7 +514,7 @@ QUnit.module('Benchmark#run');
     assert.strictEqual(data.onStart, 1);
     assert.strictEqual(data.onComplete, 1);
   });
-}());
+});
 
 /*--------------------------------------------------------------------------*/
 
@@ -825,9 +803,7 @@ Object.entries({
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark.Suite#abort');
-
-(function() {
+QUnit.module('Benchmark.Suite#abort', function() {
   QUnit.test('should ignore abort calls when the suite isn\'t running', function(assert) {
     var fired = false;
     var suite = new Benchmark.Suite('suite', {
@@ -924,13 +900,11 @@ QUnit.module('Benchmark.Suite#abort');
     })
     .run();
   });
-}());
+});
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark.Suite#reverse');
-
-(function() {
+QUnit.module('Benchmark.Suite#reverse', function() {
   QUnit.test('should reverses the element order', function(assert) {
     var suite = new Benchmark.Suite();
 
@@ -946,13 +920,11 @@ QUnit.module('Benchmark.Suite#reverse');
     benchmarks = Benchmark.Suite.asArray(suite).map(({name}) => name);
     assert.deepEqual(benchmarks, ['bar', 'foo']);
   });
-}());
+});
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark.Suite#shift');
-
-(function() {
+QUnit.module('Benchmark.Suite#shift', function() {
   QUnit.test('should remove the first element', function(assert) {
     var suite = new Benchmark.Suite();
 
@@ -990,13 +962,11 @@ QUnit.module('Benchmark.Suite#shift');
     // ensure element is removed
     assert.strictEqual(suite.length, 0);
   });
-}());
+});
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark.Suite filtered results onComplete');
-
-(function() {
+QUnit.module('Benchmark.Suite filtered results onComplete', function() {
   var count = 0,
       suite = new Benchmark.Suite();
 
@@ -1046,13 +1016,11 @@ QUnit.module('Benchmark.Suite filtered results onComplete');
     })
     .run({ 'async': true });
   });
-}());
+});
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Benchmark.Suite event flow');
-
-(function() {
+QUnit.module('Benchmark.Suite event flow', function() {
   var events = [],
       callback = function(event) { events.push(event); };
 
@@ -1148,13 +1116,11 @@ QUnit.module('Benchmark.Suite event flow');
   QUnit.test('should emit all expected events', function(assert) {
     assert.ok(events.length == 11);
   });
-}());
+});
 
 /*--------------------------------------------------------------------------*/
 
-QUnit.module('Deferred benchmarks');
-
-(function() {
+QUnit.module('Deferred benchmarks', function() {
   QUnit.test('should run a deferred benchmark correctly', function(assert) {
     var done = assert.async();
 
@@ -1211,7 +1177,7 @@ QUnit.module('Deferred benchmarks');
     })
     .run();
   });
-}());
+});
 
 /*--------------------------------------------------------------------------*/
 
