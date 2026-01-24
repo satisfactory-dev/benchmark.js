@@ -785,6 +785,119 @@ class Benchmark extends EventTarget {
   });
 
   /**
+   * The default options copied by benchmark instances.
+   */
+  static options = {
+    /**
+     * A flag to indicate that benchmark cycles will execute asynchronously
+     * by default.
+     *
+     * @type boolean
+     */
+    'async': false,
+
+    /**
+     * A flag to indicate that the benchmark clock is deferred.
+     *
+     * @type boolean
+     */
+    'defer': false,
+
+    /**
+     * The delay between test cycles (secs).
+     * @type number
+     */
+    'delay': 0.005,
+
+    /**
+     * Displayed by `Benchmark#toString` when a `name` is not available
+     * (auto-generated if absent).
+     *
+     * @type string
+     */
+    'id': undefined,
+
+    /**
+     * The default number of times to execute a test on a benchmark's first cycle.
+     *
+     * @type number
+     */
+    'initCount': 1,
+
+    /**
+     * The maximum time a benchmark is allowed to run before finishing (secs).
+     *
+     * Note: Cycle delays aren't counted toward the maximum time.
+     *
+     * @type number
+     */
+    'maxTime': 5,
+
+    /**
+     * The minimum sample size required to perform statistical analysis.
+     *
+     * @type number
+     */
+    'minSamples': 5,
+
+    /**
+     * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
+     *
+     * @type number
+     */
+    'minTime': 0,
+
+    /**
+     * The name of the benchmark.
+     *
+     * @type string
+     */
+    'name': undefined,
+
+    /**
+     * An event listener called when the benchmark is aborted.
+     *
+     * @type Function
+     */
+    'onAbort': undefined,
+
+    /**
+     * An event listener called when the benchmark completes running.
+     *
+     * @type Function
+     */
+    'onComplete': undefined,
+
+    /**
+     * An event listener called after each run cycle.
+     *
+     * @type Function
+     */
+    'onCycle': undefined,
+
+    /**
+     * An event listener called when a test errors.
+     *
+     * @type Function
+     */
+    'onError': undefined,
+
+    /**
+     * An event listener called when the benchmark is reset.
+     *
+     * @type Function
+     */
+    'onReset': undefined,
+
+    /**
+     * An event listener called when the benchmark starts running.
+     *
+     * @type Function
+     */
+    'onStart': undefined
+  };
+
+  /**
    * The number of times a test was executed.
    *
    * @type {number}
@@ -994,119 +1107,6 @@ class Benchmark extends EventTarget {
      * @type number
      */
     timeStamp: Benchmark.defaultValues.times.timeStamp,
-  };
-
-  /**
-   * The default options copied by benchmark instances.
-   */
-  static options = {
-    /**
-     * A flag to indicate that benchmark cycles will execute asynchronously
-     * by default.
-     *
-     * @type boolean
-     */
-    'async': false,
-
-    /**
-     * A flag to indicate that the benchmark clock is deferred.
-     *
-     * @type boolean
-     */
-    'defer': false,
-
-    /**
-     * The delay between test cycles (secs).
-     * @type number
-     */
-    'delay': 0.005,
-
-    /**
-     * Displayed by `Benchmark#toString` when a `name` is not available
-     * (auto-generated if absent).
-     *
-     * @type string
-     */
-    'id': undefined,
-
-    /**
-     * The default number of times to execute a test on a benchmark's first cycle.
-     *
-     * @type number
-     */
-    'initCount': 1,
-
-    /**
-     * The maximum time a benchmark is allowed to run before finishing (secs).
-     *
-     * Note: Cycle delays aren't counted toward the maximum time.
-     *
-     * @type number
-     */
-    'maxTime': 5,
-
-    /**
-     * The minimum sample size required to perform statistical analysis.
-     *
-     * @type number
-     */
-    'minSamples': 5,
-
-    /**
-     * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
-     *
-     * @type number
-     */
-    'minTime': 0,
-
-    /**
-     * The name of the benchmark.
-     *
-     * @type string
-     */
-    'name': undefined,
-
-    /**
-     * An event listener called when the benchmark is aborted.
-     *
-     * @type Function
-     */
-    'onAbort': undefined,
-
-    /**
-     * An event listener called when the benchmark completes running.
-     *
-     * @type Function
-     */
-    'onComplete': undefined,
-
-    /**
-     * An event listener called after each run cycle.
-     *
-     * @type Function
-     */
-    'onCycle': undefined,
-
-    /**
-     * An event listener called when a test errors.
-     *
-     * @type Function
-     */
-    'onError': undefined,
-
-    /**
-     * An event listener called when the benchmark is reset.
-     *
-     * @type Function
-     */
-    'onReset': undefined,
-
-    /**
-     * An event listener called when the benchmark starts running.
-     *
-     * @type Function
-     */
-    'onStart': undefined
   };
 
   /**
