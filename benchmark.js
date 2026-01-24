@@ -239,7 +239,7 @@ function getFirstArgument(fn) {
  * Computes the arithmetic mean of a sample.
  *
  * @private
- * @param {[number, ...number[]]} sample The sample.
+ * @param {number[]} sample The sample.
  * @returns {number} The mean.
  */
 function getMean(sample) {
