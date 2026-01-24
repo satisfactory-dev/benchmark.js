@@ -200,8 +200,8 @@ const createFunction = Support.browser
  * Delay the execution of a function based on the benchmark's `delay` property.
  *
  * @private
- * @param {Object} bench The benchmark instance.
- * @param {Object} fn The function to execute.
+ * @param {Benchmark} bench The benchmark instance.
+ * @param {Function} fn The function to execute.
  */
 function delay(bench, fn) {
   bench._timerId = setTimeout(() => fn(), bench.delay * 1e3);
@@ -416,14 +416,14 @@ class Timer {
   static #timer;
 
   /**
-   * @type {Object<now, () => number>}
+   * @type {{now(): number}}
    */
   static #highestDefaultTimer = performance;
 
   /**
    * A high-precision timer such as the one provided by microtime
    *
-   * @type {Object<now, () => number>|undefined}
+   * @type {{now(): number}|undefined}
    */
   static #usTimer;
 
@@ -562,6 +562,13 @@ class Timer {
  * @abstract
  */
 class EventTarget {
+  /**
+   * Registered events for the event target
+   *
+   * @type {undefined|(Object<string, Function[]>)}
+   */
+  events;
+
   /**
    * Executes all registered listeners of the specified event type.
    *
@@ -801,7 +808,7 @@ class Benchmark extends EventTarget {
   /**
    * The compiled test function.
    *
-   * @type {Function|string}
+   * @type {Function|string|undefined}
    */
   compiled = Benchmark.defaultValues.compiled;
 
@@ -815,7 +822,7 @@ class Benchmark extends EventTarget {
   /**
    * The test to benchmark.
    *
-   * @type {Function|string}
+   * @type {Function|string|undefined}
    */
   fn = Benchmark.defaultValues.fn;
 
@@ -904,8 +911,6 @@ class Benchmark extends EventTarget {
 
   /**
    * An object of stats including mean, margin or error, and standard deviation.
-   *
-   * @type Object
    */
   stats = {
     /**
@@ -960,8 +965,6 @@ class Benchmark extends EventTarget {
 
   /**
    * An object of timing data including cycle, elapsed, period, start, and stop.
-   *
-   * @type Object
    */
   times = {
     /**
@@ -995,8 +998,6 @@ class Benchmark extends EventTarget {
 
   /**
    * The default options copied by benchmark instances.
-   *
-   * @type {Object}
    */
   static options = {
     /**
@@ -1932,7 +1933,7 @@ class Event {
   /**
    * The object whose listeners are currently being processed.
    *
-   * @type Object
+   * @type {EventTarget|undefined}
    */
   currentTarget = undefined;
 
@@ -1946,7 +1947,7 @@ class Event {
   /**
    * The object to which the event was originally emitted.
    *
-   * @type Object
+   * @type {EventTarget|undefined}
    */
   target = undefined;
 
