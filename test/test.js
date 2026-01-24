@@ -3,10 +3,6 @@ import Benchmark from '../benchmark.js';
   /** Used as a reference to the global object. */
 var root = globalThis;
 
-  /** Method and object shortcuts. */
-  var
-      slice = Array.prototype.slice;
-
   /** Load libraries. */
   var
       QUnit = root.QUnit || (await import('qunit')).default;
@@ -299,7 +295,7 @@ var root = globalThis;
       QUnit.test('should providee the correct arguments when passing an ' + key, function(assert) {
         var args;
         Benchmark.filter(object, function() {
-          args || (args = slice.call(arguments));
+          args || (args = [...arguments]);
         });
 
         assert.deepEqual(args, ['a', 0, object]);
@@ -977,7 +973,7 @@ var root = globalThis;
           actual = suite.shift();
 
       assert.strictEqual(actual, undefined);
-      assert.deepEqual(slice.call(suite), []);
+      assert.deepEqual([...suite.benchmarks], []);
     });
 
     QUnit.test('should have no elements when length is `0` after shift', function(assert) {
