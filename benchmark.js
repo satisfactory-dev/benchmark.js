@@ -139,11 +139,6 @@ class Support {
   static #browser;
 
   /**
-   * @type {boolean|undefined}
-   */
-  static #decompilation;
-
-  /**
    * Detect if running in a browser environment.
    *
    * @returns {boolean}
@@ -154,31 +149,6 @@ class Support {
     }
 
     return this.#browser;
-  }
-
-  /**
-   * Detect if function decompilation is supported.
-   *
-   * @returns {boolean}
-   */
-  static get decompilation() {
-    if (this.#decompilation == undefined) {
-      try {
-        // Safari 2.x removes commas in object literals from `Function#toString` results.
-        // See https://bugs.webkit.org/show_bug.cgi?id=11609 for more details.
-        // Firefox 3.6 and Opera 9.25 strip grouping parentheses from `Function#toString` results.
-        // See https://bugzilla.mozilla.org/show_bug.cgi?id=559438 for more details.
-        this.#decompilation = Function(
-          ('return (' + (function(x) { return { 'x': '' + (1 + x) + '', 'y': 0 }; }) + ')')
-          // Avoid issues with code added by Istanbul.
-          .replace(/__cov__[^;]+;/g, '')
-        )()(0).x === '1';
-      } catch {
-        this.#decompilation = false;
-      }
-    }
-
-    return this.#decompilation;
   }
 }
 
@@ -293,7 +263,7 @@ function getSource(fn) {
   var result = '';
   if (isStringable(fn)) {
     result = String(fn);
-  } else if (Support.decompilation) {
+  } else {
     // Escape the `{` for Firefox 1.
     result = getResult(/^[^{]+\{([\s\S]*)\}\s*$/, fn);
   }
@@ -2364,11 +2334,8 @@ function clock(clone, timer) {
       decompilable = (
         stringable ||
         (
-          Support.decompilation &&
-          (
             clone.setup !== noop ||
             clone.teardown !== noop
-          )
         )
       ),
       id = bench.id,
