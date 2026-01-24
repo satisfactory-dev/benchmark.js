@@ -972,7 +972,7 @@ class Benchmark extends EventTarget {
    *
    * @type {boolean}
    */
-  async;
+  async = Benchmark.options.async;
 
   /**
    * The compiled test function.
@@ -1000,14 +1000,14 @@ class Benchmark extends EventTarget {
    *
    * @type {boolean}
    */
-  defer;
+  defer = Benchmark.options.defer;
 
   /**
    * The delay between test cycles (secs).
    *
    * @type {number}
    */
-  delay;
+  delay = Benchmark.options.delay;
 
   /**
    * The error object if the test failed.
@@ -1642,7 +1642,6 @@ class Benchmark extends EventTarget {
    */
   constructor(maybeName, fn, options = {}) {
     super();
-    var bench = this;
 
     options = 'object' === typeof maybeName ? maybeName : (
       'object' === typeof fn
@@ -1652,14 +1651,18 @@ class Benchmark extends EventTarget {
     fn = 'function' === typeof maybeName ? maybeName : fn;
     const name = 'string' === typeof maybeName ? maybeName : undefined;
 
-    this.setOptions(bench, options);
+    this.setOptions(this, options);
 
-    bench.id || (bench.id = ++counter);
-    bench.name = bench.name || name;
-    bench.fn = bench.fn === undefined ? fn : bench.fn;
+    if (!('id' in options) || options.id === undefined) {
+      this.id = ++counter;
+    } else {
+      this.id = options.id;
+    }
+    this.name = this.name || name;
+    this.fn = this.fn === undefined ? fn : this.fn;
 
-    bench.stats = cloneDeep(bench.stats);
-    bench.times = cloneDeep(bench.times);
+    this.stats = cloneDeep(this.stats);
+    this.times = cloneDeep(this.times);
   }
 
   /**
