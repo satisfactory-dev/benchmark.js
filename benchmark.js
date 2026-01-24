@@ -118,9 +118,6 @@ var doc = isHostType(globalThis, 'document') && globalThis.document;
 /** Used to access Node.js's high resolution timer. */
 var processObject = isHostType(globalThis, 'process') && globalThis.process;
 
-/** Used to prevent a `removeChild` memory leak in IE < 9. */
-var trash = doc && doc.createElement('div');
-
 /** Used to integrity check compiled tests. */
 var uid = 'uid' + (+Date.now());
 
@@ -128,26 +125,48 @@ var uid = 'uid' + (+Date.now());
 var calledBy = {};
 
 /**
- * Destroys the given element.
+ * Helper class for running scripts in-browser
  *
  * @private
+ */
+class BrowserHelper {
+  /**
+   * @type {Document}
+   */
+  #doc;
+
+  /**
+   * @type {HTMLDivElement}
+   */
+  #trash;
+
+  /**
+   * @param {Document} doc
+   */
+  constructor(doc) {
+    this.#doc = doc;
+    this.#trash = doc.createElement('div');
+  }
+
+/**
+ * Destroys the given element.
+ *
  * @param {Element} element The element to destroy.
  */
-function destroyElement(element) {
-  trash.appendChild(element);
-  trash.innerHTML = '';
+  #destroyElement(element) {
+    this.#trash.appendChild(element);
+    this.#trash.innerHTML = '';
 }
 
 /**
  * Runs a snippet of JavaScript via script injection.
  *
- * @private
  * @param {string} code The code to run.
  */
-function runScript(code) {
+  runScript(code) {
   var anchor = Benchmark,
-      script = doc.createElement('script'),
-      sibling = doc.getElementsByTagName('script')[0],
+        script = this.#doc.createElement('script'),
+        sibling = this.#doc.getElementsByTagName('script')[0],
       parent = sibling.parentNode,
       prop = uid + 'runScript',
       prefix = '(' + 'Benchmark.' + prop + '||function(){})();';
@@ -158,8 +177,8 @@ function runScript(code) {
   try {
     // Remove the inserted script *before* running the code to avoid differences
     // in the expected script element count/order of the document.
-    script.appendChild(doc.createTextNode(prefix + code));
-    anchor[prop] = function() { destroyElement(script); };
+      script.appendChild(this.#doc.createTextNode(prefix + code));
+      anchor[prop] = () => { this.#destroyElement(script); };
   } catch(e) {
     parent = parent.cloneNode(false);
     sibling = null;
@@ -167,6 +186,7 @@ function runScript(code) {
   }
   parent.insertBefore(script, sibling);
   delete anchor[prop];
+}
 }
 
 /**
@@ -176,18 +196,22 @@ function runScript(code) {
  */
 class Support {
   /**
-   * @type {boolean|undefined}
+   * @type {BrowserHelper|false|undefined}
    */
   static #browser;
 
   /**
    * Detect if running in a browser environment.
    *
-   * @returns {boolean}
+   * @returns {BrowserHelper|false}
    */
   static get browser() {
     if (this.#browser == undefined) {
-      this.#browser = doc && isHostType(globalThis, 'navigator');
+      if(doc && isHostType(globalThis, 'navigator')) {
+        this.#browser = new BrowserHelper(doc);
+      } else {
+        this.#browser = false;
+      }
     }
 
     return this.#browser;
@@ -225,18 +249,23 @@ function cloneDeep(value) {
  * @param {string} body The function body.
  * @returns {Function} The new function.
  */
-const createFunction = Support.browser
-  ? function (args, body) {
+const createFunction = (() => {
+  const helper = Support.browser;
+  if (helper) {
+    return function (args, body) {
     var result,
         anchor = Benchmark,
         prop = uid + 'createFunction';
 
-    runScript('Benchmark.' + prop + '=function(' + args + '){' + body + '}');
+    helper.runScript('Benchmark.' + prop + '=function(' + args + '){' + body + '}');
     result = anchor[prop];
     delete anchor[prop];
     return result;
+    };
   }
-  : Function;
+
+  return Function;
+})();
 
 /**
  * Delay the execution of a function based on the benchmark's `delay` property.
@@ -2780,7 +2809,7 @@ function cycle(clone, options) {
     // Fix TraceMonkey bug associated with clock fallbacks.
     // For more information see https://bugzilla.mozilla.org/show_bug.cgi?id=509069.
     if (Support.browser) {
-      runScript(uid + '=1;delete ' + uid);
+      Support.browser.runScript(uid + '=1;delete ' + uid);
     }
     // We're done.
     clone.emit(new Event('complete'));
