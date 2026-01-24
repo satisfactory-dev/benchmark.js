@@ -460,8 +460,8 @@ class Timer {
 
   /**
    * @param {Object} options
-   * @param {Object<now, () => number>} [options.highestDefaultTimer]
-   * @param {Object<now, () => number>} [options.usTimer] A high-precision timer such as the one provided by microtime
+   * @param {{now(): number}} [options.highestDefaultTimer]
+   * @param {{now(): number}} [options.usTimer] A high-precision timer such as the one provided by microtime
    * @param {boolean} [options.allowHrtime] If process.hrtime is available, controls whether it is used.
    */
   static changeContext({
