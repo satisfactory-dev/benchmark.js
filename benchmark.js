@@ -600,9 +600,16 @@ class EventTarget {
   /**
    * Registered events for the event target
    *
-   * @type {undefined|(Object<string, Function[]>)}
+   * @type {Object<string, Function[]>}
    */
-  events;
+  events = {};
+
+  /**
+   * Instance options
+   *
+   * @type {object}
+   */
+  options = {};
 
   /**
    * Executes all registered listeners of the specified event type.
@@ -776,6 +783,7 @@ class EventTarget {
         'minSamples',
         'minTime',
         'name',
+        'events',
       ].forEach((prop) => {
         if (prop in options && undefined !== options[prop]) {
           this[prop] = options[prop];
@@ -1730,6 +1738,10 @@ class Benchmark extends EventTarget {
       result.name = this.name;
     }
 
+    if (Object.keys(this.events).length > 0) {
+      result.events = cloneDeep(this.events);
+    }
+
     return result;
   }
 
@@ -2057,7 +2069,7 @@ class Event {
   /**
    * The object whose listeners are currently being processed.
    *
-   * @type {EventTarget|undefined}
+   * @type {(EventTarget[])|EventTarget|undefined}
    */
   currentTarget = undefined;
 

@@ -744,7 +744,7 @@
       QUnit.test('should handle a non-registered listener', function(assert) {
         var object = new Constructor();
         object.off('x', function() {});
-        assert.strictEqual(object.events, undefined);
+        assert.deepEqual(object.events, {});
       });
 
       QUnit.test('should handle space separated event type and listener', function(assert) {
