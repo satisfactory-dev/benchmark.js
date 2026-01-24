@@ -100,13 +100,13 @@ function has(maybe, prop) {
  * @param {RegExp} regex
  * @param {string} str
  *
- * @returns {string|null}
+ * @returns {string}
  */
 function getResult(regex, str) {
   const match = regex.exec(str);
 
   if (!match) {
-    return null;
+    return '';
   }
 
   return match[1];
@@ -310,7 +310,7 @@ function getMean(sample) {
  * Gets the source code of a function.
  *
  * @private
- * @param {Function} fn The function.
+ * @param {Function|string|{toString(): string}} fn The function.
  * @returns {string} The function's source code.
  */
 function getSource(fn) {
@@ -2362,7 +2362,8 @@ const templateData = {};
  * Clocks the time taken to execute a test per cycle (secs).
  *
  * @private
- * @param {Object} clone The benchmark instance.
+ * @param {Benchmark|Deferred} clone The benchmark instance.
+ * @param {Timer} timer
  * @returns {number} The time taken.
  */
 function clock(clone, timer) {
