@@ -756,14 +756,17 @@ class EventTarget {
       }
     });
 
+    if (object instanceof Benchmark) {
     [
       'name',
       'id',
+        'initCount',
     ].forEach((prop) => {
       if (prop in options && undefined !== options[prop]) {
         object[prop] = options[prop];
       }
     })
+    }
   }
 
   /**
@@ -996,6 +999,13 @@ class Benchmark extends EventTarget {
    * @type {string|number}
    */
   id;
+
+  /**
+   * The default number of times to execute a test on a benchmark's first cycle.
+   *
+   * @type {number}
+   */
+  initCount;
 
   /**
    * The name of the benchmark.
