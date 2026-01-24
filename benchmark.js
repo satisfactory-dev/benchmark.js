@@ -2361,7 +2361,16 @@ function clock(clone, timer) {
   var bench = clone._original,
       stringable = isStringable(bench.fn),
       count = bench.count = clone.count,
-      decompilable = stringable || (Support.decompilation && (clone.setup !== noop || clone.teardown !== noop)),
+      decompilable = (
+        stringable ||
+        (
+          Support.decompilation &&
+          (
+            clone.setup !== noop ||
+            clone.teardown !== noop
+          )
+        )
+      ),
       id = bench.id,
       name = bench.name || (typeof id == 'number' ? '<Test #' + id + '>' : id),
       result = 0;
