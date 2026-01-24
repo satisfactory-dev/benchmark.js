@@ -128,6 +128,48 @@ var uid = 'uid' + (+Date.now());
 var calledBy = {};
 
 /**
+ * Destroys the given element.
+ *
+ * @private
+ * @param {Element} element The element to destroy.
+ */
+function destroyElement(element) {
+  trash.appendChild(element);
+  trash.innerHTML = '';
+}
+
+/**
+ * Runs a snippet of JavaScript via script injection.
+ *
+ * @private
+ * @param {string} code The code to run.
+ */
+function runScript(code) {
+  var anchor = Benchmark,
+      script = doc.createElement('script'),
+      sibling = doc.getElementsByTagName('script')[0],
+      parent = sibling.parentNode,
+      prop = uid + 'runScript',
+      prefix = '(' + 'Benchmark.' + prop + '||function(){})();';
+
+  // Firefox 2.0.0.2 cannot use script injection as intended because it executes
+  // asynchronously, but that's OK because script injection is only used to avoid
+  // the previously commented JaegerMonkey bug.
+  try {
+    // Remove the inserted script *before* running the code to avoid differences
+    // in the expected script element count/order of the document.
+    script.appendChild(doc.createTextNode(prefix + code));
+    anchor[prop] = function() { destroyElement(script); };
+  } catch(e) {
+    parent = parent.cloneNode(false);
+    sibling = null;
+    script.text = code;
+  }
+  parent.insertBefore(script, sibling);
+  delete anchor[prop];
+}
+
+/**
  * A class used to flag environments/features.
  *
  * @memberOf Benchmark
@@ -205,17 +247,6 @@ const createFunction = Support.browser
  */
 function delay(bench, fn) {
   bench._timerId = setTimeout(() => fn(), bench.delay * 1e3);
-}
-
-/**
- * Destroys the given element.
- *
- * @private
- * @param {Element} element The element to destroy.
- */
-function destroyElement(element) {
-  trash.appendChild(element);
-  trash.innerHTML = '';
 }
 
 /**
@@ -301,37 +332,6 @@ function isStringable(value) {
   }
 
   return (typeof value === 'string') || (has(value, 'toString') && (typeof value.toString === 'function'));
-}
-
-/**
- * Runs a snippet of JavaScript via script injection.
- *
- * @private
- * @param {string} code The code to run.
- */
-function runScript(code) {
-  var anchor = Benchmark,
-      script = doc.createElement('script'),
-      sibling = doc.getElementsByTagName('script')[0],
-      parent = sibling.parentNode,
-      prop = uid + 'runScript',
-      prefix = '(' + 'Benchmark.' + prop + '||function(){})();';
-
-  // Firefox 2.0.0.2 cannot use script injection as intended because it executes
-  // asynchronously, but that's OK because script injection is only used to avoid
-  // the previously commented JaegerMonkey bug.
-  try {
-    // Remove the inserted script *before* running the code to avoid differences
-    // in the expected script element count/order of the document.
-    script.appendChild(doc.createTextNode(prefix + code));
-    anchor[prop] = function() { destroyElement(script); };
-  } catch(e) {
-    parent = parent.cloneNode(false);
-    sibling = null;
-    script.text = code;
-  }
-  parent.insertBefore(script, sibling);
-  delete anchor[prop];
 }
 
 class Timer {
