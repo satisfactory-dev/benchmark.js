@@ -2261,7 +2261,7 @@ class Suite extends EventTarget {
   /**
    * Reverse the benchmarks order
    *
-   * @returns {this}
+   * @returns {Suite}
    */
   reverse() {
     this.#benchmarks.reverse();
