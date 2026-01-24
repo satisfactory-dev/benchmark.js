@@ -1619,7 +1619,7 @@ class Benchmark extends EventTarget {
    * Creates a new benchmark using the same test and options.
    *
    * @param {Object} options Options object to overwrite cloned options.
-   * @returns {Object} The new benchmark instance.
+   * @returns {Benchmark} The new benchmark instance.
    * @example
    *
    * var bizarro = bench.clone({
@@ -1628,7 +1628,7 @@ class Benchmark extends EventTarget {
    */
   clone(options) {
     var bench = this,
-        result = new bench.constructor(Object.assign({}, bench, options));
+        result = new Benchmark(Object.assign({}, bench, options));
 
     // Correct the `options` object.
     result.options = Object.assign({}, cloneDeep(bench.options), cloneDeep(options));
@@ -1896,7 +1896,7 @@ class Deferred {
   /**
    * The deferred benchmark instance.
    *
-   * @type {Object}
+   * @type {Benchmark|null}
    */
   benchmark = null;
 
@@ -2569,7 +2569,7 @@ function interpolate(string) {
  * Computes stats on benchmark results.
  *
  * @private
- * @param {Object} bench The benchmark instance.
+ * @param {Benchmark} bench The benchmark instance.
  * @param {Object} options The options object.
  */
 function compute(bench, options) {
