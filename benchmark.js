@@ -768,9 +768,15 @@ class EventTarget {
 
     if (object instanceof Benchmark) {
       [
-        'name',
+        'async',
+        'defer',
+        'delay',
         'id',
         'initCount',
+        'maxTime',
+        'minSamples',
+        'minTime',
+        'name',
       ].forEach((prop) => {
         if (prop in options && undefined !== options[prop]) {
           object[prop] = options[prop];
@@ -961,6 +967,14 @@ class Benchmark extends EventTarget {
   aborted = Benchmark.defaultValues.aborted;
 
   /**
+   * A flag to indicate that benchmark cycles will execute asynchronously
+   * by default.
+   *
+   * @type {boolean}
+   */
+  async;
+
+  /**
    * The compiled test function.
    *
    * @type {Function|string|undefined}
@@ -980,6 +994,20 @@ class Benchmark extends EventTarget {
    * @type {number}
    */
   cycles = Benchmark.defaultValues.cycles;
+
+  /**
+   * A flag to indicate that the benchmark clock is deferred.
+   *
+   * @type {boolean}
+   */
+  defer;
+
+  /**
+   * The delay between test cycles (secs).
+   *
+   * @type {number}
+   */
+  delay;
 
   /**
    * The error object if the test failed.
@@ -1016,6 +1044,29 @@ class Benchmark extends EventTarget {
    * @type {number}
    */
   initCount;
+
+  /**
+   * The maximum time a benchmark is allowed to run before finishing (secs).
+   *
+   * Note: Cycle delays aren't counted toward the maximum time.
+   *
+   * @type {number}
+   */
+  maxTime;
+
+  /**
+   * The minimum sample size required to perform statistical analysis.
+   *
+   * @type {number}
+   */
+  minSamples;
+
+  /**
+   * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
+   *
+   * @type {number}
+   */
+  minTime;
 
   /**
    * The name of the benchmark.
