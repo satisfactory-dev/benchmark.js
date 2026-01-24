@@ -1,27 +1,27 @@
 <!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>Benchmark.js Test Suite</title>
-    <link rel="stylesheet" href="../node_modules/qunit/qunit/qunit.css">
-  </head>
-  <body>
-    <div id="qunit"></div>
-    <script src="../node_modules/qunit/qunit/qunit.js"></script>
-    <script type="module">
-      import Benchmark from '../benchmark.js';
-      QUnit.config.hidepassed = true;
-      globalThis.QUnit = QUnit;
-      globalThis.Benchmark = Benchmark;
+<head>
+<meta charset="utf-8">
+<title>Benchmark.js Test Suite</title>
+<link rel="stylesheet" href="../node_modules/qunit/qunit/qunit.css">
+</head>
+<body>
+<div id="qunit"></div>
+<script src="../node_modules/qunit/qunit/qunit.js"></script>
+<script type="module">
+  import Benchmark from '../benchmark.js';
+  QUnit.config.hidepassed = true;
+  globalThis.QUnit = QUnit;
+  globalThis.Benchmark = Benchmark;
 
-      var benchmarkModule;
+  var benchmarkModule;
 
-        QUnit.config.autostart = false;
-        await import('./test.js');
-            QUnit.start();
-            QUnit.on('runEnd', () => {
-                console.log('Finished running tests')
-            })
-    </script>
-  </body>
+    QUnit.config.autostart = false;
+    await import('./test.js');
+        QUnit.start();
+        QUnit.on('runEnd', () => {
+            console.log('Finished running tests')
+        })
+</script>
+</body>
 </html>
