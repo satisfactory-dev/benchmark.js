@@ -1,3 +1,5 @@
+//# allFunctionsCalledOnLoad
+
 import Benchmark from '../benchmark.js';
 
   /** Used as a reference to the global object. */
