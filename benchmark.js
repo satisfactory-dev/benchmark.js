@@ -1481,9 +1481,9 @@ class Benchmark extends EventTarget {
   /**
    * The Benchmark constructor.
    *
-   * @param {string} name A name to identify the benchmark.
-   * @param {Function|string} fn The test to benchmark.
-   * @param {Object} [options={}] Options object.
+   * @param {string|object|Function} maybeName A name to identify the benchmark.
+   * @param {Function|string} [fn] The test to benchmark.
+   * @param {Object} [options] Options object.
    * @example
    *
    * // basic usage (the `new` operator is optional)
@@ -1551,34 +1551,23 @@ class Benchmark extends EventTarget {
    *   'My name is '.concat(this.name); // "My name is foo"
    * });
    */
-  constructor(name, fn, options) {
+  constructor(maybeName, fn, options = {}) {
     super();
     var bench = this;
 
-    // Juggle arguments.
-    if (typeof name === 'object') {
-      // 1 argument (options).
-      options = name;
-    }
-    else if (typeof name === 'function') {
-      // 2 arguments (fn, options).
-      options = fn;
-      fn = name;
-    }
-    else if (typeof fn === 'object') {
-      // 2 arguments (name, options).
-      options = fn;
-      fn = null;
-      bench.name = name;
-    }
-    else {
-      // 3 arguments (name, fn [, options]).
-      bench.name = name;
-    }
+    options = 'object' === typeof maybeName ? maybeName : (
+      'object' === typeof fn
+        ? fn
+        : options
+    );
+    fn = 'function' === typeof maybeName ? maybeName : fn;
+    const name = 'string' === typeof maybeName ? maybeName : undefined;
+
     this.setOptions(bench, options);
 
     bench.id || (bench.id = ++counter);
-    bench.fn == null && (bench.fn = fn);
+    bench.name = bench.name || name;
+    bench.fn = bench.fn === undefined ? fn : bench.fn;
 
     bench.stats = cloneDeep(bench.stats);
     bench.times = cloneDeep(bench.times);
