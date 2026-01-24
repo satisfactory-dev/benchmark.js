@@ -148,45 +148,45 @@ class BrowserHelper {
     this.#trash = doc.createElement('div');
   }
 
-/**
- * Destroys the given element.
- *
- * @param {Element} element The element to destroy.
- */
+  /**
+   * Destroys the given element.
+   *
+   * @param {Element} element The element to destroy.
+   */
   #destroyElement(element) {
     this.#trash.appendChild(element);
     this.#trash.innerHTML = '';
-}
-
-/**
- * Runs a snippet of JavaScript via script injection.
- *
- * @param {string} code The code to run.
- */
-  runScript(code) {
-  var anchor = Benchmark,
-        script = this.#doc.createElement('script'),
-        sibling = this.#doc.getElementsByTagName('script')[0],
-      parent = sibling.parentNode,
-      prop = uid + 'runScript',
-      prefix = '(' + 'Benchmark.' + prop + '||function(){})();';
-
-  // Firefox 2.0.0.2 cannot use script injection as intended because it executes
-  // asynchronously, but that's OK because script injection is only used to avoid
-  // the previously commented JaegerMonkey bug.
-  try {
-    // Remove the inserted script *before* running the code to avoid differences
-    // in the expected script element count/order of the document.
-      script.appendChild(this.#doc.createTextNode(prefix + code));
-      anchor[prop] = () => { this.#destroyElement(script); };
-  } catch(e) {
-    parent = parent.cloneNode(false);
-    sibling = null;
-    script.text = code;
   }
-  parent.insertBefore(script, sibling);
-  delete anchor[prop];
-}
+
+  /**
+   * Runs a snippet of JavaScript via script injection.
+   *
+   * @param {string} code The code to run.
+   */
+  runScript(code) {
+    var anchor = Benchmark,
+          script = this.#doc.createElement('script'),
+          sibling = this.#doc.getElementsByTagName('script')[0],
+        parent = sibling.parentNode,
+        prop = uid + 'runScript',
+        prefix = '(' + 'Benchmark.' + prop + '||function(){})();';
+
+    // Firefox 2.0.0.2 cannot use script injection as intended because it executes
+    // asynchronously, but that's OK because script injection is only used to avoid
+    // the previously commented JaegerMonkey bug.
+    try {
+      // Remove the inserted script *before* running the code to avoid differences
+      // in the expected script element count/order of the document.
+        script.appendChild(this.#doc.createTextNode(prefix + code));
+        anchor[prop] = () => { this.#destroyElement(script); };
+    } catch(e) {
+      parent = parent.cloneNode(false);
+      sibling = null;
+      script.text = code;
+    }
+    parent.insertBefore(script, sibling);
+    delete anchor[prop];
+  }
 }
 
 /**
@@ -253,14 +253,14 @@ const createFunction = (() => {
   const helper = Support.browser;
   if (helper) {
     return function (args, body) {
-    var result,
-        anchor = Benchmark,
-        prop = uid + 'createFunction';
+      var result,
+          anchor = Benchmark,
+          prop = uid + 'createFunction';
 
-    helper.runScript('Benchmark.' + prop + '=function(' + args + '){' + body + '}');
-    result = anchor[prop];
-    delete anchor[prop];
-    return result;
+      helper.runScript('Benchmark.' + prop + '=function(' + args + '){' + body + '}');
+      result = anchor[prop];
+      delete anchor[prop];
+      return result;
     };
   }
 
