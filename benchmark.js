@@ -157,15 +157,6 @@ class Support {
   }
 
   /**
-   * Detect if the Timers API exists.
-   *
-   * @returns {boolean}
-   */
-  static get timeout() {
-    return true;
-  }
-
-  /**
    * Detect if function decompilation is supported.
    *
    * @returns {boolean}
@@ -1387,8 +1378,15 @@ class Benchmark extends EventTarget {
     function isAsync(object) {
       // Avoid using `instanceof` here because of IE memory leak issues with host objects.
       var async = args[0] && args[0].async;
-      return name == 'run' && (object instanceof Benchmark) &&
-        ((async == null ? object.options.async : async) && Support.timeout || object.defer);
+
+      return (
+        name == 'run' &&
+        (object instanceof Benchmark) &&
+        (
+          (async == null ? object.options.async : async) ||
+          object.defer
+        )
+      );
     }
 
     /**
@@ -1600,10 +1598,9 @@ class Benchmark extends EventTarget {
         bench.reset();
         delete calledBy.abort;
 
-        if (Support.timeout) {
           clearTimeout(bench._timerId);
           delete bench._timerId;
-        }
+
         if (!resetting) {
           bench.aborted = true;
           bench.running = false;
@@ -1852,7 +1849,13 @@ class Benchmark extends EventTarget {
     bench.emit(event);
 
     if (!event.cancelled) {
-      options = { 'async': ((options = options && options.async) == null ? bench.async : options) && Support.timeout };
+      options = {
+        'async': (
+          (options = options && options.async) == null
+            ? bench.async
+            : options
+          )
+      };
 
       options.timer = timer;
 
