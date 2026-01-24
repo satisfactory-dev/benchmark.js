@@ -19,32 +19,32 @@ var rePrimitive = /^(?:boolean|number|string|undefined)$/;
 var uidCounter = 0;
 
 /** Used to avoid hz of Infinity. */
-var divisors = {
+const divisors = Object.freeze({
   '1': 4096,
   '2': 512,
   '3': 64,
   '4': 8,
   '5': 0
-};
+});
 
 /**
  * T-Distribution two-tailed critical values for 95% confidence.
  * For more info see http://www.itl.nist.gov/div898/handbook/eda/section3/eda3672.htm.
  */
-var tTable = {
+const tTable = Object.freeze({
   '1':  12.706, '2':  4.303, '3':  3.182, '4':  2.776, '5':  2.571, '6':  2.447,
   '7':  2.365,  '8':  2.306, '9':  2.262, '10': 2.228, '11': 2.201, '12': 2.179,
   '13': 2.16,   '14': 2.145, '15': 2.131, '16': 2.12,  '17': 2.11,  '18': 2.101,
   '19': 2.093,  '20': 2.086, '21': 2.08,  '22': 2.074, '23': 2.069, '24': 2.064,
   '25': 2.06,   '26': 2.056, '27': 2.052, '28': 2.048, '29': 2.045, '30': 2.042,
   'infinity': 1.96
-};
+});
 
 /**
  * Critical Mann-Whitney U-values for 95% confidence.
  * For more info see http://www.saburchill.com/IBbiology/stats/003.html.
  */
-var uTable = {
+const uTable = Object.freeze({
   '5':  [0, 1, 2],
   '6':  [1, 2, 3, 5],
   '7':  [1, 3, 5, 6, 8],
@@ -71,7 +71,7 @@ var uTable = {
   '28': [12, 21, 30, 40, 50, 60, 70, 80, 90, 101, 111, 122, 132, 143, 154, 164, 175, 186, 196, 207, 218, 228, 239, 250, 261, 272],
   '29': [13, 22, 32, 42, 52, 62, 73, 83, 94, 105, 116, 127, 138, 149, 160, 171, 182, 193, 204, 215, 226, 238, 249, 260, 271, 282, 294],
   '30': [13, 23, 33, 43, 54, 65, 76, 87, 98, 109, 120, 131, 143, 154, 166, 177, 189, 200, 212, 223, 235, 247, 258, 270, 282, 293, 305, 317]
-};
+});
 
 /*--------------------------------------------------------------------------*/
 
@@ -1757,7 +1757,7 @@ class Benchmark extends EventTarget {
   /**
    * Determines if a benchmark is faster than another.
    *
-   * @param {Object} other The benchmark to compare.
+   * @param {Benchmark} other The benchmark to compare.
    * @returns {number} Returns `-1` if slower, `1` if faster, and `0` if indeterminate.
    */
   compare(other) {
@@ -1779,18 +1779,32 @@ class Benchmark extends EventTarget {
         u2 = getU(sample2, sample1),
         u = Math.min(u1, u2);
 
+    /**
+     * @param {number} xA
+     * @param {number[]} sampleB
+     * @returns {number}
+     */
     function getScore(xA, sampleB) {
       return sampleB.reduce((total, xB) => {
         return total + (xB > xA ? 0 : xB < xA ? 1 : 0.5);
       }, 0);
     }
 
+    /**
+     * @param {number[]} sampleA
+     * @param {number[]} sampleB
+     * @returns {number}
+     */
     function getU(sampleA, sampleB) {
       return sampleA.reduce((total, xA) => {
         return total + getScore(xA, sampleB);
       }, 0);
     }
 
+    /**
+     * @param {number} u
+     * @returns {number}
+     */
     function getZ(u) {
       return (u - ((size1 * size2) / 2)) / Math.sqrt((size1 * size2 * (size1 + size2 + 1)) / 12);
     }
@@ -2133,9 +2147,12 @@ class Event {
   /**
    * The event type.
    *
-   * @type string
+   * @type {string}
    */
   type;
+
+  /** @type {string|undefined} */
+  message;
 
   /**
    * The Event constructor.
