@@ -757,15 +757,15 @@ class EventTarget {
     });
 
     if (object instanceof Benchmark) {
-    [
-      'name',
-      'id',
+      [
+        'name',
+        'id',
         'initCount',
-    ].forEach((prop) => {
-      if (prop in options && undefined !== options[prop]) {
-        object[prop] = options[prop];
-      }
-    })
+      ].forEach((prop) => {
+        if (prop in options && undefined !== options[prop]) {
+          object[prop] = options[prop];
+        }
+      })
     }
   }
 
