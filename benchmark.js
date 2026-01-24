@@ -167,7 +167,7 @@ class Support {
         // Safari 2.x removes commas in object literals from `Function#toString` results.
         // See https://bugs.webkit.org/show_bug.cgi?id=11609 for more details.
         // Firefox 3.6 and Opera 9.25 strip grouping parentheses from `Function#toString` results.
-        // See http://bugzil.la/559438 for more details.
+        // See https://bugzilla.mozilla.org/show_bug.cgi?id=559438 for more details.
         this.#decompilation = Function(
           ('return (' + (function(x) { return { 'x': '' + (1 + x) + '', 'y': 0 }; }) + ')')
           // Avoid issues with code added by Istanbul.
@@ -227,7 +227,7 @@ function createFunction() {
   };
 
   // Fix JaegerMonkey bug.
-  // For more information see http://bugzil.la/639720.
+  // For more information see https://bugzilla.mozilla.org/show_bug.cgi?id=639720.
   createFunction = Support.browser && (createFunction('', 'return"' + uid + '"') || noop)() == uid ? createFunction : Function;
   return createFunction.apply(null, arguments);
 }
@@ -2402,7 +2402,7 @@ function clock(clone, timer) {
   try {
     if (isEmpty) {
       // Firefox may remove dead code from `Function#toString` results.
-      // For more information see http://bugzil.la/536085.
+      // For more information see https://bugzilla.mozilla.org/show_bug.cgi?id=536085.
       throw new Error('The test "' + name + '" is empty. This may be the result of dead code removal.');
     }
     else if (!deferred) {
@@ -2792,7 +2792,7 @@ function cycle(clone, options) {
   }
   else {
     // Fix TraceMonkey bug associated with clock fallbacks.
-    // For more information see http://bugzil.la/509069.
+    // For more information see https://bugzilla.mozilla.org/show_bug.cgi?id=509069.
     if (Support.browser) {
       runScript(uid + '=1;delete ' + uid);
     }
