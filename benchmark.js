@@ -165,7 +165,7 @@ class Support {
     if (this.#decompilation == undefined) {
       try {
         // Safari 2.x removes commas in object literals from `Function#toString` results.
-        // See http://webk.it/11609 for more details.
+        // See https://bugs.webkit.org/show_bug.cgi?id=11609 for more details.
         // Firefox 3.6 and Opera 9.25 strip grouping parentheses from `Function#toString` results.
         // See http://bugzil.la/559438 for more details.
         this.#decompilation = Function(
