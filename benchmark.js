@@ -867,7 +867,7 @@ class Benchmark extends EventTarget {
 
     /**
      * The delay between test cycles (secs).
-     * @type number
+     * @type {number}
      */
     'delay': 0.005,
 
@@ -875,14 +875,14 @@ class Benchmark extends EventTarget {
      * Displayed by `Benchmark#toString` when a `name` is not available
      * (auto-generated if absent).
      *
-     * @type string
+     * @type {string|undefined}
      */
     'id': undefined,
 
     /**
      * The default number of times to execute a test on a benchmark's first cycle.
      *
-     * @type number
+     * @type {number}
      */
     'initCount': 1,
 
@@ -891,21 +891,21 @@ class Benchmark extends EventTarget {
      *
      * Note: Cycle delays aren't counted toward the maximum time.
      *
-     * @type number
+     * @type {number}
      */
     'maxTime': 5,
 
     /**
      * The minimum sample size required to perform statistical analysis.
      *
-     * @type number
+     * @type {number}
      */
     'minSamples': 5,
 
     /**
      * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
      *
-     * @type number
+     * @type {number}
      */
     'minTime': 0,
 
@@ -919,42 +919,42 @@ class Benchmark extends EventTarget {
     /**
      * An event listener called when the benchmark is aborted.
      *
-     * @type Function
+     * @type {Function|undefined}
      */
     'onAbort': undefined,
 
     /**
      * An event listener called when the benchmark completes running.
      *
-     * @type Function
+     * @type {Function|undefined}
      */
     'onComplete': undefined,
 
     /**
      * An event listener called after each run cycle.
      *
-     * @type Function
+     * @type {Function|undefined}
      */
     'onCycle': undefined,
 
     /**
      * An event listener called when a test errors.
      *
-     * @type Function
+     * @type {Function|undefined}
      */
     'onError': undefined,
 
     /**
      * An event listener called when the benchmark is reset.
      *
-     * @type Function
+     * @type {Function|undefined}
      */
     'onReset': undefined,
 
     /**
      * An event listener called when the benchmark starts running.
      *
-     * @type Function
+     * @type {Function|undefined}
      */
     'onStart': undefined
   };
