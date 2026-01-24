@@ -319,7 +319,7 @@ function getSource(fn) {
     result = String(fn);
   } else {
     // Escape the `{` for Firefox 1.
-    result = getResult(/^[^{]+\{([\s\S]*)\}\s*$/, fn);
+    result = getResult(/^[^{]+\{([\s\S]*)\}\s*$/, fn.toString());
   }
   // Trim string.
   result = (result || '').replace(/^\s+|\s+$/g, '');
@@ -373,6 +373,9 @@ class Timer {
    */
   ns;
 
+  /**
+   * @type {((deferred: Deferred) => unknown)|null}
+   */
   #start = null;
 
   /**
@@ -391,12 +394,15 @@ class Timer {
     return this.#start;
   }
 
+  /**
+   * @type {((deferred: Deferred) => unknown)|null}
+   */
   #stop = null;
 
   /**
    * Stops the deferred timer.
    *
-   * @param {Object} deferred The deferred instance.
+   * @returns {(deferred: Deferred) => unknown}
    */
   get stop() {
     if (null === this.#stop) {
@@ -633,13 +639,17 @@ class EventTarget {
    * to add or remove listeners.
    *
    * @param {string} type The event type.
-   * @returns {Array} The listeners array.
+   * @returns {Function[]} The listeners array.
    */
   listeners(type) {
     var object = this,
         events = object.events || (object.events = {});
 
-    return has(events, type) ? events[type] : (events[type] = []);
+    if (!(type in events)) {
+      events[type] = [];
+    }
+
+    return events[type];
   }
 
   /**
@@ -685,7 +695,7 @@ class EventTarget {
       var index;
       if (typeof listeners == 'string') {
         type = listeners;
-        listeners = has(events, type) && events[type];
+        listeners = has(events, type) ? events[type] : [];
       }
       if (listeners) {
         if (listener) {
@@ -1635,7 +1645,7 @@ class Benchmark extends EventTarget {
   /**
    * Creates a new benchmark using the same test and options.
    *
-   * @param {Object} options Options object to overwrite cloned options.
+   * @param {Object} [options] Options object to overwrite cloned options.
    * @returns {Benchmark} The new benchmark instance.
    * @example
    *
@@ -1913,9 +1923,9 @@ class Deferred {
   /**
    * The deferred benchmark instance.
    *
-   * @type {Benchmark|null}
+   * @type {Benchmark}
    */
-  benchmark = null;
+  benchmark;
 
   /**
    * The number of deferred cycles performed while benchmarking.
@@ -2371,6 +2381,7 @@ class Suite extends EventTarget {
 
 /*------------------------------------------------------------------------*/
 
+/** @type {Object<string, string>} */
 const templateData = {};
 
 /**
@@ -2565,8 +2576,18 @@ function createCompiled(bench, decompilable, deferred, body, timer) {
 
 /**
  * Interpolates a given template string.
+ *
+ * @param {string} string
+ *
+ * @returns {string}
  */
 function interpolate(string) {
+  /**
+   * @param {TemplateStringsArray} _
+   * @param {string} string
+   *
+   * @returns {string}
+   */
   function tagged(_, string) {
     let result = string;
 
@@ -2578,7 +2599,7 @@ function interpolate(string) {
   }
 
   // Replaces all occurrences of `#` with a unique number and template tokens with content.
-  return tagged`${string.replace(/\#/g, /\d+/.exec(templateData.uid))}`;
+  return tagged`${string.replace(/\#/g, (/\d+/.exec(templateData.uid) || '').toString())}`;
 }
 
 /*------------------------------------------------------------------------*/
@@ -2741,17 +2762,24 @@ function compute(bench, options) {
  * Cycles a benchmark until a run `count` can be established.
  *
  * @private
- * @param {Object} clone The cloned benchmark instance.
+ * @param {Benchmark|Deferred} obj The cloned benchmark instance.
  * @param {Object} options The options object.
  */
-function cycle(clone, options) {
+function cycle(obj, options) {
   const {timer} = options;
 
   var deferred;
-  if (clone instanceof Deferred) {
-    deferred = clone;
-    clone = clone.benchmark;
+
+  /** @type {Benchmark} */
+  let clone;
+
+  if (obj instanceof Deferred) {
+    deferred = obj;
+    clone = obj.benchmark;
+  } else {
+    clone = obj;
   }
+
   var clocked,
       cycles,
       divisor,
