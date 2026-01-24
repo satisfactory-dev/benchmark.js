@@ -790,6 +790,39 @@ class EventTarget {
 
 class Benchmark extends EventTarget {
   /**
+   * The default values for Benchmark instance properties
+   *
+   * @returns {Object}
+   */
+  static defaultValues = Object.seal({
+    count: 0,
+    cycles: 0,
+    hz: 0,
+    compiled: undefined,
+    error: undefined,
+    fn: undefined,
+    aborted: false,
+    running: false,
+    setup: noop,
+    teardown: noop,
+    stats: {
+      moe: 0,
+      rme: 0,
+      sem: 0,
+      deviation: 0,
+      mean: 0,
+      sample: [],
+      variance: 0,
+    },
+    times: {
+      cycle: 0,
+      elapsed: 0,
+      period: 0,
+      timeStamp: 0,
+    },
+  });
+
+  /**
    * The number of times a test was executed.
    *
    * @type {number}
@@ -1138,39 +1171,6 @@ class Benchmark extends EventTarget {
   static get Timer() {
     return Timer;
   }
-
-  /**
-   * The default values for Benchmark instance properties
-   *
-   * @returns {Object}
-   */
-  static defaultValues = Object.seal({
-    count: 0,
-    cycles: 0,
-    hz: 0,
-    compiled: undefined,
-    error: undefined,
-    fn: undefined,
-    aborted: false,
-    running: false,
-    setup: noop,
-    teardown: noop,
-    stats: {
-      moe: 0,
-      rme: 0,
-      sem: 0,
-      deviation: 0,
-      mean: 0,
-      sample: [],
-      variance: 0,
-    },
-    times: {
-      cycle: 0,
-      elapsed: 0,
-      period: 0,
-      timeStamp: 0,
-    },
-  });
 
   /**
    * A generic `Array#filter` like method.
