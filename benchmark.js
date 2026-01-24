@@ -742,31 +742,30 @@ class EventTarget {
    * A helper function for setting options/event handlers.
    *
    * @protected
-   * @param {Object} object The benchmark or suite instance.
    * @param {Object} [options={}] Options object.
    */
-  setOptions(object, options) {
-    options = object.options = Object.assign({}, cloneDeep(object.constructor.options), cloneDeep(options));
+  setOptions(options) {
+    options = this.options = Object.assign({}, cloneDeep(this.constructor.options), cloneDeep(options));
 
     Object.entries(options).forEach(([key, value]) => {
       if (value != null) {
         // Add event listeners.
         if (/^on[A-Z]/.test(key)) {
           key.split(' ').forEach((key) => {
-            object.on(key.slice(2).toLowerCase(), value);
+            this.on(key.slice(2).toLowerCase(), value);
           });
         } else if (
-          !has(object, key) || (
-            object instanceof Benchmark &&
+          !has(this, key) || (
+            this instanceof Benchmark &&
             key in Benchmark.defaultValues
           )
         ) {
-          object[key] = cloneDeep(value);
+          this[key] = cloneDeep(value);
         }
       }
     });
 
-    if (object instanceof Benchmark) {
+    if (this instanceof Benchmark) {
       [
         'async',
         'defer',
@@ -779,7 +778,7 @@ class EventTarget {
         'name',
       ].forEach((prop) => {
         if (prop in options && undefined !== options[prop]) {
-          object[prop] = options[prop];
+          this[prop] = options[prop];
         }
       })
     }
@@ -1043,7 +1042,7 @@ class Benchmark extends EventTarget {
    *
    * @type {number}
    */
-  initCount;
+  initCount = Benchmark.options.initCount;
 
   /**
    * The maximum time a benchmark is allowed to run before finishing (secs).
@@ -1052,21 +1051,21 @@ class Benchmark extends EventTarget {
    *
    * @type {number}
    */
-  maxTime;
+  maxTime = Benchmark.options.maxTime;
 
   /**
    * The minimum sample size required to perform statistical analysis.
    *
    * @type {number}
    */
-  minSamples;
+  minSamples = Benchmark.options.minSamples;
 
   /**
    * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
    *
    * @type {number}
    */
-  minTime;
+  minTime = Benchmark.options.minTime;
 
   /**
    * The name of the benchmark.
@@ -1651,7 +1650,7 @@ class Benchmark extends EventTarget {
     fn = 'function' === typeof maybeName ? maybeName : fn;
     const name = 'string' === typeof maybeName ? maybeName : undefined;
 
-    this.setOptions(this, options);
+    this.setOptions(options);
 
     if (!('id' in options) || options.id === undefined) {
       this.id = ++counter;
@@ -2190,7 +2189,7 @@ class Suite extends EventTarget {
       // 2 arguments (name [, options]).
       suite.name = name;
     }
-    this.setOptions(suite, options);
+    this.setOptions(options);
   }
 
   get benchmarks() {
