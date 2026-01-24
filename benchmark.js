@@ -121,8 +121,12 @@ var processObject = isHostType(globalThis, 'process') && globalThis.process;
 /** Used to integrity check compiled tests. */
 var uid = 'uid' + (+Date.now());
 
-/** Used to avoid infinite recursion when methods call each other. */
-var calledBy = {};
+/**
+ * Used to avoid infinite recursion when methods call each other.
+ *
+ * @type {{abort?: true, abortSuite?: true, reset?: true, resetSuite?: true}}
+ */
+const calledBy = {};
 
 /**
  * Helper class for running scripts in-browser
