@@ -4,6 +4,19 @@ import {
 
 export default defineConfig([
 	{
+  /*
+		input: 'benchmark.ts',
+		output: {
+			format: 'esm',
+			name: 'Benchmark',
+			file: 'benchmark.js',
+			minify: false,
+			sourcemap: true,
+		}
+	},
+	{
+		input: 'benchmark.ts',
+  */
 		input: 'benchmark.js',
 		output: {
 			format: 'umd',
@@ -12,5 +25,5 @@ export default defineConfig([
 			minify: false,
 			sourcemap: true,
 		}
-	}
+	},
 ]);
