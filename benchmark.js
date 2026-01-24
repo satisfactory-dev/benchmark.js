@@ -726,6 +726,10 @@ class EventTarget {
         }
       }
     });
+
+    if ('name' in options && undefined !== options.name) {
+      object.name = options.name;
+    }
   }
 
   /**
@@ -850,7 +854,7 @@ class Benchmark extends EventTarget {
     /**
      * The name of the benchmark.
      *
-     * @type string
+     * @type {string|undefined}
      */
     'name': undefined,
 
@@ -945,6 +949,13 @@ class Benchmark extends EventTarget {
    * @type {number}
    */
   hz = Benchmark.defaultValues.hz;
+
+  /**
+   * The name of the benchmark.
+   *
+   * @type {string|undefined}
+   */
+  name;
 
   /**
    * A flag to indicate if the benchmark is running.
@@ -1605,6 +1616,10 @@ class Benchmark extends EventTarget {
         result[key] = cloneDeep(value);
       }
     });
+
+    if (this.name !== undefined) {
+      result.name = this.name;
+    }
 
     return result;
   }
