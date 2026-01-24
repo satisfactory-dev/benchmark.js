@@ -756,9 +756,14 @@ class EventTarget {
       }
     });
 
-    if ('name' in options && undefined !== options.name) {
-      object.name = options.name;
-    }
+    [
+      'name',
+      'id',
+    ].forEach((prop) => {
+      if (prop in options && undefined !== options[prop]) {
+        object[prop] = options[prop];
+      }
+    })
   }
 
   /**
@@ -978,6 +983,14 @@ class Benchmark extends EventTarget {
    * @type {number}
    */
   hz = Benchmark.defaultValues.hz;
+
+  /**
+   * Displayed by `Benchmark#toString` when a `name` is not available
+   * (auto-generated if absent).
+   *
+   * @type {string|number}
+   */
+  id;
 
   /**
    * The name of the benchmark.
