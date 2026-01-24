@@ -869,7 +869,7 @@ class Benchmark extends EventTarget {
      * The delay between test cycles (secs).
      * @type {number|'idle'}
      */
-    'delay': 'idle',
+    'delay': 'cancelIdleCallback' in globalThis ? 'idle' : 0.005,
 
     /**
      * Displayed by `Benchmark#toString` when a `name` is not available
