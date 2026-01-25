@@ -645,7 +645,7 @@ class EventTarget {
     var object = this,
         events = object.events || (object.events = {});
 
-    if (!(type in events)) {
+    if (!events.hasOwnProperty(type)) {
       events[type] = [];
     }
 
@@ -730,10 +730,7 @@ class EventTarget {
         events = object.events || (object.events = {});
 
     type.split(' ').forEach((type) => {
-      (has(events, type)
-        ? events[type]
-        : (events[type] = [])
-      ).push(listener);
+      this.listeners(type).push(listener);
     });
     return object;
   }
@@ -745,7 +742,9 @@ class EventTarget {
    * @param {Object} [options={}] Options object.
    */
   setOptions(options) {
-    options = this.options = Object.assign({}, cloneDeep(this.constructor.options), cloneDeep(options));
+    /** @type {typeof Benchmark | typeof Suite} */
+    const ctor = this.constructor;
+    options = this.options = Object.assign({}, cloneDeep(ctor.options), cloneDeep(options));
 
     Object.entries(options).forEach(([key, value]) => {
       if (value != null) {
@@ -1019,7 +1018,7 @@ class Benchmark extends EventTarget {
   /**
    * The error object if the test failed.
    *
-   * @type {Object|undefined}
+   * @type {unknown}
    */
   error = Benchmark.defaultValues.error;
 
@@ -1270,7 +1269,7 @@ class Benchmark extends EventTarget {
   /**
    * A generic `Array#filter` like method.
    *
-   * @param {Array} array The array to iterate over.
+   * @param {(Benchmark[])|Suite} array The array to iterate over.
    * @param {Function|string} callback The function/alias called per iteration.
    * @returns {Array} A new array of values that passed callback filter.
    * @example
@@ -1413,7 +1412,7 @@ class Benchmark extends EventTarget {
         bench,
         /** @type {boolean} */
         queued,
-        /** @type {number|false} */
+        /** @type {number} */
         index = -1,
         eventProps = { 'currentTarget': benches },
         options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
@@ -1533,9 +1532,15 @@ class Benchmark extends EventTarget {
         benches.shift();
       }
       // If we reached the last index then return `false`.
-      return (queued ? benches.length : index < result.length)
+      const haveNotReachedLastIndex = (queued ? benches.length : index < result.length)
         ? index
-        : (index = false);
+        : false;
+
+      if (false === haveNotReachedLastIndex) {
+        index = 0;
+      }
+
+      return haveNotReachedLastIndex;
     }
 
     // Start iterating over the array.
@@ -2068,6 +2073,11 @@ class Deferred {
   cycles = 0;
 
   /**
+   * @type {Function|undefined}
+   */
+  teardown;
+
+  /**
    * The time taken to complete the deferred benchmark (secs).
    *
    * @type {number}
@@ -2169,16 +2179,21 @@ class Event {
    */
   type;
 
-  /** @type {string|undefined} */
+  /** @type {unknown} */
   message;
 
   /**
    * The Event constructor.
    *
    * @memberOf Benchmark
-   * @param {Object|string} type The event type.
+   * @param {{type: string}|string} type The event type.
    */
   constructor(type) {
+    if ('object' === typeof type) {
+      this.type = type.type;
+    } else {
+      this.type = type;
+    }
     Object.assign(this, {
         timeStamp: +Date.now(),
         ...(
@@ -2224,6 +2239,11 @@ class Suite extends EventTarget {
   running = false;
 
   /**
+   * @type {string}
+   */
+  name;
+
+  /**
    * The Suite constructor.
    *
    * @memberOf Benchmark
@@ -2261,16 +2281,16 @@ class Suite extends EventTarget {
    */
   constructor(name, options) {
     super();
-    var suite = this;
 
     this.#benchmarks = [];
     // Juggle arguments.
     if (typeof name === 'object') {
       // 1 argument (options).
       options = name;
+      this.name = options.name;
     } else {
       // 2 arguments (name [, options]).
-      suite.name = name;
+      this.name = name;
     }
     this.setOptions(options);
   }
@@ -2495,9 +2515,15 @@ class Suite extends EventTarget {
       'name': 'run',
       'args': options,
       'queued': options.queued,
+      /**
+       * @param {Event} event
+       */
       'onStart': function(event) {
         suite.emit(event);
       },
+      /**
+       * @param {Event} event
+       */
       'onCycle': function(event) {
         var bench = event.target;
         if (bench.error) {
@@ -2506,6 +2532,9 @@ class Suite extends EventTarget {
         suite.emit(event);
         event.aborted = suite.aborted;
       },
+      /**
+       * @param {Event} event
+       */
       'onComplete': function(event) {
         suite.running = false;
         suite.emit(event);
@@ -2573,6 +2602,7 @@ function clock(clone, timer) {
     : 'var r#,s#,m#=this,f#=m#.fn,i#=m#.count,n#=t#.ns;${setup}\n${begin};' +
       'while(i#--){${fn}\n}${end};${teardown}\nreturn{elapsed:r#,uid:"${uid}"}';
 
+  /** @type {Function|null} */
   var compiled = bench.compiled = clone.compiled = createCompiled(
       bench,
       decompilable,
@@ -2760,6 +2790,7 @@ function compute(bench, options) {
       elapsed = 0,
       initCount = bench.initCount,
       minSamples = bench.minSamples,
+      /** @type {Benchmark[]} */
       queue = [],
       sample = bench.stats.sample;
 
@@ -2813,15 +2844,25 @@ function compute(bench, options) {
 
   /**
    * Determines if more clones should be queued or if cycling should stop.
+   *
+   * @param {Event} event
    */
   function evaluate(event) {
+    /** @type {number} */
     var critical,
+        /** @type {number} */
         df,
+        /** @type {number} */
         mean,
+        /** @type {number} */
         moe,
+        /** @type {number} */
         rme,
+        /** @type {number} */
         sd,
+        /** @type {number} */
         sem,
+        /** @type {number} */
         variance,
         clone = event.target,
         done = bench.aborted,
@@ -2829,6 +2870,12 @@ function compute(bench, options) {
         size = sample.push(clone.times.period),
         maxedOut = size >= minSamples && (elapsed += now - clone.times.timeStamp) / 1e3 > bench.maxTime,
         times = bench.times,
+        /**
+         * @param {number} sum
+         * @param {number} x
+         *
+         * @returns {number}
+         */
         varOf = function(sum, x) { return sum + Math.pow(x - mean, 2); };
 
     // Exit early for aborted or unclockable tests.
@@ -2847,8 +2894,10 @@ function compute(bench, options) {
       sem = sd / Math.sqrt(size);
       // Compute the degrees of freedom.
       df = size - 1;
+
+      const maybe_tTable_key = (Math.round(df) || 1).toString();
       // Compute the critical value.
-      critical = tTable[Math.round(df) || 1] || tTable.infinity;
+      critical = tTable[maybe_tTable_key] || tTable.infinity;
       // Compute the margin of error.
       moe = sem * critical;
       // Compute the relative margin of error.
@@ -2926,10 +2975,13 @@ function cycle(obj, options) {
 
   /** @type {number} */
   var clocked,
+      /** @type {number} */
       cycles,
-      divisor,
+      /** @type {Event} */
       event,
+      /** @type {Benchmark['minTime']} */
       minTime,
+      /** @type {number} */
       period,
       async = options.async,
       bench = clone._original,
