@@ -20,11 +20,11 @@ var uidCounter = 0;
 
 /** Used to avoid hz of Infinity. */
 const divisors = Object.freeze({
-  '1': 4096,
-  '2': 512,
-  '3': 64,
-  '4': 8,
-  '5': 0
+  1: 4096,
+  2: 512,
+  3: 64,
+  4: 8,
+  5: 0,
 });
 
 /**
@@ -275,14 +275,14 @@ const createFunction = (() => {
  * Gets the name of the first argument from a function's source.
  *
  * @private
- * @param {Function} fn The function.
+ * @param {Function&{toString:() => string}} fn The function.
  * @returns {string} The argument name.
  */
 function getFirstArgument(fn) {
   return (
     !has(fn, 'toString') &&
     (
-      /^[\s(]*function[^(]*\(([^\s,)]+)/.exec(fn) ||
+      /^[\s(]*function[^(]*\(([^\s,)]+)/.exec(fn.toString()) ||
       []
     )[1]
   ) || '';
@@ -960,6 +960,13 @@ class Benchmark extends EventTarget {
   };
 
   /**
+   * Original copy of Benchmark created when cloned
+   *
+   * @type {Benchmark|undefined}
+   */
+  _original;
+
+  /**
    * A flag to indicate if the benchmark is aborted.
    *
    * @type {boolean}
@@ -977,7 +984,7 @@ class Benchmark extends EventTarget {
   /**
    * The compiled test function.
    *
-   * @type {Function|string|undefined}
+   * @type {Function|undefined}
    */
   compiled = Benchmark.defaultValues.compiled;
 
@@ -1284,9 +1291,15 @@ class Benchmark extends EventTarget {
    */
   static filter(array, callback) {
     if (callback === 'successful') {
-      // Callback to exclude those that are errored, unrun, or have hz of Infinity.
+      /**
+       * Callback to exclude those that are errored, unrun, or have hz of Infinity.
+       *
+       * @param {Benchmark} bench
+       *
+       * @returns {boolean}
+       */
       callback = function(bench) {
-        return bench.cycles && Number.isFinite(bench.hz) && !bench.error;
+        return !!bench.cycles && Number.isFinite(bench.hz) && !bench.error;
       };
     }
     else if (callback === 'fastest' || callback === 'slowest') {
@@ -1350,9 +1363,10 @@ class Benchmark extends EventTarget {
    * @returns {string} The more readable string representation.
    */
   static formatNumber(number) {
-    number = String(number).split('.');
-    return number[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',') +
-      (number[1] ? '.' + number[1] : '');
+    /** @type {[string]|[string, string]} */
+    const parts = String(number).split('.');
+    return parts[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',') +
+      (parts[1] ? '.' + parts[1] : '');
   }
 
   /**
@@ -1399,6 +1413,7 @@ class Benchmark extends EventTarget {
         bench,
         /** @type {boolean} */
         queued,
+        /** @type {number|false} */
         index = -1,
         eventProps = { 'currentTarget': benches },
         options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
@@ -1557,11 +1572,12 @@ class Benchmark extends EventTarget {
    * Creates a string of joined array values or object key-value pairs.
    *
    * @param {Array|Object} object The object to operate on.
-   * @param {string} [separator1=','] The separator used between key-value pairs.
-   * @param {string} [separator2=': '] The separator used between keys and values.
+   * @param {string} [separator1] The separator used between key-value pairs.
+   * @param {string} [separator2] The separator used between keys and values.
    * @returns {string} The joined result.
    */
-  static join(object, separator1, separator2) {
+  static join(object, separator1 = ',', separator2 = ': ') {
+    /** @type {string[]} */
     var result = [],
         length = (object = Object(object)).length,
         arrayLike = length === length >>> 0;
@@ -1862,12 +1878,14 @@ class Benchmark extends EventTarget {
       delete calledBy.reset;
       return bench;
     }
+
+    /** @type {Event} */
     var event,
         index = 0,
+        /** @type {{destination: object, key: string, value: unknown}[]} */
         changes = [],
+        /** @type {{destination: object, source: object}[]} */
         queue = [];
-
-    const blank = new Benchmark();
 
     // A non-recursive solution to check if properties have changed.
     // For more information see http://www.jslab.dk/articles/non.recursive.preorder.traversal.part4.
@@ -1950,7 +1968,7 @@ class Benchmark extends EventTarget {
         stats = bench.stats,
         size = stats.sample.length,
         pm = '\xb1',
-        result = bench.name || (Number.isNaN(id) ? id : '<Test #' + id + '>');
+        result = (bench.name || (Number.isNaN(id) ? id : '<Test #' + id + '>')).toString();
 
     if (error) {
       var errorStr;
@@ -2126,7 +2144,7 @@ class Event {
   /**
    * The return value of the last executed listener.
    *
-   * @type Mixed
+   * @type {*}
    */
   result = undefined;
 
@@ -2634,7 +2652,13 @@ function clock(clone, timer) {
 /**
  * Creates a compiled function from the given function `body`.
  *
+ * @param {Benchmark} bench
+ * @param {boolean} decompilable
+ * @param {boolean} deferred
+ * @param {string} body
  * @param {Timer} timer
+ *
+ * @returns {Function}
  */
 function createCompiled(bench, decompilable, deferred, body, timer) {
   var fn = bench.fn,
@@ -2756,6 +2780,8 @@ function compute(bench, options) {
 
   /**
    * Updates the clone/original benchmarks to keep their data in sync.
+   *
+   * @param {Event} event
    */
   function update(event) {
     var clone = this,
@@ -2898,6 +2924,7 @@ function cycle(obj, options) {
     clone = obj;
   }
 
+  /** @type {number} */
   var clocked,
       cycles,
       divisor,
@@ -2942,10 +2969,19 @@ function cycle(obj, options) {
     clone.running = clocked < minTime;
 
     if (clone.running) {
+      /**
+       * @param {number} maybe
+       *
+       * @returns {boolean}
+       */
+      function has_divisor(maybe) {
+        return maybe in divisors;
+      }
+
       // Tests may clock at `0` when `initCount` is a small number,
       // to avoid that we set its count to something a bit higher.
-      if (!clocked && (divisor = divisors[clone.cycles]) != null) {
-        count = Math.floor(4e6 / divisor);
+      if (!clocked && has_divisor(clone.cycles)) {
+        count = Math.floor(4e6 / divisors[clone.cycles]);
       }
       // Calculate how many more iterations it will take to achieve the `minTime`.
       if (count <= clone.count) {
