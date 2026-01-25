@@ -523,9 +523,7 @@ Object.entries({
   'Benchmark.Suite': Benchmark.Suite,
 }).forEach(([namespace, Constructor]) => {
 
-  QUnit.module(namespace + '#emit');
-
-  (function() {
+  QUnit.module(namespace + '#emit', function() {
     QUnit.test('should emit with no listeners', function(assert) {
       var event = new Benchmark.Event('empty'),
           object = new Constructor();
@@ -624,13 +622,11 @@ Object.entries({
       object.emit(new Benchmark.Event('type'));
       assert.strictEqual(event.type, 'type');
     });
-  }());
+  });
 
   /*------------------------------------------------------------------------*/
 
-  QUnit.module(namespace + '#listeners');
-
-  (function() {
+  QUnit.module(namespace + '#listeners', function() {
     QUnit.test('should return the correct listeners', function(assert) {
       var listener = function() {},
           object = new Constructor();
@@ -644,13 +640,11 @@ Object.entries({
       assert.deepEqual(object.listeners('x'), []);
       assert.deepEqual(object.events, { 'x': [] });
     });
-  }());
+  });
 
   /*------------------------------------------------------------------------*/
 
-  QUnit.module(namespace + '#off');
-
-  (function() {
+  QUnit.module(namespace + '#off', function() {
     QUnit.test('should return the benchmark', function(assert) {
       var listener = function() {},
           object = new Constructor();
@@ -744,13 +738,11 @@ Object.entries({
       assert.deepEqual(events.y, []);
       assert.deepEqual(events.z, []);
     });
-  }());
+  });
 
   /*------------------------------------------------------------------------*/
 
-  QUnit.module(namespace + '#on');
-
-  (function() {
+  QUnit.module(namespace + '#on', function() {
     QUnit.test('should return the benchmark', function(assert) {
       var listener = function() {},
           object = new Constructor();
@@ -798,7 +790,7 @@ Object.entries({
       assert.deepEqual(events.x, [listener]);
       assert.deepEqual(events.y, [listener]);
     });
-  }());
+  });
 });
 
 /*--------------------------------------------------------------------------*/
