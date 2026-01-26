@@ -1825,7 +1825,7 @@ class Benchmark extends EventTarget<
    * });
    */
   constructor(maybeName: Partial<BenchmarkOptions>);
-  constructor(maybeName: string, fn: Function | string, options: Partial<BenchmarkOptions>);
+  constructor(maybeName: string, fn: Function | string, options?: Partial<BenchmarkOptions>);
   constructor(maybeName: string | Partial<BenchmarkOptions> | Function, fn?: Function | string, options: Partial<BenchmarkOptions> = {}) {
     super();
 
@@ -2616,7 +2616,7 @@ class Suite extends EventTarget<SuiteOptions> {
    *   'onComplete': onComplete
    * });
    */
-  add(name: string, fn: Function | string, options: object): object {
+  add(name: string, fn: Function | string, options?: Partial<BenchmarkOptions>): object {
     var suite = this,
         bench = new Benchmark(name, fn, options),
         event = new Event<typeof bench, 'add'>({
