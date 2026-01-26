@@ -38,6 +38,7 @@
     "node": "^20.20.0 || >= 22.22.0"
   },
   "files": [
+    "benchmark.ts",
     "benchmark.d.ts",
     "benchmark.js.map",
     "benchmark.js",
