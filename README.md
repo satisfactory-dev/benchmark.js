@@ -7,7 +7,7 @@ Forked from [benchmark.js](https://github.com/bestiejs/benchmark.js)
 
 ## Documentation
 
-* [API Documentation](https://benchmarkjs.com/docs)
+* [API Documentation](https://github.com/satisfactory-dev/benchmark.js/tree/main/doc)
 
 In a browser:
 
