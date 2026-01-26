@@ -7,8 +7,8 @@ export default defineConfig([
 		input: 'benchmark.ts',
 		output: {
 			format: 'esm',
-			name: 'Benchmark',
 			file: 'benchmark.js',
+			exports: 'named',
 			minify: false,
 			sourcemap: true,
 		}
@@ -20,6 +20,7 @@ export default defineConfig([
 			format: 'umd',
 			name: 'Benchmark',
 			file: 'benchmark.umd.js',
+			exports: 'named',
 			minify: false,
 			sourcemap: true,
 		}
