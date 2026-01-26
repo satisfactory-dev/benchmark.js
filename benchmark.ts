@@ -2453,6 +2453,7 @@ class Suite extends EventTarget<SuiteOptions> {
    * });
    */
   constructor(name: Partial<SuiteOptions>);
+  constructor(name: string, options: Partial<SuiteOptions>);
   constructor(name: string | Partial<SuiteOptions>, options?: Partial<SuiteOptions>) {
     super();
 
