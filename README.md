@@ -12,30 +12,28 @@ Forked from [benchmark.js](https://github.com/bestiejs/benchmark.js)
 In a browser:
 
 ```html
-<script src="benchmark.umd.js"></script>
-```
-
-In an AMD loader:
-
-```js
-require({
-  'paths': {
-    'benchmark': 'path/to/benchmark',
+<script type="importmap">
+{
+  "imports": {
+    "@satifactory-dev/benchmark": "../path/to/benchmark.js"
   }
-},
-['benchmark'], function(Benchmark) {/*…*/});
+}
+</script>
+<script type="module">
+  import Benchmark from '@satifactory-dev/benchmark';
+</script>
 ```
 
 Using npm:
 
 ```shell
-$ npm i --save benchmark
+$ npm i --save @satisfactory-dev/benchmark
 ```
 
 In Node.js:
 
 ```js
-var Benchmark = require('benchmark');
+import Benchmark from '@satisfactory-dev/benchmark';
 ```
 
 Optionally, use the [microtime module](https://github.com/wadey/node-microtime) by Wade Simmons:
@@ -45,7 +43,7 @@ npm i --save microtime
 ```
 
 ```js
-var Benchmark = require('benchmark');
+import Benchmark from '@satisfactory-dev/benchmark';
 
 function microtime() {
 	const version = globalThis?.process?.version || '';

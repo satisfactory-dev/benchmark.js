@@ -8,8 +8,15 @@
 <body>
 <div id="qunit"></div>
 <script src="../node_modules/qunit/qunit/qunit.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "@satifactory-dev/benchmark": "../benchmark.js"
+  }
+}
+</script>
 <script type="module">
-  import Benchmark from '../benchmark.js';
+  import Benchmark from '@satifactory-dev/benchmark';
   QUnit.config.hidepassed = true;
   globalThis.QUnit = QUnit;
   globalThis.Benchmark = Benchmark;
