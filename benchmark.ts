@@ -783,7 +783,7 @@ abstract class EventTarget<
     });
 
     if (this instanceof Benchmark) {
-      const _options = options as Partial<(typeof Benchmark)['options']>;
+      const _options = options as Partial<BenchmarkOptions>;
       ([
         'async',
         'defer',
@@ -796,8 +796,8 @@ abstract class EventTarget<
         'name',
         'events',
       ] as const).forEach((prop) => {
-        if (prop in _options && undefined !== _options[prop as ((keyof typeof _options) & string)]) {
-          (this[prop] as Benchmark[typeof prop]) = _options[prop as ((keyof typeof _options) & string)];
+        if (prop in _options && undefined !== _options[prop as keyof typeof _options]) {
+          this[prop as keyof typeof this]= _options[prop as keyof typeof _options] as (typeof this)[keyof typeof this];
         }
       })
     }
@@ -868,7 +868,86 @@ type SuiteRunOptions = (
   }>
 );
 
-type BenchmarkOptions = (typeof Benchmark)['options'];
+type BenchmarkOptions = {
+  /**
+   * A flag to indicate that benchmark cycles will execute asynchronously
+   * by default.
+   */
+  async: boolean,
+
+  /**
+   * A flag to indicate that the benchmark clock is deferred.
+   */
+  defer: boolean,
+
+  /**
+   * The delay between test cycles (secs).
+   */
+  delay: 'idle' | number,
+
+  /**
+   * Displayed by `Benchmark#toString` when a `name` is not available
+   * (auto-generated if absent).
+   */
+  id: string | undefined,
+
+  /**
+   * The default number of times to execute a test on a benchmark's first cycle.
+   */
+  initCount: number,
+
+  /**
+   * The maximum time a benchmark is allowed to run before finishing (secs).
+   *
+   * Note: Cycle delays aren't counted toward the maximum time.
+   */
+  maxTime: number,
+
+  /**
+   * The minimum sample size required to perform statistical analysis.
+   */
+  minSamples: number,
+
+  /**
+   * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
+   */
+  minTime: number,
+
+  /**
+   * The name of the benchmark.
+   */
+  name: string | undefined,
+
+  /**
+   * An event listener called when the benchmark is aborted.
+   */
+  onAbort: (this: Benchmark, event: Event<Benchmark, 'abort'>) => unknown,
+
+  /**
+   * An event listener called when the benchmark completes running.
+   */
+  onComplete: (this: Benchmark, event: Event<Benchmark, 'complete'>) => unknown,
+
+  /**
+   * An event listener called after each run cycle.
+   */
+  onCycle: (this: Benchmark, event: Event<Benchmark, 'cycle'>) => unknown,
+
+  /**
+   * An event listener called when a test errors.
+   */
+  onError: (this: Benchmark, event: Event<Benchmark, 'error'>) => unknown,
+
+  /**
+   * An event listener called when the benchmark is reset.
+   */
+  onReset: (this: Benchmark, event: Event<Benchmark, 'reset'>) => unknown,
+
+  /**
+   * An event listener called when the benchmark starts running.
+   */
+  onStart: (this: Benchmark, event: Event<Benchmark, 'start'>) => unknown,
+};
 
 type ClonedBenchmark = Benchmark & {
   _original: Benchmark;
@@ -922,172 +1001,82 @@ class Benchmark extends EventTarget<
   /**
    * The default options copied by benchmark instances.
    */
-  static options = {
-    /**
-     * A flag to indicate that benchmark cycles will execute asynchronously
-     * by default.
-     *
-     * @type boolean
-     */
-    'async': false,
-
-    /**
-     * A flag to indicate that the benchmark clock is deferred.
-     *
-     * @type boolean
-     */
-    'defer': false,
-
-    /**
-     * The delay between test cycles (secs).
-     * @type {number|'idle'}
-     */
-    'delay': 'cancelIdleCallback' in globalThis ? 'idle' as const : 0.005,
-
-    /**
-     * Displayed by `Benchmark#toString` when a `name` is not available
-     * (auto-generated if absent).
-     *
-     * @type {string|undefined}
-     */
-    'id': undefined,
-
-    /**
-     * The default number of times to execute a test on a benchmark's first cycle.
-     *
-     * @type {number}
-     */
-    'initCount': 1,
-
-    /**
-     * The maximum time a benchmark is allowed to run before finishing (secs).
-     *
-     * Note: Cycle delays aren't counted toward the maximum time.
-     *
-     * @type {number}
-     */
-    'maxTime': 5,
-
-    /**
-     * The minimum sample size required to perform statistical analysis.
-     *
-     * @type {number}
-     */
-    'minSamples': 5,
-
-    /**
-     * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
-     *
-     * @type {number}
-     */
-    'minTime': 0,
-
-    /**
-     * The name of the benchmark.
-     *
-     * @type {string|undefined}
-     */
-    'name': undefined,
-
-    /**
-     * An event listener called when the benchmark is aborted.
-     *
-     * @type {Function|undefined}
-     */
-    'onAbort': undefined,
-
-    /**
-     * An event listener called when the benchmark completes running.
-     *
-     * @type {Function|undefined}
-     */
-    'onComplete': undefined,
-
-    /**
-     * An event listener called after each run cycle.
-     *
-     * @type {Function|undefined}
-     */
-    'onCycle': undefined,
-
-    /**
-     * An event listener called when a test errors.
-     *
-     * @type {Function|undefined}
-     */
-    'onError': undefined,
-
-    /**
-     * An event listener called when the benchmark is reset.
-     *
-     * @type {Function|undefined}
-     */
-    'onReset': undefined,
-
-    /**
-     * An event listener called when the benchmark starts running.
-     *
-     * @type {Function|undefined}
-     */
-    'onStart': undefined
+  static options: (
+    & Omit<
+      BenchmarkOptions,
+      (
+        | 'name'
+        | 'onAbort'
+        | 'onComplete'
+        | 'onCycle'
+        | 'onError'
+        | 'onReset'
+        | 'onStart'
+      )
+    >
+    & Partial<Pick<
+      BenchmarkOptions,
+      (
+        | 'name'
+        | 'onAbort'
+        | 'onComplete'
+        | 'onCycle'
+        | 'onError'
+        | 'onReset'
+        | 'onStart'
+      )
+    >>
+  ) = {
+    async: false,
+    defer: false,
+    delay: 'cancelIdleCallback' in globalThis ? 'idle' as const : 0.005,
+    id: undefined,
+    initCount: 1,
+    maxTime: 5,
+    minSamples: 5,
+    minTime: 0,
   };
 
   /**
    * Original copy of Benchmark created when cloned
-   *
-   * @type {Benchmark|undefined}
    */
   _original: Benchmark | undefined;
 
   /**
    * A flag to indicate if the benchmark is aborted.
-   *
-   * @type {boolean}
    */
   aborted: boolean = Benchmark.defaultValues.aborted;
 
   /**
    * A flag to indicate that benchmark cycles will execute asynchronously
    * by default.
-   *
-   * @type {boolean}
    */
-  async: boolean = Benchmark.options.async;
+  async: boolean = !!Benchmark.options?.async;
 
   /**
    * The compiled test function.
-   *
-   * @type {Function|undefined}
    */
   compiled: Function | undefined = Benchmark.defaultValues.compiled;
 
   /**
    * The number of times a test was executed.
-   *
-   * @type {number}
    */
   count: number = Benchmark.defaultValues.count;
 
   /**
    * The number of cycles performed while benchmarking.
-   *
-   * @type {number}
    */
   cycles: number = Benchmark.defaultValues.cycles;
 
   /**
    * A flag to indicate that the benchmark clock is deferred.
-   *
-   * @type {boolean}
    */
-  defer: boolean = Benchmark.options.defer;
+  defer: boolean = !!Benchmark.options?.defer;
 
   /**
    * The delay between test cycles (secs).
-   *
-   * @type {number|'idle'}
    */
-  delay: number | 'idle' = Benchmark.options.delay;
+  delay: number | 'idle' = Benchmark.options.delay || 0.005;
 
   /**
    * The error object if the test failed.
@@ -1843,12 +1832,12 @@ class Benchmark extends EventTarget<
    * @returns {Object} The benchmark instance.
    */
   abort(): object {
-    var event,
+    var event: Event<typeof this, 'abort'>,
         bench = this,
         resetting = calledBy.reset;
 
     if (bench.running) {
-      event = new Event<this>('abort');
+      event = new Event<this, 'abort'>('abort');
       bench.emit(event);
       if (!event.cancelled || resetting) {
         // Avoid infinite recursion.
@@ -2120,7 +2109,7 @@ class Benchmark extends EventTarget<
 
     // If changed emit the `reset` event and if it isn't cancelled reset the benchmark.
     if (changes.length &&
-        (bench.emit(event = new Event<this>('reset')), !event.cancelled)) {
+        (bench.emit(event = new Event<this, 'reset'>('reset')), !event.cancelled)) {
       changes.forEach((data) => {
         // this _could_ be done with a runtime conditional check,
         //  but at build time it would be a redundant condition
@@ -2179,7 +2168,7 @@ class Benchmark extends EventTarget<
    */
   run(options: RunOptions): object {
     var bench = this as ClonedBenchmark,
-        event = new Event<ClonedBenchmark>('start');
+        event = new Event<typeof bench, 'start'>('start');
 
     const timer = options?.timer || Timer.timer;
 
@@ -2371,6 +2360,8 @@ class Event<
    * @memberOf Benchmark
    * @param {{type: Type}|Type} type The event type.
    */
+  constructor(type: Type);
+  constructor(type: EventOptions<Type>);
   constructor(type: EventOptions<Type> | Type) {
     if ('object' === typeof type) {
       this.type = type.type;
@@ -2392,7 +2383,7 @@ type SuiteOptions = (
   & {
     name: string,
     onAbort: (this: Suite, e: Event<Suite, 'abort'>) => unknown,
-    onAdd: (this: Suite, e: Event<Suite, 'add'>) => unknown,
+    onAdd: (this: Suite, e: Event<Benchmark, 'add'>) => unknown,
     onReset: (this: Suite, e: Event<Suite, 'reset'>) => unknown,
     onStart: (this: Suite, e: Event<Suite, 'start'>) => unknown,
     onCycle: (this: Suite, e: EventWithTarget<Benchmark, 'cycle'>) => unknown,
@@ -2547,7 +2538,7 @@ class Suite extends EventTarget<SuiteOptions> {
         resetting = calledBy.resetSuite;
 
     if (suite.running) {
-      const event = new Event<typeof this>('abort');
+      const event = new Event<typeof this, 'abort'>('abort');
       suite.emit(event);
       if (!event.cancelled || resetting) {
         // Avoid infinite recursion.
@@ -2603,7 +2594,10 @@ class Suite extends EventTarget<SuiteOptions> {
   add(name: string, fn: Function | string, options: object): object {
     var suite = this,
         bench = new Benchmark(name, fn, options),
-        event = new Event<typeof bench>({ 'type': 'add', 'target': bench });
+        event = new Event<typeof bench, 'add'>({
+          type: 'add',
+          target: bench,
+        }) as EventWithTarget<typeof bench, 'add'>;
 
     if (suite.emit(event), !event.cancelled) {
       this.#benchmarks.push(bench);
@@ -2670,7 +2664,7 @@ class Suite extends EventTarget<SuiteOptions> {
     }
     // Reset if the state has changed.
     else if ((suite.aborted || suite.running) &&
-        (suite.emit(event = new Event<this>('reset')), !event.cancelled)) {
+        (suite.emit(event = new Event<this, 'reset'>('reset')), !event.cancelled)) {
       suite.aborted = suite.running = false;
       if (!aborting) {
         Benchmark.invoke(suite, 'reset');
@@ -3017,7 +3011,7 @@ function compute(bench: Benchmark, options: RunOptions) {
         }
         if (type == 'abort') {
           bench.abort();
-          bench.emit(new Event<Benchmark>('cycle'));
+          bench.emit(new Event<Benchmark, 'cycle'>('cycle'));
         } else {
           event.currentTarget = event.target = bench;
           bench.emit(event);
