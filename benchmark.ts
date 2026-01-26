@@ -2299,8 +2299,9 @@ class Deferred<
 
 type EventWithTarget<
   T extends EventTarget | (Benchmark[]) = EventTarget | (Benchmark[]),
+  Type extends string = string,
 > = (
-  & Omit<Event, 'target'>
+  & Omit<Event<T, Type>, 'target'>
   & {
     target: T,
   }
@@ -2322,6 +2323,7 @@ type EventOptions<
 
 class Event<
   T extends (EventTarget | Benchmark[]) = (EventTarget | Benchmark[]),
+  Type extends string = string,
 > {
   /**
    * A flag to indicate if the emitters listener iteration is aborted.
@@ -2358,7 +2360,7 @@ class Event<
   /**
    * The event type.
    */
-  type: string;
+  type: Type;
 
   /** @type {unknown} */
   message: unknown;
@@ -2367,9 +2369,9 @@ class Event<
    * The Event constructor.
    *
    * @memberOf Benchmark
-   * @param {{type: string}|string} type The event type.
+   * @param {{type: Type}|Type} type The event type.
    */
-  constructor(type: EventOptions | string) {
+  constructor(type: EventOptions<Type> | Type) {
     if ('object' === typeof type) {
       this.type = type.type;
     } else {
@@ -2386,15 +2388,24 @@ class Event<
   }
 }
 
-type SuiteOptions = {
-  name: string | undefined,
-};
+type SuiteOptions = (
+  & {
+    name: string,
+    onAbort: (this: Suite, e: Event<Suite, 'abort'>) => unknown,
+    onAdd: (this: Suite, e: Event<Suite, 'add'>) => unknown,
+    onReset: (this: Suite, e: Event<Suite, 'reset'>) => unknown,
+    onStart: (this: Suite, e: Event<Suite, 'start'>) => unknown,
+    onCycle: (this: Suite, e: EventWithTarget<Benchmark, 'cycle'>) => unknown,
+    onError: (this: Suite, e: EventWithTarget<Benchmark, 'error'>) => unknown,
+    onComplete: (this: Suite, e: EventWithTarget<Benchmark, 'complete'>) => unknown,
+  }
+);
 
 class Suite extends EventTarget<SuiteOptions> {
   /**
    * The default options copied by suite instances.
    */
-  static options: SuiteOptions = {
+  static options: Partial<SuiteOptions> = {
 
     /**
      * The name of the suite.
@@ -2421,7 +2432,7 @@ class Suite extends EventTarget<SuiteOptions> {
    *
    * @memberOf Benchmark
    * @param {string|object} name A name to identify the suite.
-   * @param {SuiteOptions} [options={}] Options object.
+   * @param {SuiteOptions} [options] Options object.
    * @example
    *
    * // basic usage (the `new` operator is optional)
@@ -2592,7 +2603,7 @@ class Suite extends EventTarget<SuiteOptions> {
   add(name: string, fn: Function | string, options: object): object {
     var suite = this,
         bench = new Benchmark(name, fn, options),
-        event = new Event<typeof this>({ 'type': 'add', 'target': bench });
+        event = new Event<typeof bench>({ 'type': 'add', 'target': bench });
 
     if (suite.emit(event), !event.cancelled) {
       this.#benchmarks.push(bench);
