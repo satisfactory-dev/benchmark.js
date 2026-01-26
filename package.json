@@ -6,6 +6,7 @@
   "exports": {
     "import": "./benchmark.js",
     "require": "./benchmark.umd.js",
+    "types": "./benchmark.d.ts",
     "default": "./benchmark.umd.js"
   },
   "keywords": [
@@ -26,15 +27,19 @@
   "funding": "https://github.com/satisfactory-dev/benchmark.js?sponsor=1",
   "devDependencies": {
     "@satisfactory-dev/docdown": "^0.1.1",
+    "@types/node": "^25.0.10",
     "c8": "^10.1.3",
     "playwright": "^1.57.0",
     "qunit": "^2.25.0",
-    "rolldown": "^1.0.0-rc.1"
+    "rolldown": "^1.0.0-rc.1",
+    "typescript": "^5.9.3"
   },
   "engines": {
     "node": "^20.20.0 || >= 22.22.0"
   },
   "files": [
+    "benchmark.d.ts",
+    "benchmark.js.map",
     "benchmark.js",
     "benchmark.umd.js.map",
     "benchmark.umd.js"

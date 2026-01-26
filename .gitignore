@@ -5,6 +5,7 @@ coverage
 node_modules
 /.devcontainer/.env
 /.cache/
-/benchmark.umd.js
-/benchmark.umd.js.map
+/benchmark*.js
+/benchmark*.js.map
+/benchmark*.d.ts
 /version.json

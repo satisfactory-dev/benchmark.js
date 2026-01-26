@@ -17,6 +17,7 @@ nvm--exec: nvm--install
 build:
 	@make nvm--exec VERSION=20 CMD="node ./dump-version.js"
 	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/rolldown -c ./rolldown.config.js"
+	@make nvm--exec VERSION=20 CMD="./node_modules/.bin/tsc -p tsconfig.app.json --declaration --emitDeclarationOnly"
 
 init:
 	@make nvm--exec VERSION=20 CMD="npm install"
@@ -52,5 +53,5 @@ coverage--merge:
 
 docs:
 	@make nvm CMD="use 20"
-	@./node_modules/.bin/docdown benchmark.js doc/README.md style=github title="@satisfactory-dev/benchmark <span>$(shell git rev-parse HEAD)</span>" toc=categories url=https://github.com/satisfactory-dev/benchmark.js/blob/$(shell git rev-parse HEAD)/benchmark.js
+	@./node_modules/.bin/docdown benchmark.ts doc/README.md lang=ts style=github title="@satisfactory-dev/benchmark <span>$(shell git rev-parse HEAD)</span>" toc=categories url=https://github.com/satisfactory-dev/benchmark.js/blob/$(shell git rev-parse HEAD)/benchmark.ts
 	@make nvm CMD="use 25"

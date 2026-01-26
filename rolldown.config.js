@@ -4,7 +4,6 @@ import {
 
 export default defineConfig([
 	{
-  /*
 		input: 'benchmark.ts',
 		output: {
 			format: 'esm',
@@ -16,7 +15,6 @@ export default defineConfig([
 	},
 	{
 		input: 'benchmark.ts',
-  */
 		input: 'benchmark.js',
 		output: {
 			format: 'umd',

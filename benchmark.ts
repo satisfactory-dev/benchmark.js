@@ -84,25 +84,17 @@ function noop() {
   /** empty */
 }
 
-/**
- * @param {*} maybe
- * @param {string} prop
- *
- * @returns {boolean}
- */
-function has(maybe, prop) {
+function has<T extends unknown | {[key: string]: unknown} | Function>(maybe: T, prop: string | keyof T): prop is keyof T;
+function has<T extends unknown | {[key: string]: unknown} | Function>(maybe: T, prop: string | keyof T): maybe is (
+  & T
+  & {[prop]: T[typeof prop & keyof T]}
+) {
   const canHaveProps = maybe && (typeof maybe === 'object' || typeof maybe === 'function');
 
   return canHaveProps && maybe.hasOwnProperty(prop);
 }
 
-/**
- * @param {RegExp} regex
- * @param {string} str
- *
- * @returns {string}
- */
-function getResult(regex, str) {
+function getResult(regex: RegExp, str: string): string {
   const match = regex.exec(str);
 
   if (!match) {
@@ -126,7 +118,7 @@ var uid = 'uid' + (+Date.now());
  *
  * @type {{abort?: true, abortSuite?: true, reset?: true, resetSuite?: true}}
  */
-const calledBy = {};
+const calledBy: { abort?: true; abortSuite?: true; reset?: true; resetSuite?: true; } = {};
 
 /**
  * Helper class for running scripts in-browser
@@ -137,17 +129,17 @@ class BrowserHelper {
   /**
    * @type {Document}
    */
-  #doc;
+  #doc: Document;
 
   /**
    * @type {HTMLDivElement}
    */
-  #trash;
+  #trash: HTMLDivElement;
 
   /**
    * @param {Document} doc
    */
-  constructor(doc) {
+  constructor(doc: Document) {
     this.#doc = doc;
     this.#trash = doc.createElement('div');
   }
@@ -157,7 +149,7 @@ class BrowserHelper {
    *
    * @param {Element} element The element to destroy.
    */
-  #destroyElement(element) {
+  #destroyElement(element: Element) {
     this.#trash.appendChild(element);
     this.#trash.innerHTML = '';
   }
@@ -167,11 +159,11 @@ class BrowserHelper {
    *
    * @param {string} code The code to run.
    */
-  runScript(code) {
+  runScript(code: string) {
     var anchor = Benchmark.anchor,
           script = this.#doc.createElement('script'),
-          sibling = this.#doc.getElementsByTagName('script')[0],
-        parent = sibling.parentNode,
+          sibling: HTMLScriptElement | null = this.#doc.getElementsByTagName('script')[0],
+        parent: Node | null | undefined = sibling.parentNode,
         prop = uid + 'runScript',
         prefix = '(' + 'Benchmark.anchor.' + prop + '||function(){})();';
 
@@ -184,11 +176,11 @@ class BrowserHelper {
         script.appendChild(this.#doc.createTextNode(prefix + code));
         anchor[prop] = () => { this.#destroyElement(script); };
     } catch(e) {
-      parent = parent.cloneNode(false);
+      parent = parent?.cloneNode(false);
       sibling = null;
       script.text = code;
     }
-    parent.insertBefore(script, sibling);
+    parent?.insertBefore(script, sibling);
     delete anchor[prop];
   }
 }
@@ -199,17 +191,12 @@ class BrowserHelper {
  * @memberOf Benchmark
  */
 class Support {
-  /**
-   * @type {BrowserHelper|false|undefined}
-   */
-  static #browser;
+  static #browser: BrowserHelper | false | undefined;
 
   /**
    * Detect if running in a browser environment.
-   *
-   * @returns {BrowserHelper|false}
    */
-  static get browser() {
+  static get browser(): BrowserHelper | false {
     if (this.#browser == undefined) {
       if(doc && isHostType(globalThis, 'navigator')) {
         this.#browser = new BrowserHelper(doc);
@@ -229,17 +216,17 @@ class Support {
  * objects assigning all other values by reference.
  *
  * @private
- * @param {*} value The value to clone.
- * @returns {*} The cloned value.
+ * @param {unknown} value The value to clone.
+ * @returns {unknown} The cloned value.
  */
-function cloneDeep(value) {
+function cloneDeep<T>(value: T): T {
   if (Array.isArray(value)) {
-    return [...value];
+    return [...value] as T;
   } else if (value && typeof value === 'object') {
     return Object.fromEntries(
       Object.entries(value)
         .map(([key, value]) => [key, cloneDeep(value)]),
-    );
+    ) as T;
   }
 
   return value;
@@ -253,10 +240,10 @@ function cloneDeep(value) {
  * @param {string} body The function body.
  * @returns {Function} The new function.
  */
-const createFunction = (() => {
+const createFunction = ((): Function => {
   const helper = Support.browser;
   if (helper) {
-    return function (args, body) {
+    return function (args: string, body: string) {
       var result,
           anchor = Benchmark.anchor,
           prop = uid + 'createFunction';
@@ -278,7 +265,7 @@ const createFunction = (() => {
  * @param {Function&{toString:() => string}} fn The function.
  * @returns {string} The argument name.
  */
-function getFirstArgument(fn) {
+function getFirstArgument(fn: Function & { toString: () => string; }): string {
   return (
     !has(fn, 'toString') &&
     (
@@ -295,7 +282,7 @@ function getFirstArgument(fn) {
  * @param {number[]} sample The sample.
  * @returns {number} The mean.
  */
-function getMean(sample) {
+function getMean(sample: number[]): number {
   return sample.reduce((sum, x) => sum + x, 0) / sample.length;
 }
 
@@ -306,7 +293,7 @@ function getMean(sample) {
  * @param {Function|string|{toString(): string}} fn The function.
  * @returns {string} The function's source code.
  */
-function getSource(fn) {
+function getSource(fn: Function | string | { toString(): string; }): string {
   var result = '';
   if (isStringable(fn)) {
     result = String(fn);
@@ -333,7 +320,7 @@ function getSource(fn) {
  * @param {string} property The property to check.
  * @returns {boolean} Returns `true` if the property value is a non-primitive, else `false`.
  */
-function isHostType(object, property) {
+function isHostType(object: any, property: string): boolean {
   if (object == null) {
     return false;
   }
@@ -348,7 +335,7 @@ function isHostType(object, property) {
  * @param {*} value The value to check.
  * @returns {boolean} Returns `true` if the value can be coerced, else `false`.
  */
-function isStringable(value) {
+function isStringable(value: any): boolean {
   if (null === value) {
     return false;
   }
@@ -356,27 +343,39 @@ function isStringable(value) {
   return (typeof value === 'string') || (has(value, 'toString') && (typeof value.toString === 'function'));
 }
 
-class Timer {
+type NsStartStop = {
+  stop(): unknown,
+  start(): unknown,
+  microseconds(): number,
+};
+type NsNow = {
+  now(): number,
+};
+
+class Timer<
+  Unit extends 'ms' | 'us' | 'ns' = 'ms' | 'us' | 'ns',
+> {
   /**
    * The timer namespace object or constructor.
-   *
-   * @readonly
-   *
-   * @type {Function|Object}
    */
-  ns;
+  readonly ns: {
+    us: (
+      | NsStartStop
+      | (() => number)
+    ),
+    ns: (() => [number, number]),
+    ms: (
+      | NsNow
+      | DateConstructor
+    )
+  }[Unit];
 
-  /**
-   * @type {((deferred: Deferred) => unknown)|null}
-   */
-  #start = null;
+  #start: ((deferred: Deferred) => unknown) | null = null;
 
   /**
    * Starts the deferred timer.
-   *
-   * @param {Object} deferred The deferred instance.
    */
-  get start() {
+  get start(): ((deferred: Deferred) => unknown) {
     if (null === this.#start) {
       this.#start = createFunction(
         interpolate('o#'),
@@ -384,20 +383,15 @@ class Timer {
       );
     }
 
-    return this.#start;
+    return this.#start as ((deferred: Deferred) => unknown);
   }
 
-  /**
-   * @type {((deferred: Deferred) => unknown)|null}
-   */
-  #stop = null;
+  #stop: ((deferred: Deferred) => unknown) | null = null;
 
   /**
    * Stops the deferred timer.
-   *
-   * @returns {(deferred: Deferred) => unknown}
    */
-  get stop() {
+  get stop(): (deferred: Deferred) => unknown {
     if (null === this.#stop) {
       this.#stop = createFunction(
         interpolate('o#'),
@@ -405,55 +399,33 @@ class Timer {
       );
     }
 
-    return this.#stop;
+    return this.#stop as (deferred: Deferred) => unknown;
   }
 
-  /**
-   * @readonly
-   *
-   * @type {number}
-   */
-  res;
+  readonly res: number;
 
-  /**
-   * @readonly
-   *
-   * @type {'ms'|'us'|'ns'}
-   */
-  unit;
+  readonly unit: Unit;
 
-  /**
-   *
-   * @param {Timer['ns']} ns
-   * @param {Timer['res']} res
-   * @param {Timer['unit']} unit
-   */
   constructor (
-    ns,
-    res,
-    unit,
+    ns: Timer<Unit>['ns'],
+    res: Timer['res'],
+    unit: Unit,
   ) {
     this.ns = ns;
     this.res = res;
     this.unit = unit;
   }
 
-  /**
-   * @type {Timer|undefined}
-   */
-  static #timer;
+  static #timer: Timer | undefined;
 
-  /**
-   * @type {{now(): number}}
-   */
-  static #highestDefaultTimer = performance;
+  static #highestDefaultTimer: { now(): number; } = performance;
 
   /**
    * A high-precision timer such as the one provided by microtime
    *
    * @type {{now(): number}|undefined}
    */
-  static #usTimer;
+  static #usTimer: { now(): number; } | undefined;
 
   static #allowHrtime = true;
 
@@ -467,20 +439,45 @@ class Timer {
     highestDefaultTimer = performance,
     usTimer = undefined,
     allowHrtime = true,
-  } = {}) {
+  }: { highestDefaultTimer?: { now(): number; }; usTimer?: { now(): number; }; allowHrtime?: boolean; } = {}) {
     this.#timer = undefined;
     this.#highestDefaultTimer = highestDefaultTimer;
     this.#usTimer = usTimer;
     this.#allowHrtime = allowHrtime;
   }
 
+  static #isUs(
+    unit: 'us' | 'ns' | 'ms',
+    ns: Timer<typeof unit>['ns'],
+  ): ns is Timer<'us'>['ns'];
+  static #isUs(
+    unit: 'us' | 'ns' | 'ms',
+    ns: Timer<typeof unit>['ns'],
+  ): unit is 'us' {
+    return unit === 'us';
+  }
+
+  static #isNs(
+    unit: 'us' | 'ns' | 'ms',
+    ns: Timer<typeof unit>['ns'],
+  ): ns is Timer<'ns'>['ns'];
+  static #isNs(
+    unit: 'us' | 'ns' | 'ms',
+    ns: Timer<typeof unit>['ns'],
+  ): unit is 'ns' {
+    return unit === 'ns';
+  }
+
+  static #isNsDate(
+    ns: Timer<'ms'>['ns']
+  ): ns is DateConstructor {
+    return !('now' in ns);
+  }
+
   /**
    * Gets the current timer's minimum resolution (secs).
-   *
-   * @param {Timer['unit']} unit
-   * @param {Timer['ns']} ns
    */
-  static #getRes(unit, ns) {
+  static #getRes<T extends Timer['unit']>(unit: T, ns: Timer<T>['ns']): number {
     var measured,
         begin,
         count = 30,
@@ -489,9 +486,9 @@ class Timer {
 
     // Get average smallest measurable time.
     while (count--) {
-      if (unit == 'us') {
+      if (this.#isUs(unit, ns)) {
         divisor = 1e6;
-        if (ns.stop) {
+        if ('stop' in ns) {
           ns.start();
           while (!(measured = ns.microseconds())) {}
         } else {
@@ -499,13 +496,13 @@ class Timer {
           while (!(measured = ns() - begin)) {}
         }
       }
-      else if (unit == 'ns') {
+      else if (this.#isNs(unit, ns)) {
         divisor = 1e9;
         begin = (begin = ns())[0] + (begin[1] / divisor);
         while (!(measured = ((measured = ns())[0] + (measured[1] / divisor)) - begin)) {}
         divisor = 1;
       }
-      else if (ns.now) {
+      else if (!this.#isNsDate(ns)) {
         begin = (+ns.now());
         while (!(measured = (+ns.now()) - begin)) {}
       }
@@ -530,10 +527,10 @@ class Timer {
    *
    * @returns {Timer}
    */
-  static get timer() {
+  static get timer(): Timer {
     if (undefined === this.#timer) {
       /** @type {[Timer, ...Timer[]]} */
-      const timers = [
+      const timers: [Timer, ...Timer[]] = [
         new Timer(
           this.#highestDefaultTimer,
           Math.max(0.0015, this.#getRes('ms', this.#highestDefaultTimer)),
@@ -586,32 +583,53 @@ class Timer {
 
 /**
  * Abstract class handling events for both Benchmark and Suite
- *
- * @abstract
  */
-class EventTarget {
+abstract class EventTarget<
+  Options extends object = object,
+> {
   /**
    * Registered events for the event target
    *
    * @type {Object<string, Function[]>}
    */
-  events = {};
+  events: { [s: string]: Function[]; } = {};
 
   /**
    * Instance options
-   *
-   * @type {object}
    */
-  options = {};
+  options: Partial<Options> = {};
 
   /**
    * Executes all registered listeners of the specified event type.
    *
    * @param {Event} event The event type or object.
    * @param {...*} [args] Arguments to invoke the listener with.
-   * @returns {*} Returns the return value of the last listener executed.
+   * @returns {unknown} Returns the return value of the last listener executed.
    */
-  emit(event) {
+  emit(
+    this: Benchmark,
+    event: Event<this>,
+  ): unknown;
+  emit(
+    this: ClonedBenchmark,
+    event: Event<this>,
+  ): unknown;
+  emit(
+    this: Suite,
+    event: (
+      | Event<this>
+      | Event<Suite>
+      | Event<Benchmark>
+      | EventWithTarget<this | Suite | Benchmark>
+    ),
+  ): unknown;
+  emit(
+    this: Suite | Benchmark | ClonedBenchmark,
+    event: (
+      | Event<this | Suite | Benchmark>
+      | EventWithTarget<this | Suite | Benchmark | ClonedBenchmark>
+    ),
+  ): unknown {
     var listeners,
         object = this,
         events = object.events,
@@ -641,7 +659,7 @@ class EventTarget {
    * @param {string} type The event type.
    * @returns {Function[]} The listeners array.
    */
-  listeners(type) {
+  listeners(type: string): Function[] {
     var object = this,
         events = object.events || (object.events = {});
 
@@ -677,7 +695,7 @@ class EventTarget {
    * // unregister all listeners for all event types
    * bench.off();
    */
-  off(type, listener) {
+  off(type: string, listener: Function): object {
     var object = this,
         events = object.events;
 
@@ -685,11 +703,14 @@ class EventTarget {
       return object;
     }
 
-    const loopOver = type ? type.split(' ') : events;
+    const loopOver = type ? (type.split(' ') as (keyof this['events'] & string)[]) : events;
 
     const entries = Array.isArray(loopOver)
-      ? loopOver.map((value, key) => [key, value])
-      : Object.entries(loopOver);
+      ? loopOver.map((value, key): [number, (keyof this['events'] & string)] => [key, value])
+      : Object.entries(loopOver) as [
+        (keyof this['events'] & string),
+        Function[]
+      ][];
 
     entries.forEach(function([type, listeners]) {
       var index;
@@ -716,7 +737,7 @@ class EventTarget {
    *
    * @param {string} type The event type.
    * @param {Function} listener The function to register.
-   * @returns {Object} The current instance.
+   * @returns {EventTarget} The current instance.
    * @example
    *
    * // register a listener for an event type
@@ -725,14 +746,12 @@ class EventTarget {
    * // register a listener for multiple event types
    * bench.on('start cycle', listener);
    */
-  on(type, listener) {
-    var object = this,
-        events = object.events || (object.events = {});
-
+  on(type: string, listener: Function): this {
     type.split(' ').forEach((type) => {
       this.listeners(type).push(listener);
     });
-    return object;
+
+    return this;
   }
 
   /**
@@ -741,9 +760,8 @@ class EventTarget {
    * @protected
    * @param {Object} [options={}] Options object.
    */
-  setOptions(options) {
-    /** @type {typeof Benchmark | typeof Suite} */
-    const ctor = this.constructor;
+  setOptions(options?: Partial<Options>) {
+    const ctor = this.constructor as (typeof Benchmark | typeof Suite);
     options = this.options = Object.assign({}, cloneDeep(ctor.options), cloneDeep(options));
 
     Object.entries(options).forEach(([key, value]) => {
@@ -751,7 +769,7 @@ class EventTarget {
         // Add event listeners.
         if (/^on[A-Z]/.test(key)) {
           key.split(' ').forEach((key) => {
-            this.on(key.slice(2).toLowerCase(), value);
+            this.on(key.slice(2).toLowerCase(), value as Function);
           });
         } else if (
           !has(this, key) || (
@@ -759,13 +777,14 @@ class EventTarget {
             key in Benchmark.defaultValues
           )
         ) {
-          this[key] = cloneDeep(value);
+          this[key as keyof this] = cloneDeep(value as (typeof this)[keyof this]);
         }
       }
     });
 
     if (this instanceof Benchmark) {
-      [
+      const _options = options as Partial<(typeof Benchmark)['options']>;
+      ([
         'async',
         'defer',
         'delay',
@@ -776,9 +795,9 @@ class EventTarget {
         'minTime',
         'name',
         'events',
-      ].forEach((prop) => {
-        if (prop in options && undefined !== options[prop]) {
-          this[prop] = options[prop];
+      ] as const).forEach((prop) => {
+        if (prop in _options && undefined !== _options[prop as ((keyof typeof _options) & string)]) {
+          (this[prop] as Benchmark[typeof prop]) = _options[prop as ((keyof typeof _options) & string)];
         }
       })
     }
@@ -786,31 +805,86 @@ class EventTarget {
 
   /**
    * Converts a Suite or Suite-like object/array to an array of values
-   *
-   * @param {(unknown[])|Suite|Object<number|'length', unknown>} array
-   *
-   * @returns {(unknown[])|(Benchmark[])}
    */
-  static asArray(array) {
+  static asArray<
+    T extends (
+      | Benchmark[]
+      | Suite
+      | (
+        & {[key: number]: Benchmark}
+        & {length: number}
+      )
+    )
+  >(array: T):  Benchmark[] {
     if (Array.isArray(array)) {
       return [...array];
     } else if (array instanceof Suite) {
       return array.benchmarks;
     }
 
-    return Object.keys(array || Object.create(null))
-      .filter((maybe) => /^\d+$/.test(maybe))
+    return (Object.keys(array || Object.create(null)) as (number | 'length')[])
+      .filter((maybe: number | 'length'): maybe is number => /^\d+$/.test(maybe.toString()))
       .map((key) => array[key]);
   }
 }
 
 /*------------------------------------------------------------------------*/
 
-class Benchmark extends EventTarget {
+type InvokeOptions<
+  T0 extends Suite | (Benchmark[]),
+> = (
+  | {
+    name: string,
+    onStart: (this: T0, event: Event<T0>) => unknown,
+    onCycle: (
+      | ((this: T0, event: EventWithTarget<Benchmark>) => unknown)
+    ),
+    onComplete: (
+      | ((this: T0, event: EventWithTarget<Benchmark>) => unknown)
+    ),
+  }
+);
+
+type InvokeOptionsWithArgs<
+  T0 extends Suite | (Benchmark[]),
+  Args extends {[key: string]: unknown}
+> = (
+  & InvokeOptions<T0>
+  & {
+    args: Args,
+    queued: boolean,
+  }
+);
+
+type RunOptions = Partial<{
+  timer: Timer,
+  async: boolean,
+}>;
+
+type SuiteRunOptions = (
+  & RunOptions
+  & Partial<{
+    queued: boolean,
+  }>
+);
+
+type BenchmarkOptions = (typeof Benchmark)['options'];
+
+type ClonedBenchmark = Benchmark & {
+  _original: Benchmark;
+}
+
+type CompiledBenchmark = ClonedBenchmark & {
+  compiled: Exclude<Benchmark['compiled'], undefined>,
+};
+
+class Benchmark extends EventTarget<
+  BenchmarkOptions
+> {
   /**
    * @type {Object<string, unknown>}
    */
-  static anchor = Object.create(null);
+  static anchor: { [s: string]: unknown; } = Object.create(null);
 
   /**
    * The default values for Benchmark instance properties
@@ -834,7 +908,7 @@ class Benchmark extends EventTarget {
       sem: 0,
       deviation: 0,
       mean: 0,
-      sample: [],
+      sample: [] as number[],
       variance: 0,
     },
     times: {
@@ -868,7 +942,7 @@ class Benchmark extends EventTarget {
      * The delay between test cycles (secs).
      * @type {number|'idle'}
      */
-    'delay': 'cancelIdleCallback' in globalThis ? 'idle' : 0.005,
+    'delay': 'cancelIdleCallback' in globalThis ? 'idle' as const : 0.005,
 
     /**
      * Displayed by `Benchmark#toString` when a `name` is not available
@@ -963,14 +1037,14 @@ class Benchmark extends EventTarget {
    *
    * @type {Benchmark|undefined}
    */
-  _original;
+  _original: Benchmark | undefined;
 
   /**
    * A flag to indicate if the benchmark is aborted.
    *
    * @type {boolean}
    */
-  aborted = Benchmark.defaultValues.aborted;
+  aborted: boolean = Benchmark.defaultValues.aborted;
 
   /**
    * A flag to indicate that benchmark cycles will execute asynchronously
@@ -978,63 +1052,63 @@ class Benchmark extends EventTarget {
    *
    * @type {boolean}
    */
-  async = Benchmark.options.async;
+  async: boolean = Benchmark.options.async;
 
   /**
    * The compiled test function.
    *
    * @type {Function|undefined}
    */
-  compiled = Benchmark.defaultValues.compiled;
+  compiled: Function | undefined = Benchmark.defaultValues.compiled;
 
   /**
    * The number of times a test was executed.
    *
    * @type {number}
    */
-  count = Benchmark.defaultValues.count;
+  count: number = Benchmark.defaultValues.count;
 
   /**
    * The number of cycles performed while benchmarking.
    *
    * @type {number}
    */
-  cycles = Benchmark.defaultValues.cycles;
+  cycles: number = Benchmark.defaultValues.cycles;
 
   /**
    * A flag to indicate that the benchmark clock is deferred.
    *
    * @type {boolean}
    */
-  defer = Benchmark.options.defer;
+  defer: boolean = Benchmark.options.defer;
 
   /**
    * The delay between test cycles (secs).
    *
    * @type {number|'idle'}
    */
-  delay = Benchmark.options.delay;
+  delay: number | 'idle' = Benchmark.options.delay;
 
   /**
    * The error object if the test failed.
    *
    * @type {unknown}
    */
-  error = Benchmark.defaultValues.error;
+  error: unknown = Benchmark.defaultValues.error;
 
   /**
    * The test to benchmark.
    *
    * @type {Function|string|undefined}
    */
-  fn = Benchmark.defaultValues.fn;
+  fn: Function | string | undefined = Benchmark.defaultValues.fn;
 
   /**
    * The number of executions per second.
    *
    * @type {number}
    */
-  hz = Benchmark.defaultValues.hz;
+  hz: number = Benchmark.defaultValues.hz;
 
   /**
    * Displayed by `Benchmark#toString` when a `name` is not available
@@ -1042,14 +1116,14 @@ class Benchmark extends EventTarget {
    *
    * @type {string|number}
    */
-  id;
+  id: string | number;
 
   /**
    * The default number of times to execute a test on a benchmark's first cycle.
    *
    * @type {number}
    */
-  initCount = Benchmark.options.initCount;
+  initCount: number = Benchmark.options.initCount;
 
   /**
    * The maximum time a benchmark is allowed to run before finishing (secs).
@@ -1058,35 +1132,35 @@ class Benchmark extends EventTarget {
    *
    * @type {number}
    */
-  maxTime = Benchmark.options.maxTime;
+  maxTime: number = Benchmark.options.maxTime;
 
   /**
    * The minimum sample size required to perform statistical analysis.
    *
    * @type {number}
    */
-  minSamples = Benchmark.options.minSamples;
+  minSamples: number = Benchmark.options.minSamples;
 
   /**
    * The time needed to reduce the percent uncertainty of measurement to 1% (secs).
    *
    * @type {number}
    */
-  minTime = Benchmark.options.minTime;
+  minTime: number = Benchmark.options.minTime;
 
   /**
    * The name of the benchmark.
    *
    * @type {string|undefined}
    */
-  name;
+  name: string | undefined;
 
   /**
    * A flag to indicate if the benchmark is running.
    *
    * @type {boolean}
    */
-  running = Benchmark.defaultValues.running;
+  running: boolean = Benchmark.defaultValues.running;
 
   /**
    * Compiled into the test and executed immediately **before** the test loop.
@@ -1148,7 +1222,7 @@ class Benchmark extends EventTarget {
    *   }())
    * }())
    */
-  setup = Benchmark.defaultValues.setup;
+  setup: Function | string = Benchmark.defaultValues.setup;
 
   /**
    * An object of stats including mean, margin or error, and standard deviation.
@@ -1209,7 +1283,7 @@ class Benchmark extends EventTarget {
    *
    * @type {Function|string}
    */
-  teardown = Benchmark.defaultValues.teardown;
+  teardown: Function | string = Benchmark.defaultValues.teardown;
 
   /**
    * An object of timing data including cycle, elapsed, period, start, and stop.
@@ -1244,15 +1318,12 @@ class Benchmark extends EventTarget {
     timeStamp: Benchmark.defaultValues.times.timeStamp,
   };
 
-  /** @type {number|undefined} */
-  #timerId;
+  #timerId: number | undefined | NodeJS.Timeout;
 
   /**
    * The semantic version number.
-   *
-   * @type {string}
    */
-  static version = version.version;
+  static version: string = version.version;
 
   static get Event() {
     return Event;
@@ -1288,7 +1359,12 @@ class Benchmark extends EventTarget {
    * // get benchmarks that completed without erroring
    * Benchmark.filter(benches, 'successful');
    */
-  static filter(array, callback) {
+  static filter(
+    array: (Benchmark[]) | Suite,
+    callback: ((maybe: Benchmark, index?: number | string, array?: (Benchmark[])|Suite) => boolean) | string,
+  ): Array<any> {
+    type callback_not_a_string = Exclude<typeof callback, string>;
+
     if (callback === 'successful') {
       /**
        * Callback to exclude those that are errored, unrun, or have hz of Infinity.
@@ -1297,7 +1373,7 @@ class Benchmark extends EventTarget {
        *
        * @returns {boolean}
        */
-      callback = function(bench) {
+      callback = function(bench: Benchmark): boolean {
         return !!bench.cycles && Number.isFinite(bench.hz) && !bench.error;
       };
     }
@@ -1314,15 +1390,18 @@ class Benchmark extends EventTarget {
     }
 
     if (array instanceof Suite) {
-      return array.benchmarks.filter((benchmark, index) => callback(benchmark, index, array));
+      return array.benchmarks.filter((
+        benchmark,
+        index,
+      ) => (callback as callback_not_a_string)(benchmark, index, array));
     }
 
     if (!Array.isArray(array)) {
       const {
         isArrayLike,
         result,
-      } = Object.entries(array)
-        .filter(([key, value]) => callback(
+      } = (Object.entries(array) as [string, Benchmark][])
+        .filter(([key, value]) => (callback as callback_not_a_string)(
           value,
           (typeof key === 'string' && /^\d+/.test(key))
             ? parseInt(key, 10)
@@ -1352,7 +1431,7 @@ class Benchmark extends EventTarget {
         return isArrayLike ? Object.values(result) : result;
     }
 
-    return array.filter(callback);
+    return array.filter(callback as (maybe: Benchmark) => boolean);
   }
 
   /**
@@ -1361,9 +1440,9 @@ class Benchmark extends EventTarget {
    * @param {number} number The number to convert.
    * @returns {string} The more readable string representation.
    */
-  static formatNumber(number) {
-    /** @type {[string]|[string, string]} */
-    const parts = String(number).split('.');
+  static formatNumber(number: number|`${number}`): string {
+    const parts = String(number).split('.') as [string] | [string, string];
+
     return parts[0].replace(/(?=(?:\d{3})+$)(?!\b)/g, ',') +
       (parts[1] ? '.' + parts[1] : '');
   }
@@ -1374,7 +1453,7 @@ class Benchmark extends EventTarget {
    * @param {(Benchmark[])|Suite} benches Array of benchmarks to iterate over.
    * @param {{name: string}|string} maybeName The name of the method to invoke OR options object.
    * @param {...*} [args] Arguments to invoke the method with.
-   * @returns {Array} A new array of values returned from each method invoked.
+   * @returns {Benchmark[]} A new array of values returned from each method invoked.
    * @example
    *
    * // invoke `reset` on all benchmarks
@@ -1405,51 +1484,85 @@ class Benchmark extends EventTarget {
    *   'onComplete': onComplete
    * });
    */
-  static invoke(benches, maybeName) {
-    /** @type {unknown[]} */
-    var args,
-        /** @type {Benchmark} */
-        bench,
-        /** @type {boolean} */
-        queued,
-        /** @type {number} */
-        index = -1,
-        eventProps = { 'currentTarget': benches },
-        options = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
+  static invoke(
+    benches: Suite,
+    maybeName: 'reset' | 'abort',
+  ): Benchmark[];
+  static invoke(
+    benches: Benchmark[] | Suite,
+    maybeName: InvokeOptionsWithArgs<typeof benches, SuiteRunOptions>,
+  ): Benchmark[];
+  static invoke(
+    benches: Suite,
+    maybeName: InvokeOptionsWithArgs<Suite, SuiteRunOptions>,
+  ): Benchmark[];
+  static invoke(
+    benches: (Benchmark[]) | Suite,
+    maybeName: (
+      | InvokeOptions<
+        typeof benches
+      >
+      | InvokeOptionsWithArgs<
+        typeof benches,
+        SuiteRunOptions
+      >
+      | InvokeOptionsWithArgs<
+        Suite,
+        SuiteRunOptions
+      >
+      | string
+    ),
+  ): Benchmark[] {
+    var args: unknown[],
+        bench: Benchmark,
+        queued: boolean,
+        index: number = -1,
+        eventProps: Partial<EventOptions> = { 'currentTarget': benches },
+        defaultOptions = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
         result = this.asArray(benches);
 
-    /** @type {string} */
-    let name;
+    let name: string;
+
+    let options: (
+      | InvokeOptions<typeof benches>
+      | InvokeOptionsWithArgs<typeof benches, SuiteRunOptions>
+    );
 
     // Juggle arguments.
     if ((typeof maybeName === 'string')) {
       // 2 arguments (array, name).
       args = Array.prototype.slice.call(arguments, 2);
       name = maybeName;
+      options = {...defaultOptions, name} as InvokeOptions<typeof benches>;
     } else {
       // 2 arguments (array, options).
-      options = Object.assign(options, maybeName);
-      name = 'name' in options ? options.name : '';
-      args = Array.isArray(args = 'args' in options ? options.args : []) ? args : [args];
-      queued = options.queued;
+      options = Object.assign(
+        {},
+        defaultOptions,
+        maybeName,
+      ) as typeof options;
+      name = options?.name || '';
+      const maybeArgs = 'args' in options ? options.args : [];
+      args = Array.isArray(maybeArgs) ? maybeArgs : [maybeArgs];
+      queued = 'queued' in options ? !!options.queued : false;
     }
 
     /**
      * Invokes the method of the current object and if synchronous, fetches the next.
      */
     function execute() {
-      var listeners,
+      var listeners: Function[],
           async = isAsync(bench);
 
       if (async) {
         // Use `getNext` as the first listener.
         bench.on('complete', getNext);
         listeners = bench.events.complete;
-        listeners.splice(0, 0, listeners.pop());
+        listeners.splice(0, 0, listeners.pop() as Function);
       }
       // Execute method.
-      result[index] = (typeof (bench ? bench[name] : undefined) === 'function')
-        ? bench[name].apply(bench, args)
+      result[index] = (typeof (bench ? bench[name as keyof typeof bench] : undefined) === 'function')
+        ? (bench[name as keyof typeof bench] as Function).apply(bench, args)
         : undefined;
       // If synchronous return `true` until finished.
       return !async && getNext();
@@ -1460,7 +1573,7 @@ class Benchmark extends EventTarget {
      *
      * @param {Event} [event]
      */
-    function getNext(event) {
+    function getNext(event?: Event) {
       var cycleEvent,
           last = bench,
           async = isAsync(last);
@@ -1472,8 +1585,10 @@ class Benchmark extends EventTarget {
       // Emit "cycle" event.
       eventProps.type = 'cycle';
       eventProps.target = last;
-      cycleEvent = new Event(eventProps);
-      options.onCycle.call(benches.benchmarks, cycleEvent);
+      cycleEvent = new Event<Benchmark>(
+        eventProps as EventOptions<'cycle'>,
+      ) as EventWithTarget<Benchmark>;
+      options.onCycle.call((benches as Suite).benchmarks, cycleEvent);
 
       // Choose next benchmark if not exiting early.
       if (!cycleEvent.aborted && raiseIndex() !== false) {
@@ -1492,7 +1607,12 @@ class Benchmark extends EventTarget {
       } else {
         // Emit "complete" event.
         eventProps.type = 'complete';
-        options.onComplete.call(benches, new Event(eventProps));
+        options.onComplete.call(
+          benches,
+          new Event(
+            eventProps as EventOptions<'complete'>
+          ) as EventWithTarget<typeof last>,
+        );
       }
       // When used as a listener `event.aborted = true` will cancel the rest of
       // the "complete" listeners because they were already called above and when
@@ -1507,9 +1627,9 @@ class Benchmark extends EventTarget {
     /**
      * Checks if invoking `Benchmark#run` with asynchronous cycles.
      */
-    function isAsync(object) {
+    function isAsync(object?: Benchmark) {
       // Avoid using `instanceof` here because of IE memory leak issues with host objects.
-      var async = args[0] && args[0].async;
+      var async = args[0] && (args[0] as Benchmark).async;
 
       return (
         name == 'run' &&
@@ -1550,16 +1670,31 @@ class Benchmark extends EventTarget {
       bench = (result instanceof Suite ? result.benchmarks : result)[index];
       eventProps.type = 'start';
       eventProps.target = bench;
-      options.onStart.call(benches, new Event(eventProps));
+      options.onStart.call(
+        benches,
+        new Event(
+          eventProps as EventOptions<'start'>
+        )
+      );
 
       // End early if the suite was aborted in an "onStart" listener.
       if (name == 'run' && (benches instanceof Suite) && benches.aborted) {
         // Emit "cycle" event.
         eventProps.type = 'cycle';
-        options.onCycle.call(benches.benchmarks, new Event(eventProps));
+        options.onCycle.call(
+          benches.benchmarks,
+          new Event(
+            eventProps as EventOptions<'cycle'>
+          ) as EventWithTarget<typeof bench>
+        );
         // Emit "complete" event.
         eventProps.type = 'complete';
-        options.onComplete.call(benches, new Event(eventProps));
+        options.onComplete.call(
+          benches,
+          new Event(
+            eventProps as EventOptions<'complete'>
+          ) as EventWithTarget<typeof bench>,
+        );
       }
       // Start method execution.
       else {
@@ -1581,9 +1716,9 @@ class Benchmark extends EventTarget {
    * @param {string} [separator2] The separator used between keys and values.
    * @returns {string} The joined result.
    */
-  static join(object, separator1 = ',', separator2 = ': ') {
+  static join(object: Array<any> | object, separator1: string = ',', separator2: string = ': '): string {
     /** @type {string[]} */
-    var result = [],
+    var result: string[] = [],
         length = (object = Object(object)).length,
         arrayLike = length === length >>> 0;
 
@@ -1675,7 +1810,9 @@ class Benchmark extends EventTarget {
    *   'My name is '.concat(this.name); // "My name is foo"
    * });
    */
-  constructor(maybeName, fn, options = {}) {
+  constructor(maybeName: Partial<BenchmarkOptions>);
+  constructor(maybeName: string, fn: Function | string, options: Partial<BenchmarkOptions>);
+  constructor(maybeName: string | Partial<BenchmarkOptions> | Function, fn?: Function | string, options: Partial<BenchmarkOptions> = {}) {
     super();
 
     options = 'object' === typeof maybeName ? maybeName : (
@@ -1705,13 +1842,13 @@ class Benchmark extends EventTarget {
    *
    * @returns {Object} The benchmark instance.
    */
-  abort() {
+  abort(): object {
     var event,
         bench = this,
         resetting = calledBy.reset;
 
     if (bench.running) {
-      event = new Event('abort');
+      event = new Event<this>('abort');
       bench.emit(event);
       if (!event.cancelled || resetting) {
         // Avoid infinite recursion.
@@ -1733,7 +1870,7 @@ class Benchmark extends EventTarget {
   /**
    * Creates a new benchmark using the same test and options.
    *
-   * @param {Object} [options] Options object to overwrite cloned options.
+   * @param {Partial<BenchmarkOptions>} [options] Options object to overwrite cloned options.
    * @returns {Benchmark} The new benchmark instance.
    * @example
    *
@@ -1741,26 +1878,29 @@ class Benchmark extends EventTarget {
    *   'name': 'doppelganger'
    * });
    */
-  clone(options) {
+  clone(options?: Partial<BenchmarkOptions>): Benchmark {
     var bench = this,
         result = new Benchmark(Object.assign({}, bench, options));
 
     // Correct the `options` object.
     result.options = Object.assign({}, cloneDeep(bench.options), cloneDeep(options));
 
-    const properties = Object.keys(Benchmark.defaultValues);
+    const properties = Object.keys(Benchmark.defaultValues) as (
+      keyof typeof Benchmark['defaultValues'] & string
+    )[];
 
     for (const property of properties) {
       if (undefined === result[property]) {
         const value = cloneDeep(bench[property]);
-        result[property] = value;
+        (result[property] as Benchmark[typeof property]) = value;
       }
     }
 
     // Copy own custom properties.
-    Object.entries(bench).forEach(([key, value]) => {
+    (Object.entries(bench)).forEach(([key, value]) => {
       if (!has(result, key)) {
-        result[key] = cloneDeep(value);
+        const prop = key as keyof Benchmark;
+        (result[prop] as typeof result[typeof prop]) = cloneDeep(value as typeof result[typeof prop]);
       }
     });
 
@@ -1781,7 +1921,7 @@ class Benchmark extends EventTarget {
    * @param {Benchmark} other The benchmark to compare.
    * @returns {number} Returns `-1` if slower, `1` if faster, and `0` if indeterminate.
    */
-  compare(other) {
+  compare(other: Benchmark): number {
     var bench = this;
 
     // Exit early if comparing the same benchmark.
@@ -1805,7 +1945,7 @@ class Benchmark extends EventTarget {
      * @param {number[]} sampleB
      * @returns {number}
      */
-    function getScore(xA, sampleB) {
+    function getScore(xA: number, sampleB: number[]): number {
       return sampleB.reduce((total, xB) => {
         return total + (xB > xA ? 0 : xB < xA ? 1 : 0.5);
       }, 0);
@@ -1816,7 +1956,7 @@ class Benchmark extends EventTarget {
      * @param {number[]} sampleB
      * @returns {number}
      */
-    function getU(sampleA, sampleB) {
+    function getU(sampleA: number[], sampleB: number[]): number {
       return sampleA.reduce((total, xA) => {
         return total + getScore(xA, sampleB);
       }, 0);
@@ -1826,7 +1966,7 @@ class Benchmark extends EventTarget {
      * @param {number} u
      * @returns {number}
      */
-    function getZ(u) {
+    function getZ(u: number): number {
       return (u - ((size1 * size2) / 2)) / Math.sqrt((size1 * size2 * (size1 + size2 + 1)) / 12);
     }
     // Reject the null hypothesis the two samples come from the
@@ -1838,7 +1978,7 @@ class Benchmark extends EventTarget {
       return Math.abs(zStat) > 1.96 ? (u == u1 ? 1 : -1) : 0;
     }
     // ...the U value is less than or equal the critical U value.
-    critical = maxSize < 5 || minSize < 3 ? 0 : uTable[maxSize][minSize - 3];
+    critical = maxSize < 5 || minSize < 3 ? 0 : uTable[maxSize as unknown as keyof typeof uTable][minSize - 3];
     return u <= critical ? (u == u1 ? 1 : -1) : 0;
   }
 
@@ -1849,7 +1989,7 @@ class Benchmark extends EventTarget {
    *
    * @param {Function} fn The function to execute.
    */
-  delayFn(fn) {
+  delayFn(fn: Function) {
     if ('idle' === this.delay) {
       this.#timerId = requestIdleCallback(() => fn());
     } else {
@@ -1862,7 +2002,7 @@ class Benchmark extends EventTarget {
    */
   #clearDelayFn() {
     if ('idle' === this.delay) {
-      cancelIdleCallback(this.#timerId);
+      cancelIdleCallback(this.#timerId as number);
     } else {
       clearTimeout(this.#timerId);
     }
@@ -1874,7 +2014,7 @@ class Benchmark extends EventTarget {
    *
    * @returns {Object} The benchmark instance.
    */
-  reset() {
+  reset(): object {
     var bench = this;
     if (bench.running && !calledBy.abort) {
       // No worries, `reset()` is called within `abort()`.
@@ -1884,17 +2024,35 @@ class Benchmark extends EventTarget {
       return bench;
     }
 
-    /** @type {Event} */
-    var event,
+    type QueueItem<T extends object|(unknown[]) = object|(unknown[])> = {
+      destination: T,
+      source: T,
+    };
+
+    type ChangeItem<
+      T extends object | (unknown[]) = object | (unknown[])
+    > = {
+      destination: QueueItem<T>['destination'],
+      key: (
+        T extends unknown[]
+          ? (`${number}` | number)
+          : keyof T
+      ),
+      value: (
+        T extends unknown[]
+          ? QueueItem<T>['destination'][number]
+          : QueueItem<T>['destination'][keyof T]
+      ),
+    };
+
+    var event: Event,
         index = 0,
-        /** @type {{destination: object, key: string, value: unknown}[]} */
-        changes = [],
-        /** @type {{destination: object, source: object}[]} */
-        queue = [];
+        changes: ChangeItem[] = [],
+        queue: QueueItem[] = [];
 
     // A non-recursive solution to check if properties have changed.
     // For more information see http://www.jslab.dk/articles/non.recursive.preorder.traversal.part4.
-    var data = {
+    var data: QueueItem = {
       'destination': bench,
       'source': Object.assign(
         {},
@@ -1905,10 +2063,19 @@ class Benchmark extends EventTarget {
     };
 
     do {
-      Object.entries(data.source).forEach(([key, value]) => {
+      (
+        Object.entries(data.source) as (
+          typeof data.source extends unknown[]
+            ? [number, unknown]
+            : [string, unknown]
+        )[]
+      ).forEach(([
+        key,
+        value,
+      ]) => {
         var changed,
             destination = data.destination,
-            currValue = destination[key];
+            currValue = destination[key as keyof typeof destination] as typeof value;
 
         // Skip pseudo private properties and event listeners.
         if (/^_|^events$|^on[A-Z]/.test(key)) {
@@ -1921,11 +2088,12 @@ class Benchmark extends EventTarget {
               changed = true;
               currValue = [];
             }
+
             // Check if an array has changed its length.
-            if (currValue.length != value.length) {
+            if ((currValue as unknown[]).length != value.length) {
               changed = true;
-              currValue = currValue.slice(0, value.length);
-              currValue.length = value.length;
+              currValue = (currValue as unknown[]).slice(0, value.length);
+              (currValue as unknown[]).length = value.length;
             }
           }
           // Check if an object has changed to a non-object value.
@@ -1935,16 +2103,16 @@ class Benchmark extends EventTarget {
           }
           // Register a changed object.
           if (changed) {
-            changes.push({ 'destination': destination, 'key': key, 'value': currValue });
+            changes.push({ 'destination': destination, 'key': key as ChangeItem['key'], 'value': currValue });
           }
-          queue.push({ 'destination': currValue, 'source': value });
+          queue.push({ 'destination': currValue as QueueItem['destination'], 'source': value });
         }
         // Register a changed primitive.
         else if (
           !(currValue === value) &&
           value !== undefined
         ) {
-          changes.push({ 'destination': destination, 'key': key, 'value': value });
+          changes.push({ 'destination': destination, 'key': key as ChangeItem['key'], 'value': value });
         }
       });
     }
@@ -1952,9 +2120,11 @@ class Benchmark extends EventTarget {
 
     // If changed emit the `reset` event and if it isn't cancelled reset the benchmark.
     if (changes.length &&
-        (bench.emit(event = new Event('reset')), !event.cancelled)) {
+        (bench.emit(event = new Event<this>('reset')), !event.cancelled)) {
       changes.forEach((data) => {
-        data.destination[data.key] = data.value;
+        // this _could_ be done with a runtime conditional check,
+        //  but at build time it would be a redundant condition
+        (data.destination as {[key: string]: unknown})[data.key as string] = data.value;
       });
     }
     return bench;
@@ -1965,7 +2135,7 @@ class Benchmark extends EventTarget {
    *
    * @returns {string} A string representation of the benchmark instance.
    */
-  toString() {
+  toString(): string {
     var bench = this,
         error = bench.error,
         hz = bench.hz,
@@ -1988,7 +2158,7 @@ class Benchmark extends EventTarget {
       result += ': ' + errorStr;
     }
     else {
-      result += ' x ' + Benchmark.formatNumber(hz.toFixed(hz < 100 ? 2 : 0)) + ' ops/sec ' + pm +
+      result += ' x ' + Benchmark.formatNumber(hz.toFixed(hz < 100 ? 2 : 0) as `${number}`) + ' ops/sec ' + pm +
         stats.rme.toFixed(2) + '% (' + size + ' run' + (size == 1 ? '' : 's') + ' sampled)';
     }
     return result;
@@ -2007,9 +2177,9 @@ class Benchmark extends EventTarget {
    * // or with options
    * bench.run({ 'async': true });
    */
-  run(options) {
-    var bench = this,
-        event = new Event('start');
+  run(options: RunOptions): object {
+    var bench = this as ClonedBenchmark,
+        event = new Event<ClonedBenchmark>('start');
 
     const timer = options?.timer || Timer.timer;
 
@@ -2024,10 +2194,10 @@ class Benchmark extends EventTarget {
 
     if (!event.cancelled) {
       options = {
-        'async': (
-          (options = options && options.async) == null
+        'async': !!(
+          undefined === options?.async
             ? bench.async
-            : options
+            : options.async
           )
       };
 
@@ -2038,7 +2208,7 @@ class Benchmark extends EventTarget {
         if (bench.defer) {
           new Deferred(bench, timer);
         } else {
-          cycle(bench, options);
+          cycle(bench, options as Parameters<typeof cycle>[1]);
         }
       }
       // For original benchmarks.
@@ -2050,55 +2220,49 @@ class Benchmark extends EventTarget {
   }
 }
 
-class Deferred {
+type DeferredWithTeardown = (
+  & Deferred<CompiledBenchmark>
+  & {teardown: Exclude<Deferred['teardown'], undefined>}
+);
+
+class Deferred<
+  T extends ClonedBenchmark = ClonedBenchmark
+> {
   /**
    * The Timer instance.
-   *
-   * @type {Timer}
    */
-  #timer;
+  #timer: Timer;
 
   /**
    * The deferred benchmark instance.
-   *
-   * @type {Benchmark}
    */
-  benchmark;
+  benchmark: T;
 
   /**
    * The number of deferred cycles performed while benchmarking.
-   *
-   * @type {number}
    */
-  cycles = 0;
+  cycles: number = 0;
 
-  /**
-   * @type {Function|undefined}
-   */
-  teardown;
+  teardown: Function | undefined;
 
   /**
    * The time taken to complete the deferred benchmark (secs).
-   *
-   * @type {number}
    */
-  elapsed = 0;
+  elapsed: number = 0;
 
   /**
    * A timestamp of when the deferred benchmark started (ms).
-   *
-   * @type {number}
    */
-  timeStamp = 0;
+  timeStamp: number = 0;
 
   /**
    * The Deferred constructor.
    *
    * @memberOf Benchmark
-   * @param {Benchmark} clone The cloned benchmark instance.
+   * @param {T} clone The cloned benchmark instance.
    * @param {Timer} timer The timer instance.
    */
-  constructor(clone, timer) {
+  constructor(clone: T, timer: Timer) {
     this.benchmark = clone;
     this.#timer = timer;
     clock(this, timer);
@@ -2107,7 +2271,7 @@ class Deferred {
   /**
    * Handles cycling/completing the deferred benchmark.
    */
-  resolve() {
+  resolve(this: DeferredWithTeardown) {
     var deferred = this,
         clone = deferred.benchmark,
         bench = clone._original;
@@ -2127,60 +2291,77 @@ class Deferred {
       clone.delayFn(() => { cycle(deferred, {timer: this.#timer}); });
     }
   }
+
+  static isA(maybe: unknown): maybe is (Deferred | DeferredWithTeardown) {
+    return maybe instanceof Deferred;
+  }
 }
 
-class Event {
+type EventWithTarget<
+  T extends EventTarget | (Benchmark[]) = EventTarget | (Benchmark[]),
+> = (
+  & Omit<Event, 'target'>
+  & {
+    target: T,
+  }
+)
+
+type EventOptions<
+  Type extends string = string
+> = (
+  | {
+    type: Type,
+    target: Benchmark,
+    currentTarget: (Benchmark[]) | Suite,
+  }
+  | {
+    type: Type,
+    target: Suite | Benchmark,
+  }
+);
+
+class Event<
+  T extends (EventTarget | Benchmark[]) = (EventTarget | Benchmark[]),
+> {
   /**
    * A flag to indicate if the emitters listener iteration is aborted.
-   *
-   * @type boolean
    */
-  aborted = false;
+  aborted: boolean = false;
 
   /**
    * A flag to indicate if the default action is cancelled.
-   *
-   * @type boolean
    */
-  cancelled = false;
+  cancelled: boolean = false;
 
   /**
    * The object whose listeners are currently being processed.
-   *
-   * @type {(EventTarget[])|EventTarget|undefined}
    */
-  currentTarget = undefined;
+  currentTarget: T | undefined = undefined;
 
   /**
    * The return value of the last executed listener.
-   *
-   * @type {*}
    */
-  result = undefined;
+  result: unknown = undefined;
 
   /**
    * The object to which the event was originally emitted.
    *
    * @type {EventTarget|undefined}
    */
-  target = undefined;
+  target: T | undefined = undefined;
 
   /**
    * A timestamp of when the event was created (ms).
-   *
-   * @type number
    */
-  timeStamp = 0;
+  timeStamp: number = 0;
 
   /**
    * The event type.
-   *
-   * @type {string}
    */
-  type;
+  type: string;
 
   /** @type {unknown} */
-  message;
+  message: unknown;
 
   /**
    * The Event constructor.
@@ -2188,7 +2369,7 @@ class Event {
    * @memberOf Benchmark
    * @param {{type: string}|string} type The event type.
    */
-  constructor(type) {
+  constructor(type: EventOptions | string) {
     if ('object' === typeof type) {
       this.type = type.type;
     } else {
@@ -2205,50 +2386,42 @@ class Event {
   }
 }
 
-class Suite extends EventTarget {
+type SuiteOptions = {
+  name: string | undefined,
+};
+
+class Suite extends EventTarget<SuiteOptions> {
   /**
    * The default options copied by suite instances.
-   *
-   * @type {Object}
    */
-  static options = {
+  static options: SuiteOptions = {
 
     /**
      * The name of the suite.
-     *
-     * @type {string|string}
      */
     'name': undefined
   }
 
-  /** @type {Benchmark[]} */
-  #benchmarks;
+  #benchmarks: Benchmark[];
 
   /**
    * A flag to indicate if the suite is aborted.
-   *
-   * @type {boolean}
    */
-  aborted = false;
+  aborted: boolean = false;
 
   /**
    * A flag to indicate if the suite is running.
-   *
-   * @type {boolean}
    */
-  running = false;
+  running: boolean = false;
 
-  /**
-   * @type {string}
-   */
-  name;
+  name: string | undefined;
 
   /**
    * The Suite constructor.
    *
    * @memberOf Benchmark
-   * @param {string} name A name to identify the suite.
-   * @param {Object} [options={}] Options object.
+   * @param {string|object} name A name to identify the suite.
+   * @param {SuiteOptions} [options={}] Options object.
    * @example
    *
    * // basic usage (the `new` operator is optional)
@@ -2279,7 +2452,8 @@ class Suite extends EventTarget {
    *   'onComplete': onComplete
    * });
    */
-  constructor(name, options) {
+  constructor(name: Partial<SuiteOptions>);
+  constructor(name: string | Partial<SuiteOptions>, options?: Partial<SuiteOptions>) {
     super();
 
     this.#benchmarks = [];
@@ -2326,7 +2500,7 @@ class Suite extends EventTarget {
    *
    * @returns {Suite}
    */
-  reverse() {
+  reverse(): Suite {
     this.#benchmarks.reverse();
 
     return this;
@@ -2337,7 +2511,7 @@ class Suite extends EventTarget {
    *
    * @returns {Benchmark|undefined}
    */
-  shift() {
+  shift(): Benchmark | undefined {
     return this.#benchmarks.shift();
   }
 
@@ -2346,7 +2520,7 @@ class Suite extends EventTarget {
    *
    * @returns {number}
    */
-  indexOf(bench) {
+  indexOf(bench: Benchmark): number {
     return this.#benchmarks.indexOf(bench);
   }
 
@@ -2355,13 +2529,13 @@ class Suite extends EventTarget {
    *
    * @returns {Object} The suite instance.
    */
-  abort() {
+  abort(): object {
     var
         suite = this,
         resetting = calledBy.resetSuite;
 
     if (suite.running) {
-      const event = new Event('abort');
+      const event = new Event<typeof this>('abort');
       suite.emit(event);
       if (!event.cancelled || resetting) {
         // Avoid infinite recursion.
@@ -2414,10 +2588,10 @@ class Suite extends EventTarget {
    *   'onComplete': onComplete
    * });
    */
-  add(name, fn, options) {
+  add(name: string, fn: Function | string, options: object): object {
     var suite = this,
         bench = new Benchmark(name, fn, options),
-        event = new Event({ 'type': 'add', 'target': bench });
+        event = new Event<typeof this>({ 'type': 'add', 'target': bench });
 
     if (suite.emit(event), !event.cancelled) {
       this.#benchmarks.push(bench);
@@ -2428,19 +2602,22 @@ class Suite extends EventTarget {
   /**
    * Creates a new suite with cloned benchmarks.
    *
-   * @param {Object} options Options object to overwrite cloned options.
-   * @returns {Object} The new suite instance.
+   * @param {SuiteOptions} options Options object to overwrite cloned options.
+   * @returns {Suite} The new suite instance.
    */
-  clone(options) {
+  clone(options?: SuiteOptions): Suite {
     var suite = this,
-        result = new suite.constructor(Object.assign({}, suite.options, options));
+        result = new Suite(Object.assign({}, suite.options, options));
 
     // Copy own properties.
-    Object.entries(suite).forEach(([key, value]) => {
+    (
+      Object.entries(suite) as [
+        (keyof Suite & string),
+        Suite[keyof Suite & string]
+      ][]
+    ).forEach(([key, value]) => {
       if (!has(result, key)) {
-        result[key] = (typeof value?.clone === 'function')
-          ? value.clone()
-          : cloneDeep(value);
+        result[key] = cloneDeep(value as Suite[typeof key]);
       }
     });
     return result;
@@ -2452,9 +2629,9 @@ class Suite extends EventTarget {
    * @param {Function|string} callback The function/alias called per iteration.
    * @returns {Object} A new suite of benchmarks that passed callback filter.
    */
-  filter(callback) {
+  filter(callback: Parameters<typeof Benchmark['filter']>[1]): object {
     var suite = this,
-        result = new suite.constructor(suite.options);
+        result = new Suite(suite.options);
 
     const cb = Benchmark.filter(this, callback);
 
@@ -2468,8 +2645,8 @@ class Suite extends EventTarget {
    *
    * @returns {Object} The suite instance.
    */
-  reset() {
-    var event,
+  reset(): object {
+    var event: Event<this>,
         suite = this,
         aborting = calledBy.abortSuite;
 
@@ -2481,7 +2658,7 @@ class Suite extends EventTarget {
     }
     // Reset if the state has changed.
     else if ((suite.aborted || suite.running) &&
-        (suite.emit(event = new Event('reset')), !event.cancelled)) {
+        (suite.emit(event = new Event<this>('reset')), !event.cancelled)) {
       suite.aborted = suite.running = false;
       if (!aborting) {
         Benchmark.invoke(suite, 'reset');
@@ -2494,7 +2671,7 @@ class Suite extends EventTarget {
    * Runs the suite.
    *
    * @param {Object} [options={}] Options object.
-   * @returns {Object} The suite instance.
+   * @returns {Suite} The suite instance.
    * @example
    *
    * // basic usage
@@ -2503,7 +2680,7 @@ class Suite extends EventTarget {
    * // or with options
    * suite.run({ 'async': true, 'queued': true });
    */
-  run(options) {
+  run(options?: SuiteRunOptions): this {
     var suite = this;
 
     suite.reset();
@@ -2511,35 +2688,28 @@ class Suite extends EventTarget {
     options || (options = {});
     options.timer = options?.timer || Timer.timer;
 
-    Benchmark.invoke(suite, {
+    const invoke_options: InvokeOptionsWithArgs<Suite, SuiteRunOptions> = {
       'name': 'run',
       'args': options,
-      'queued': options.queued,
-      /**
-       * @param {Event} event
-       */
-      'onStart': function(event) {
+      'queued': !!options.queued,
+      'onStart': function(this: Suite, event: Event<typeof this>) {
         suite.emit(event);
       },
-      /**
-       * @param {Event} event
-       */
-      'onCycle': function(event) {
+      'onCycle': function(this: Suite, event: EventWithTarget<Benchmark>) {
         var bench = event.target;
         if (bench.error) {
-          suite.emit(new Event({ 'type': 'error', 'target': bench }));
+          suite.emit(new Event<typeof bench>({ 'type': 'error', 'target': bench }));
         }
         suite.emit(event);
         event.aborted = suite.aborted;
       },
-      /**
-       * @param {Event} event
-       */
-      'onComplete': function(event) {
+      'onComplete': function(this: Suite, event: EventWithTarget<Benchmark>) {
         suite.running = false;
         suite.emit(event);
       }
-    });
+    };
+
+    Benchmark.invoke(suite, invoke_options);
     return suite;
   }
 }
@@ -2547,7 +2717,7 @@ class Suite extends EventTarget {
 /*------------------------------------------------------------------------*/
 
 /** @type {Object<string, string>} */
-const templateData = {};
+const templateData: { [s: string]: string; } = {};
 
 /**
  * Clocks the time taken to execute a test per cycle (secs).
@@ -2557,8 +2727,8 @@ const templateData = {};
  * @param {Timer} timer
  * @returns {number} The time taken.
  */
-function clock(clone, timer) {
-  var deferred;
+function clock(clone: ClonedBenchmark | Deferred, timer: Timer): number {
+  var deferred: Deferred | undefined;
 
   if (clone instanceof Deferred) {
     deferred = clone;
@@ -2603,10 +2773,10 @@ function clock(clone, timer) {
       'while(i#--){${fn}\n}${end};${teardown}\nreturn{elapsed:r#,uid:"${uid}"}';
 
   /** @type {Function|null} */
-  var compiled = bench.compiled = clone.compiled = createCompiled(
+  var compiled: Function | null | boolean = bench.compiled = clone.compiled = createCompiled(
       bench,
       decompilable,
-      deferred,
+      !!deferred,
       funcBody,
       timer
     ),
@@ -2643,7 +2813,7 @@ function clock(clone, timer) {
     compiled = createCompiled(
       bench,
       decompilable,
-      deferred,
+      !!deferred,
       funcBody,
       timer,
     );
@@ -2667,7 +2837,7 @@ function clock(clone, timer) {
     compiled = bench.compiled = clone.compiled = createCompiled(
       bench,
       decompilable,
-      deferred,
+      !!deferred,
       funcBody,
       timer,
     );
@@ -2690,15 +2860,21 @@ function clock(clone, timer) {
  *
  * @returns {Function}
  */
-function createCompiled(bench, decompilable, deferred, body, timer) {
+function createCompiled(
+  bench: Benchmark,
+  decompilable: boolean,
+  deferred: boolean,
+  body: string,
+  timer: Timer,
+): Function {
   var fn = bench.fn,
-      fnArg = deferred ? getFirstArgument(fn) || 'deferred' : '';
+      fnArg = deferred ? getFirstArgument(fn as Function) || 'deferred' : '';
 
   templateData.uid = uid + uidCounter++;
 
   Object.assign(templateData, {
     'setup': decompilable ? getSource(bench.setup) : interpolate('m#.setup()'),
-    'fn': decompilable ? getSource(fn) : interpolate('m#.fn(' + fnArg + ')'),
+    'fn': decompilable ? getSource(fn as Function) : interpolate('m#.fn(' + fnArg + ')'),
     'fnArg': fnArg,
     'teardown': decompilable ? getSource(bench.teardown) : interpolate('m#.teardown()')
   });
@@ -2711,7 +2887,7 @@ function createCompiled(bench, decompilable, deferred, body, timer) {
     });
   }
   else if (timer.unit == 'us') {
-    if (timer.ns.stop) {
+    if ('stop' in timer.ns) {
       Object.assign(templateData, {
         'begin': interpolate('s#=n#.start()'),
         'end': interpolate('r#=n#.microseconds()/1e6')
@@ -2723,7 +2899,7 @@ function createCompiled(bench, decompilable, deferred, body, timer) {
       });
     }
   }
-  else if (timer.ns.now) {
+  else if ('now' in timer.ns) {
     Object.assign(templateData, {
       'begin': interpolate('s#=(+n#.now())'),
       'end': interpolate('r#=((+n#.now())-s#)/1e3')
@@ -2753,14 +2929,14 @@ function createCompiled(bench, decompilable, deferred, body, timer) {
  *
  * @returns {string}
  */
-function interpolate(string) {
+function interpolate(string: string): string {
   /**
    * @param {TemplateStringsArray} _
    * @param {string} string
    *
    * @returns {string}
    */
-  function tagged(_, string) {
+  function tagged(_: TemplateStringsArray, string: string): string {
     let result = string;
 
     for (const [key, value] of Object.entries(templateData)) {
@@ -2781,9 +2957,9 @@ function interpolate(string) {
  *
  * @private
  * @param {Benchmark} bench The benchmark instance.
- * @param {Object} options The options object.
+ * @param {RunOptions} options The options object.
  */
-function compute(bench, options) {
+function compute(bench: Benchmark, options: RunOptions) {
   const {timer} = options;
 
   var async = options.async,
@@ -2791,7 +2967,7 @@ function compute(bench, options) {
       initCount = bench.initCount,
       minSamples = bench.minSamples,
       /** @type {Benchmark[]} */
-      queue = [],
+      queue: Benchmark[] = [],
       sample = bench.stats.sample;
 
   /**
@@ -2814,7 +2990,7 @@ function compute(bench, options) {
    *
    * @param {Event} event
    */
-  function update(event) {
+  function update(this: Benchmark, event: Event<Benchmark>) {
     var clone = this,
         type = event.type;
 
@@ -2829,7 +3005,7 @@ function compute(bench, options) {
         }
         if (type == 'abort') {
           bench.abort();
-          bench.emit(new Event('cycle'));
+          bench.emit(new Event<Benchmark>('cycle'));
         } else {
           event.currentTarget = event.target = bench;
           bench.emit(event);
@@ -2844,39 +3020,23 @@ function compute(bench, options) {
 
   /**
    * Determines if more clones should be queued or if cycling should stop.
-   *
-   * @param {Event} event
    */
-  function evaluate(event) {
-    /** @type {number} */
-    var critical,
-        /** @type {number} */
-        df,
-        /** @type {number} */
-        mean,
-        /** @type {number} */
-        moe,
-        /** @type {number} */
-        rme,
-        /** @type {number} */
-        sd,
-        /** @type {number} */
-        sem,
-        /** @type {number} */
-        variance,
+  function evaluate(event: EventWithTarget<Benchmark>) {
+    var critical: number,
+        df: number,
+        mean: number,
+        moe: number,
+        rme: number,
+        sd: number,
+        sem: number,
+        variance: number,
         clone = event.target,
         done = bench.aborted,
         now = (+Date.now()),
         size = sample.push(clone.times.period),
         maxedOut = size >= minSamples && (elapsed += now - clone.times.timeStamp) / 1e3 > bench.maxTime,
         times = bench.times,
-        /**
-         * @param {number} sum
-         * @param {number} x
-         *
-         * @returns {number}
-         */
-        varOf = function(sum, x) { return sum + Math.pow(x - mean, 2); };
+        varOf = function(sum: number, x: number) { return sum + Math.pow(x - mean, 2); };
 
     // Exit early for aborted or unclockable tests.
     if (done || clone.hz == Infinity) {
@@ -2895,7 +3055,7 @@ function compute(bench, options) {
       // Compute the degrees of freedom.
       df = size - 1;
 
-      const maybe_tTable_key = (Math.round(df) || 1).toString();
+      const maybe_tTable_key = (Math.round(df) || 1).toString() as keyof typeof tTable;
       // Compute the critical value.
       critical = tTable[maybe_tTable_key] || tTable.infinity;
       // Compute the margin of error.
@@ -2944,6 +3104,7 @@ function compute(bench, options) {
     'name': 'run',
     'args': { async, timer },
     'queued': true,
+    onStart: noop,
     'onCycle': evaluate,
     'onComplete': function() { bench.emit(new Event('complete')); }
   });
@@ -2955,35 +3116,32 @@ function compute(bench, options) {
  * Cycles a benchmark until a run `count` can be established.
  *
  * @private
- * @param {Benchmark|Deferred} obj The cloned benchmark instance.
- * @param {Object} options The options object.
+ * @param {ClonedBenchmark|Deferred} obj The cloned benchmark instance.
+ * @param {RunOptions} options The options object.
  */
-function cycle(obj, options) {
+function cycle(obj: ClonedBenchmark | Deferred | DeferredWithTeardown, options: (
+  & Omit<RunOptions, 'timer'>
+  & Required<Pick<RunOptions, 'timer'>>
+)) {
   const {timer} = options;
 
   var deferred;
 
-  /** @type {Benchmark} */
-  let clone;
+  let clone: ClonedBenchmark;
 
-  if (obj instanceof Deferred) {
+  if (Deferred.isA(obj)) {
     deferred = obj;
     clone = obj.benchmark;
   } else {
     clone = obj;
   }
 
-  /** @type {number} */
-  var clocked,
-      /** @type {number} */
-      cycles,
-      /** @type {Event} */
-      event,
-      /** @type {Benchmark['minTime']} */
-      minTime,
-      /** @type {number} */
-      period,
-      async = options.async,
+  var clocked: number = 0,
+      cycles: number,
+      event: Event<typeof clone>,
+      minTime: Benchmark['minTime'] = 0,
+      period: number,
+      async = !!options.async,
       bench = clone._original,
       count = clone.count,
       times = clone.times;
@@ -3021,12 +3179,7 @@ function cycle(obj, options) {
     clone.running = clocked < minTime;
 
     if (clone.running) {
-      /**
-       * @param {number} maybe
-       *
-       * @returns {boolean}
-       */
-      function has_divisor(maybe) {
+      function has_divisor(maybe: number): maybe is keyof typeof divisors {
         return maybe in divisors;
       }
 
@@ -3043,7 +3196,7 @@ function cycle(obj, options) {
     }
   }
   // Should we exit early?
-  event = new Event('cycle');
+  event = new Event<typeof clone>('cycle');
   clone.emit(event);
   if (event.aborted) {
     clone.abort();
@@ -3053,7 +3206,7 @@ function cycle(obj, options) {
     // Start a new cycle.
     clone.count = count;
     if (deferred) {
-      clone.compiled.call(deferred, globalThis, timer);
+      clone.compiled?.call(deferred, globalThis, timer);
     } else if (async) {
       clone.delayFn(function() { cycle(clone, options); });
     } else {
@@ -3067,7 +3220,7 @@ function cycle(obj, options) {
       Support.browser.runScript(uid + '=1;delete ' + uid);
     }
     // We're done.
-    clone.emit(new Event('complete'));
+    clone.emit(new Event<ClonedBenchmark>('complete'));
   }
 }
 
