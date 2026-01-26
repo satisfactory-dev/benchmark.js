@@ -3228,3 +3228,8 @@ function cycle(obj: ClonedBenchmark | Deferred | DeferredWithTeardown, options: 
 
 // Export Benchmark.
 export default Benchmark;
+
+export {
+  Benchmark,
+  Suite,
+}
