@@ -859,13 +859,38 @@ type InvokeOptionsWithArgs<
 type RunOptions = Partial<{
   timer: Timer,
   async: boolean,
+  queued: boolean,
 }>;
 
-type SuiteRunOptions = (
-  & RunOptions
-  & Partial<{
+type SuiteInvokeOptions<
+  Name extends string = string,
+  T extends (Benchmark[]) | Suite = (Benchmark[]) | Suite,
+> = (
+  & {
+    name: Name,
+  }
+  & Partial<Pick<
+    SuiteOptions<T>,
+    (
+      | 'onAbort'
+      | 'onAdd'
+      | 'onReset'
+      | 'onStart'
+      | 'onCycle'
+      | 'onError'
+      | 'onComplete'
+    )
+  >>
+);
+
+type SuiteRunOptions<
+  T extends (Benchmark[]) | Suite = (Benchmark[]) | Suite,
+> = (
+  & SuiteInvokeOptions<'run', T>
+  & {
+    args: RunOptions,
     queued: boolean,
-  }>
+  }
 );
 
 type BenchmarkOptions = {
@@ -1473,32 +1498,12 @@ class Benchmark extends EventTarget<
    *   'onComplete': onComplete
    * });
    */
-  static invoke(
-    benches: Suite,
-    maybeName: 'reset' | 'abort',
-  ): Benchmark[];
-  static invoke(
-    benches: Benchmark[] | Suite,
-    maybeName: InvokeOptionsWithArgs<typeof benches, SuiteRunOptions>,
-  ): Benchmark[];
-  static invoke(
-    benches: Suite,
-    maybeName: InvokeOptionsWithArgs<Suite, SuiteRunOptions>,
-  ): Benchmark[];
-  static invoke(
-    benches: (Benchmark[]) | Suite,
+  static invoke<
+    T extends (Benchmark[]) | Suite
+  >(
+    benches: T,
     maybeName: (
-      | InvokeOptions<
-        typeof benches
-      >
-      | InvokeOptionsWithArgs<
-        typeof benches,
-        SuiteRunOptions
-      >
-      | InvokeOptionsWithArgs<
-        Suite,
-        SuiteRunOptions
-      >
+      | SuiteInvokeOptions<string, T>
       | string
     ),
   ): Benchmark[] {
@@ -1507,14 +1512,28 @@ class Benchmark extends EventTarget<
         queued: boolean,
         index: number = -1,
         eventProps: Partial<EventOptions> = { 'currentTarget': benches },
-        defaultOptions = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
+        defaultOptions: Pick<
+          SuiteInvokeOptions,
+          (
+            | 'onStart'
+            | 'onCycle'
+            | 'onComplete'
+          )
+        > = { 'onStart': noop, 'onCycle': noop, 'onComplete': noop },
         result = this.asArray(benches);
 
     let name: string;
 
     let options: (
-      | InvokeOptions<typeof benches>
-      | InvokeOptionsWithArgs<typeof benches, SuiteRunOptions>
+      & SuiteInvokeOptions<string, T>
+      & Required<Pick<
+        SuiteInvokeOptions<string, T>,
+        (
+            | 'onStart'
+            | 'onCycle'
+            | 'onComplete'
+        )
+      >>
     );
 
     // Juggle arguments.
@@ -1522,7 +1541,7 @@ class Benchmark extends EventTarget<
       // 2 arguments (array, name).
       args = Array.prototype.slice.call(arguments, 2);
       name = maybeName;
-      options = {...defaultOptions, name} as InvokeOptions<typeof benches>;
+      options = {...defaultOptions, name} as typeof options;
     } else {
       // 2 arguments (array, options).
       options = Object.assign(
@@ -1563,7 +1582,7 @@ class Benchmark extends EventTarget<
      * @param {Event} [event]
      */
     function getNext(event?: Event) {
-      var cycleEvent,
+      var cycleEvent: EventWithTarget<typeof last, 'cycle'>,
           last = bench,
           async = isAsync(last);
 
@@ -1574,14 +1593,20 @@ class Benchmark extends EventTarget<
       // Emit "cycle" event.
       eventProps.type = 'cycle';
       eventProps.target = last;
-      cycleEvent = new Event<Benchmark>(
+      cycleEvent = new Event<typeof last, 'cycle'>(
         eventProps as EventOptions<'cycle'>,
-      ) as EventWithTarget<Benchmark>;
-      options.onCycle.call((benches as Suite).benchmarks, cycleEvent);
+      ) as EventWithTarget<typeof last, 'cycle'>;
+      options.onCycle.call((benches as Suite).benchmarks as T, cycleEvent);
 
       // Choose next benchmark if not exiting early.
       if (!cycleEvent.aborted && raiseIndex() !== false) {
-        bench = queued ? (benches instanceof Suite ? benches.benchmarks : benches)[0] : result[index];
+        bench = queued
+          ? (
+            benches instanceof Suite
+              ? benches.benchmarks
+              : benches as Benchmark[]
+          )[0]
+          : result[index];
         if (isAsync(bench)) {
           bench.delayFn(execute);
         }
@@ -1598,9 +1623,9 @@ class Benchmark extends EventTarget<
         eventProps.type = 'complete';
         options.onComplete.call(
           benches,
-          new Event(
+          new Event<typeof last, 'complete'>(
             eventProps as EventOptions<'complete'>
-          ) as EventWithTarget<typeof last>,
+          ) as EventWithTarget<typeof last, 'complete'>,
         );
       }
       // When used as a listener `event.aborted = true` will cancel the rest of
@@ -1671,18 +1696,18 @@ class Benchmark extends EventTarget<
         // Emit "cycle" event.
         eventProps.type = 'cycle';
         options.onCycle.call(
-          benches.benchmarks,
-          new Event(
+          benches.benchmarks as T,
+          new Event<typeof bench, 'cycle'>(
             eventProps as EventOptions<'cycle'>
-          ) as EventWithTarget<typeof bench>
+          ) as EventWithTarget<typeof bench, 'cycle'>
         );
         // Emit "complete" event.
         eventProps.type = 'complete';
         options.onComplete.call(
           benches,
-          new Event(
+          new Event<typeof bench, 'complete'>(
             eventProps as EventOptions<'complete'>
-          ) as EventWithTarget<typeof bench>,
+          ) as EventWithTarget<typeof bench, 'complete'>,
         );
       }
       // Start method execution.
@@ -2360,8 +2385,6 @@ class Event<
    * @memberOf Benchmark
    * @param {{type: Type}|Type} type The event type.
    */
-  constructor(type: Type);
-  constructor(type: EventOptions<Type>);
   constructor(type: EventOptions<Type> | Type) {
     if ('object' === typeof type) {
       this.type = type.type;
@@ -2379,16 +2402,18 @@ class Event<
   }
 }
 
-type SuiteOptions = (
+type SuiteOptions<
+  T extends (Benchmark[]) | Suite = (Benchmark[]) | Suite,
+> = (
   & {
     name: string,
-    onAbort: (this: Suite, e: Event<Suite, 'abort'>) => unknown,
-    onAdd: (this: Suite, e: Event<Benchmark, 'add'>) => unknown,
-    onReset: (this: Suite, e: Event<Suite, 'reset'>) => unknown,
-    onStart: (this: Suite, e: Event<Suite, 'start'>) => unknown,
-    onCycle: (this: Suite, e: EventWithTarget<Benchmark, 'cycle'>) => unknown,
-    onError: (this: Suite, e: EventWithTarget<Benchmark, 'error'>) => unknown,
-    onComplete: (this: Suite, e: EventWithTarget<Benchmark, 'complete'>) => unknown,
+    onAbort: (this: T, e: Event<Suite, 'abort'>) => unknown,
+    onAdd: (this: T, e: Event<Benchmark, 'add'>) => unknown,
+    onReset: (this: T, e: Event<Suite, 'reset'>) => unknown,
+    onStart: (this: T, e: Event<Suite, 'start'>) => unknown,
+    onCycle: (this: T, e: EventWithTarget<Benchmark, 'cycle'>) => unknown,
+    onError: (this: T, e: EventWithTarget<Benchmark, 'error'>) => unknown,
+    onComplete: (this: T, e: EventWithTarget<Benchmark, 'complete'>) => unknown,
   }
 );
 
@@ -2686,7 +2711,7 @@ class Suite extends EventTarget<SuiteOptions> {
    * // or with options
    * suite.run({ 'async': true, 'queued': true });
    */
-  run(options?: SuiteRunOptions): this {
+  run(options?: RunOptions): this {
     var suite = this;
 
     suite.reset();
@@ -2694,7 +2719,7 @@ class Suite extends EventTarget<SuiteOptions> {
     options || (options = {});
     options.timer = options?.timer || Timer.timer;
 
-    const invoke_options: InvokeOptionsWithArgs<Suite, SuiteRunOptions> = {
+    const invoke_options: SuiteRunOptions<Suite> = {
       'name': 'run',
       'args': options,
       'queued': !!options.queued,
@@ -3106,14 +3131,19 @@ function compute(bench: Benchmark, options: RunOptions) {
 
   // Init queue and begin.
   enqueue();
-  Benchmark.invoke(queue, {
+
+  const queueOptions: SuiteRunOptions<
+    typeof queue
+  > = {
     'name': 'run',
     'args': { async, timer },
     'queued': true,
     onStart: noop,
     'onCycle': evaluate,
     'onComplete': function() { bench.emit(new Event('complete')); }
-  });
+  };
+
+  Benchmark.invoke(queue, queueOptions);
 }
 
 /*------------------------------------------------------------------------*/
