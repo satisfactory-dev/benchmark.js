@@ -22,9 +22,7 @@ import {
 
 import {
   Event,
-  EventWithTarget,
 } from './Events.ts';
-import { SuiteRunOptions } from './Suite.ts';
 
 import Support from './Support.ts';
 import Timer from './Timer.ts';
