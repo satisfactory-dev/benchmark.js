@@ -168,10 +168,6 @@ class Suite extends EventTarget<SuiteOptions> {
    * Useful for truncating the array.
    */
   set length(value) {
-    if (undefined === this.#benchmarks) {
-      this.#benchmarks = [];
-    }
-
     this.#benchmarks.length = value;
   }
 
