@@ -11,12 +11,19 @@ import {
   Benchmark,
 } from './lib/Benchmark.ts';
 
+import type {
+  cycleFormatter,
+} from './lib/Suite.ts';
 import {
   Suite,
 } from './lib/Suite.ts';
 
 // Export Benchmark.
 export default Benchmark;
+
+export type {
+  cycleFormatter,
+}
 
 export {
   Benchmark,
