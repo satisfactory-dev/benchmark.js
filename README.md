@@ -128,8 +128,8 @@ function reducer(was, stats) {
     },
     sample: {
       value: stats.stats.mean,
-      lowest_value: stats.sample.sort((a, b) => a - b)[0],
-      highest_value: stats.sample.sort((a, b) => b - a)[0],
+      lower_value: stats.sample.sort((a, b) => a - b)[0],
+      upper_value: stats.sample.sort((a, b) => b - a)[0],
     },
   }
 
