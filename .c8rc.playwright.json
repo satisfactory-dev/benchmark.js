@@ -1,5 +1,5 @@
 {
 	"reporter": ["text", "html"],
 	"report-dir": "./coverage/playwright",
-	"include": ["benchmark.ts", "benchmark.js", "benchmark.umd.js"]
+	"include": ["benchmark.ts", "./lib/*.ts", "benchmark.js", "benchmark.umd.js"]
 }

@@ -9,6 +9,8 @@
 
 import version from './version.json' with {type: 'json'};
 
+import BrowserHelper from './lib/BrowserHelper.ts';
+
 /** Used to assign each benchmark an incremented id. */
 var counter = 0;
 
@@ -110,80 +112,12 @@ var doc = isHostType(globalThis, 'document') && globalThis.document;
 /** Used to access Node.js's high resolution timer. */
 var processObject = isHostType(globalThis, 'process') && globalThis.process;
 
-/** Used to integrity check compiled tests. */
-var uid = 'uid' + (+Date.now());
-
 /**
  * Used to avoid infinite recursion when methods call each other.
  *
  * @type {{abort?: true, abortSuite?: true, reset?: true, resetSuite?: true}}
  */
 const calledBy: { abort?: true; abortSuite?: true; reset?: true; resetSuite?: true; } = {};
-
-/**
- * Helper class for running scripts in-browser
- *
- * @private
- */
-class BrowserHelper {
-  /**
-   * @type {Document}
-   */
-  #doc: Document;
-
-  /**
-   * @type {HTMLDivElement}
-   */
-  #trash: HTMLDivElement;
-
-  /**
-   * @param {Document} doc
-   */
-  constructor(doc: Document) {
-    this.#doc = doc;
-    this.#trash = doc.createElement('div');
-  }
-
-  /**
-   * Destroys the given element.
-   *
-   * @param {Element} element The element to destroy.
-   */
-  #destroyElement(element: Element) {
-    this.#trash.appendChild(element);
-    this.#trash.innerHTML = '';
-  }
-
-  /**
-   * Runs a snippet of JavaScript via script injection.
-   *
-   * @param {string} code The code to run.
-   */
-  runScript(code: string) {
-    var anchor = Benchmark.anchor,
-          script = this.#doc.createElement('script'),
-          sibling: HTMLScriptElement | null = this.#doc.getElementsByTagName('script')[0],
-        parent: Node | null | undefined = sibling.parentNode,
-        prop = uid + 'runScript',
-        prefix = '(' + 'Benchmark.anchor.' + prop + '||function(){})();';
-
-    // Firefox 2.0.0.2 cannot use script injection as intended because it executes
-    // asynchronously, but that's OK because script injection is only used to avoid
-    // the previously commented JaegerMonkey bug.
-    try {
-      // Remove the inserted script *before* running the code to avoid differences
-      // in the expected script element count/order of the document.
-        script.appendChild(this.#doc.createTextNode(prefix + code));
-        anchor[prop] = () => { this.#destroyElement(script); };
-    } catch(e) {
-      parent = parent?.cloneNode(false);
-      sibling = null;
-      script.text = code;
-    }
-    parent?.insertBefore(script, sibling);
-    delete anchor[prop];
-  }
-}
 
 /**
  * A class used to flag environments/features.
@@ -246,7 +180,7 @@ const createFunction = ((): Function => {
     return function (args: string, body: string) {
       var result,
           anchor = Benchmark.anchor,
-          prop = uid + 'createFunction';
+          prop = BrowserHelper.uid + 'createFunction';
 
       helper.runScript('Benchmark.anchor.' + prop + '=function(' + args + '){' + body + '}');
       result = anchor[prop];
@@ -2901,7 +2835,7 @@ function createCompiled(
   var fn = bench.fn,
       fnArg = deferred ? getFirstArgument(fn as Function) || 'deferred' : '';
 
-  templateData.uid = uid + uidCounter++;
+  templateData.uid = BrowserHelper.uid + uidCounter++;
 
   Object.assign(templateData, {
     'setup': decompilable ? getSource(bench.setup) : interpolate('m#.setup()'),
@@ -3253,7 +3187,7 @@ function cycle(obj: ClonedBenchmark | Deferred | DeferredWithTeardown, options: 
     // Fix TraceMonkey bug associated with clock fallbacks.
     // For more information see https://bugzilla.mozilla.org/show_bug.cgi?id=509069.
     if (Support.browser) {
-      Support.browser.runScript(uid + '=1;delete ' + uid);
+      Support.browser.runScript(BrowserHelper.uid + '=1;delete ' + BrowserHelper.uid);
     }
     // We're done.
     clone.emit(new Event<ClonedBenchmark>('complete'));
