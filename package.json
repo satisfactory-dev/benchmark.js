@@ -39,6 +39,7 @@
   },
   "files": [
     "benchmark.ts",
+    "version.json",
     "benchmark.d.ts",
     "benchmark.js.map",
     "benchmark.js",
