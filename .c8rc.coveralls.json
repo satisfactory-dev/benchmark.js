@@ -1,5 +1,5 @@
 {
 	"reporter": ["lcovonly"],
 	"report-dir": "./coverage",
-	"include": ["benchmark.ts", "./lib/*.ts", "benchmark.js", "benchmark.umd.js"]
+	"include": []
 }

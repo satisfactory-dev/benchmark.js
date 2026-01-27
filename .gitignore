@@ -9,4 +9,6 @@ node_modules
 /benchmark*.js.map
 /benchmark*.d.ts
 /version.json
-/lib/*.d.ts
+/lib/**/*.d.ts
+/lib/**/*.js
+/lib/**/*.js.map

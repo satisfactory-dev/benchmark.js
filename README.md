@@ -46,37 +46,37 @@ npm i --save microtime
 import Benchmark from '@satisfactory-dev/benchmark';
 
 function microtime() {
-	const version = globalThis?.process?.version || '';
-	if (
-		version.startsWith('v21.') ||
-		version.startsWith('v22.') ||
-		version.startsWith('v23.')
-	) {
-		console.warn('microtime appears to misbehave on node 21-23');
+  const version = globalThis?.process?.version || '';
+  if (
+    version.startsWith('v21.') ||
+    version.startsWith('v22.') ||
+    version.startsWith('v23.')
+  ) {
+    console.warn('microtime appears to misbehave on node 21-23');
 
-		return;
-	}
+    return;
+  }
 
-	try {
-		const result = require('microtime');
+  try {
+    const result = require('microtime');
 
-		console.log('using microtime');
+    console.log('using microtime');
 
-		return result.now;
-	} catch {
-	}
+    return result.now;
+  } catch {
+  }
 
-	console.log('not using microtime');
+  console.log('not using microtime');
 
-	return undefined;
+  return undefined;
 }
 
 const maybe_microtime = microtime();
 
 if (maybe_microtime) {
-	Benchmark.Timer.changeContext({
-		usTimer: maybe_microtime,
-	});
+  Benchmark.Timer.changeContext({
+    usTimer: maybe_microtime,
+  });
 }
 ```
 
@@ -106,6 +106,75 @@ suite.add('RegExp#test', function() {
 // => RegExp#test x 4,161,532 +-0.99% (59 cycles)
 // => String#indexOf x 6,139,623 +-1.00% (131 cycles)
 // => Fastest is String#indexOf
+```
+
+### Bencher Integration
+
+#### logger.js
+```ts
+import {
+  bencherLogger,
+  bencherReduction,
+  extractStats,
+} from '@satisfactory-dev/benchmark/integrations/bencher';
+
+function reducer(was, stats) {
+  was[`${stats.suite}::${stats.benchmark}`] = {
+    hz: {
+      value: stats.hz,
+    },
+    rme: {
+      value: stats.stats.rme,
+    },
+    sample: {
+      value: stats.stats.mean,
+      lowest_value: stats.sample.sort((a, b) => a - b)[0],
+      highest_value: stats.sample.sort((a, b) => b - a)[0],
+    },
+  }
+
+  return was;
+}
+
+async function* formatter(
+  cycleFormatter,
+  reducer,
+  suiteSets,
+) {
+  for (const suites of suiteSets) {
+    const result = await Suite.formatCycles(cycleFormatter, ...suites);
+    yield bencherReduction(reducer, ...result);
+  }
+}
+
+async function logger(suiteSets) {
+  return bencherLogger(
+    extractStats,
+    reducer,
+    formatter,
+    suiteSets,
+    process.stdout,
+  )
+}
+
+export default logger;
+```
+
+#### example_perf.js
+```js
+import Benchmark from '@satifactory-dev/benchmark';
+import logger from 'logger.js';
+
+// suite definitions goes here, pretend we have `const suites = [];`
+
+// if one exports the suites, one can execute the benchmarks in batch
+export default suites;
+
+// if one checks to see if the file is called directly, one can execute just these benchmarks
+if (process.argv[1] === import.meta.filename) {
+  await logger([suites]);
+}
+
 ```
 
 ## Support

@@ -14,6 +14,16 @@ export default defineConfig([
 		}
 	},
 	{
+		input: 'lib/integrations/Bencher.ts',
+		output: {
+			format: 'esm',
+			file: 'lib/integrations/Bencher.js',
+			exports: 'named',
+			minify: false,
+			sourcemap: true,
+		}
+	},
+	{
 		input: 'benchmark.ts',
 		input: 'benchmark.js',
 		output: {

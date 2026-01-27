@@ -69,6 +69,11 @@ type SuiteInvokeOptions<
   >>
 );
 
+type cycleFormatter<T> = (
+  suite: Suite,
+  benchmark: Benchmark,
+) => T;
+
 class Suite extends EventTarget<SuiteOptions> {
   /**
    * The default options copied by suite instances.
@@ -415,9 +420,60 @@ class Suite extends EventTarget<SuiteOptions> {
       .filter((maybe: number | 'length'): maybe is number => /^\d+$/.test(maybe.toString()))
       .map((key) => array[key]);
   }
+
+  static async formatCycles<T>(
+    cycleFormatter: cycleFormatter<T>,
+    ...suites: [Suite, ...Suite[]]
+  ): Promise<T[]> {
+    const results: T[] = [];
+
+    for (const suite of suites) {
+      results.push(...await this.#suiteCycleFormatter<T>(cycleFormatter, suite));
+    }
+
+    return results;
+  }
+
+  static async #suiteCycleFormatter<T>(
+    cycleFormatter: cycleFormatter<T>,
+    suite: Suite,
+  ): Promise<T[]> {
+    return new Promise<T[]>((yup, nope) => {
+      const cycles: {[key: `${string}::${string}`]: T} = {}
+
+      function cycle(e: EventWithTarget<Benchmark>) {
+        const key: `${string}::${string}` = `${suite.name}::${e.target.name}`;
+
+        cycles[key] = cycleFormatter(suite, e.target);
+      }
+
+      function error(e: EventWithTarget<Benchmark>) {
+        cleanup();
+        nope(e.target.error as Error)
+      }
+
+      function cleanup() {
+        suite.off('cycle', cycle);
+        suite.off('error', error);
+        suite.off('complete', complete);
+      }
+
+      function complete() {
+        cleanup();
+        yup(Object.values(cycles));
+      }
+
+      suite.on('cycle', cycle)
+      suite.on('error', error);
+      suite.on('complete', complete);
+
+      suite.run()
+    })
+  }
 }
 
 export type {
+  cycleFormatter,
   SuiteInvokeOptions,
   SuiteRunOptions,
 }

@@ -4,10 +4,16 @@
   "license": "MIT",
   "type": "module",
   "exports": {
+    ".": {
     "import": "./benchmark.js",
     "require": "./benchmark.umd.js",
     "types": "./benchmark.d.ts",
     "default": "./benchmark.umd.js"
+    },
+    "./integrations/bencher": {
+      "import": "./lib/integrations/Bencher.js",
+      "types": "./lib/integrations/Bencher.d.ts"
+    }
   },
   "keywords": [
     "benchmark",

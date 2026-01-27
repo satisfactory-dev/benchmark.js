@@ -1,6 +1,11 @@
 //# allFunctionsCalledOnLoad
 
-import Benchmark from '../benchmark.js';
+import Benchmark, { Suite } from '../benchmark.js';
+import {
+  bencherLogger,
+  bencherReduction,
+  extractStats,
+} from '../lib/integrations/Bencher.js';
 
   /** Used as a reference to the global object. */
 var root = globalThis;
@@ -1109,6 +1114,164 @@ QUnit.module('Benchmark.Suite event flow', function() {
     assert.ok(events.length == 11);
   });
 });
+
+/*--------------------------------------------------------------------------*/
+
+QUnit.module('Benchmark.Suite cycle formatter', () => {
+  QUnit.test('Behaves over multiple runs', async (assert) => {
+    const suiteA = (new Suite())
+      .add('foo', () => {})
+      .add('bar', () => {});
+    const suiteB = (new Suite())
+      .add('baz', () => {})
+      .add('bat', () => {});
+
+    const randomC = crypto.randomUUID();
+    const randomD = crypto.randomUUID();
+
+    const suiteC = (new Suite(randomC))
+      .add('foo', () => {})
+      .add('bar', () => {});
+    const suiteD = (new Suite(randomD))
+      .add('baz', () => {})
+      .add('bat', () => {});
+
+    const formatterA = (
+      suite,
+      benchmark,
+    ) => `${suite.name}::${benchmark.name}::${benchmark.id}`;
+
+    const formatterB = (
+      suite,
+      benchmark,
+    ) => `${suite.name}::${benchmark.name}`;
+
+    const a = await Suite.formatCycles(formatterA, suiteA, suiteB);
+    const b = await Suite.formatCycles(formatterA, suiteA, suiteB);
+    const c1 = await Suite.formatCycles(formatterB, suiteA, suiteB);
+    const d1 = await Suite.formatCycles(formatterB, suiteA, suiteB);
+    const c2 = await Suite.formatCycles(formatterB, suiteC, suiteD);
+    const d2 = await Suite.formatCycles(formatterB, suiteC, suiteD);
+    const e1 = await Suite.formatCycles(extractStats, suiteA, suiteB, suiteC, suiteD);
+    const e2 = await Suite.formatCycles(extractStats, suiteA, suiteB, suiteC, suiteD);
+
+    assert.deepEqual(a, b);
+    assert.deepEqual(c1, d1);
+    assert.deepEqual(c2, d2);
+
+    assert.deepEqual(c1, [
+      'undefined::foo',
+      'undefined::bar',
+      'undefined::baz',
+      'undefined::bat',
+    ]);
+    assert.deepEqual(c2, [
+      `${randomC}::foo`,
+      `${randomC}::bar`,
+      `${randomD}::baz`,
+      `${randomD}::bat`,
+    ]);
+
+    assert.deepEqual(
+      e1.map(({suite}) => suite),
+      e2.map(({suite}) => suite),
+    );
+
+    assert.deepEqual(
+      e1.map(({benchmark}) => benchmark),
+      e2.map(({benchmark}) => benchmark),
+    );
+  })
+
+  QUnit.test('Bencher integration', async (assert) => {
+    const result = [];
+    const stream = new WritableStream({
+      write(chunk) {
+        result.push(chunk);
+      }
+    });
+    const writer = stream.getWriter();
+    const suiteA = (new Suite())
+      .add('foo', () => {})
+      .add('bar', () => {});
+    const suiteB = (new Suite())
+      .add('baz', () => {})
+      .add('bat', () => {});
+
+    const randomC = crypto.randomUUID();
+    const randomD = crypto.randomUUID();
+
+    const suiteC = (new Suite(randomC))
+      .add('foo', () => {})
+      .add('bar', () => {});
+    const suiteD = (new Suite(randomD))
+      .add('baz', () => {})
+      .add('bat', () => {});
+
+    function reducer(was, stats) {
+      was[`${stats.suite}::${stats.benchmark}`] = {
+        hz: {
+          value: stats.hz,
+        },
+        rme: {
+          value: stats.stats.rme,
+        },
+        sample: {
+          value: stats.stats.mean,
+          lowest_value: stats.sample.sort((a, b) => a - b)[0],
+          highest_value: stats.sample.sort((a, b) => b - a)[0],
+        },
+      }
+
+      return was;
+    }
+
+    async function* formatter(
+      cycleFormatter,
+      reducer,
+      suiteSets,
+    ) {
+      for (const suites of suiteSets) {
+        const result = await Suite.formatCycles(cycleFormatter, ...suites);
+        yield bencherReduction(reducer, ...result);
+      }
+    }
+
+    await bencherLogger(
+      extractStats,
+      reducer,
+      formatter,
+      [
+        [suiteA, suiteB],
+        [suiteC, suiteD],
+      ],
+      writer,
+    );
+
+    // strictly speaking, one should be doing JSON schema validation at this point,
+    //  but if it reaches here it won't have thrown at least
+    assert.ok(result.join('').length > 0);
+
+    if (globalThis?.process?.stdout) {
+      assert.equal(await new Promise((yup) => {
+        bencherLogger(
+          extractStats,
+          reducer,
+          formatter,
+          [
+            [suiteA, suiteB],
+            [suiteC, suiteD],
+          ],
+          process.stdout,
+        ).then(() => {
+          yup(true);
+        }).catch((err) => {
+          yup(err);
+        })
+      }), true);
+    }
+  })
+})
 
 /*--------------------------------------------------------------------------*/
 
