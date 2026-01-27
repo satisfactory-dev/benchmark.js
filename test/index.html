@@ -21,8 +21,6 @@
   globalThis.QUnit = QUnit;
   globalThis.Benchmark = Benchmark;
 
-  var benchmarkModule;
-
     QUnit.config.autostart = false;
     await import('./test.js');
         QUnit.start();
