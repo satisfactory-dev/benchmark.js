@@ -7,5 +7,5 @@
 		"rewriteRelativeImportExtensions": true,
 		"sourceMap": true
 	},
-	"include": ["./benchmark.ts"]
+	"include": ["./benchmark.ts", "./lib/integrations/Bencher.ts"]
 }
