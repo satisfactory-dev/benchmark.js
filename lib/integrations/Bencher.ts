@@ -36,10 +36,18 @@ type BMF = {
   }
 };
 
+type stats = {
+  suite: string,
+  benchmark: string,
+  stats: Omit<Benchmark['stats'], 'sample'>,
+  sample: Benchmark['stats']['sample'],
+  hz: Benchmark['hz'],
+};
+
 function extractStats (
   suite: Suite,
   benchmark: Benchmark,
-) {
+): stats {
   const {
     sample,
     ...stats
@@ -82,6 +90,7 @@ async function bencherLogger<T>(
 
 export type {
   BMF,
+  stats,
 }
 export {
   bencherReduction,
