@@ -18,6 +18,9 @@ type BMF = {
     [key: string]: (
       | {
         value: number,
+      }
+      | {
+        value: number,
         lower_value: number,
       }
       | {
